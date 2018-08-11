@@ -1,0 +1,319 @@
+/** 
+ * SARL-AGTCITY-BASE - Team controller for Agents in City Game
+ * Copyright (C) 2017 The SARL-AGTCITY-BASE Authors.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package au.edu.rmit.agtgrp.sarl.agtcity.agents.dummy
+
+// MASSIM EIS imports
+import eis.EnvironmentInterfaceStandard
+import massim.eismassim.EnvironmentInterface
+import eis.exceptions.ActException
+import eis.iilang.Action
+import eis.iilang.Percept
+import eis.iilang.EnvironmentState;
+
+
+// SARL imports
+import io.sarl.core.DefaultContextInteractions
+import io.sarl.core.Initialize
+import io.sarl.core.Lifecycle
+import io.sarl.core.Logging
+
+// General Java tools
+import java.util.*;
+import java.io.File
+import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Paths
+import javax.management.relation.RelationException
+import org.json.JSONObject
+
+// Middleware for Agent City
+// from https://bitbucket.org/ssardina-research/sarl-agtcity-mw
+import au.edu.rmit.agtgrp.sarl.mw.agtcity.utils.ConfHandler
+import au.edu.rmit.agtgrp.sarl.mw.agtcity.aggregator.Util
+import au.edu.rmit.agtgrp.sarl.mw.agtcity.entities.PlayerState
+
+import au.edu.rmit.agtgrp.sarl.mw.agtcity.capacities.C_Reporting
+import au.edu.rmit.agtgrp.sarl.mw.agtcity.capacities.C_MassimTalking
+import au.edu.rmit.agtgrp.sarl.mw.agtcity.skills.S_ConsoleReporting
+import au.edu.rmit.agtgrp.sarl.mw.agtcity.skills.S_MassimTalking17
+
+
+// Events
+import au.edu.rmit.agtgrp.sarl.agtcity.events.E_MoveRandomly
+import au.edu.rmit.agtgrp.sarl.agtcity.events.E_ReportInfo
+import au.edu.rmit.agtgrp.sarl.agtcity.events.E_SenseEnvironment
+
+
+
+import au.edu.rmit.agtgrp.sarl.agtcity.beliefs.KB_AgtCity
+
+
+import eis.iilang.Identifier
+
+import eis.exceptions.PerceiveException
+
+import io.sarl.extras.SWI_KB_Prolog
+import io.sarl.extras.KB_Prolog
+import io.mochalog.bridge.prolog.query.exception.NoSuchSolutionException
+import io.mochalog.bridge.prolog.query.Query
+import au.edu.rmit.agtgrp.sarl.agtcity.beliefs.SWI_KB_AgtCity
+import io.mochalog.bridge.prolog.SandboxedPrologContext
+import io.mochalog.bridge.prolog.PrologContext
+
+/** 
+ * This is a single SARL agent that uses the S_MassimTalking07 skill 
+ * to manage ALL the players in the  game simulation.
+ * 
+ * Agent also uses a SWI Knowledge base via this.prolog KB
+ * 
+ * When created it can receive the following arguments (in order);
+ * - SARL agent name
+ * - directory where server and players configuration files are stored
+ * - file name of the server configuration 
+ * - file name of the players configuration (where credentials are placed)
+ * 
+ * @author Sebastian Sardina (ssardina@gmail.com)
+ *  
+ */
+agent SWISingleFullAgent {
+    uses Logging, Lifecycle, DefaultContextInteractions 
+    uses C_Reporting, C_MassimTalking
+	uses KB_AgtCity, KB_Prolog	// We can use KB_Prolog directly!
+
+	val agentLogLevel = 3 
+	var myName = "swiSingleFullAgent" // Default value (if not given at creation as argument)
+
+	
+	/*
+	 * Agent may receive the path directory where the config files for server connection
+	 * and player authentications are located. Otherwise, will query via terminal.
+	 */
+    on Initialize { // Should only be initializing with the EIS as a parameter.
+	{
+		// There could be many arguments passed, in this order:
+		//	1. Agent name
+		//	2. Directory with EI configuration files (eiConfigDir)
+		// 	3. EI configuration json file (eiMassimConfigFile)
+		//	4. Authentication configuration json file (eiMassimAuthConfigFile)
+        var args = newArrayList(occurrence.parameters) 
+		var eiConfigDir : String = "./"						// default value
+		var eiMassimConfigFile = "eismassimconfig.json" 	// default value
+		var eiMassimAuthConfigFile = "agentsconfig.json" 	// default value
+
+		// First parameter is agent name - Get it and set it!!!
+		// Agent name will be used to register agent-specific capabilities, like logging or knowledgebases
+		if (args.length >= 1) {
+			myName = args.get(0) as String
+		}
+		// Give reporting skill via console
+		setSkill(new S_ConsoleReporting(myName), C_Reporting)
+		setLogLevel(4)
+
+		// If eiMassimConfigFile and eiMassimAuthConfigFile are included in 3rd and 4rth args
+		if (args.length >= 4) {
+			eiMassimConfigFile = args.get(2) as String
+			eiMassimAuthConfigFile = args.get(3) as String
+		}
+		
+		// Set up a new Prolog belief base - load agent knowledge bases. 
+		val beliefSpace = String.format(myName)
+		setSkill(new SWI_KB_AgtCity(0, beliefSpace))
+		kb_load("src/main/sarl/au/edu/rmit/agtgrp/sarl/agtcity/beliefs/tools.pl")
+		kb_load("src/main/sarl/au/edu/rmit/agtgrp/sarl/agtcity/beliefs/percept-mgmt.pl")
+		kb_load("src/main/sarl/au/edu/rmit/agtgrp/sarl/agtcity/beliefs/decision-making.pl") 
+
+		// Assert my name in the KB
+		assertFirst("agentName(@S)", myName)
+//		kb_recordKBName(myName)
+
+
+		agent_says("PHASE 1: REGISTERING MASSIM TALKING SKILL VIA CONFIGURATION FILES {0} AND {1}", 
+				eiMassimConfigFile, eiMassimAuthConfigFile)
+        if (args.length >= 2)
+            eiConfigDir = args.get(1) as String
+        else {
+        	// There is no 3rd argument, so search in directory and try to get it
+            eiConfigDir = ConfHandler.getConfDir()
+        }
+  		// Give agent ability to talk to MASSIM server
+		setSkill(
+			new S_MassimTalking17(Paths.get(eiConfigDir, eiMassimConfigFile),
+				Paths.get(eiConfigDir, eiMassimAuthConfigFile)), C_MassimTalking
+		)
+
+		agent_says("PHASE 2: INITIALIZING ENVIRONMENT INTERFACE USING CONFIGURATION FILE {0} ", eiMassimConfigFile)
+        if (MT_initialize()) {
+        	agent_says("I have initialized the EI successfully!")
+        } else {
+			agent_says("Something wrong when registering the game server, I am finished...")
+			killMe
+        }
+
+        agent_says("PHASE 3: REGISTERING AGENTS INTO ENVIRONMENT (GAME ENGINE) VIA FILE {0}", eiMassimAuthConfigFile)
+		MT_registerPlayersFromConfig()
+		agent_shouts("I am now alive! Will start working now (sending and acting!)...")
+                
+        // Signal that all SARL agents have been created - Communicator will start working!        
+        emit(new E_SenseEnvironment())
+	}
+
+}
+
+	/**
+	 * Start a cycle to continously sense the environment until EI is not running anymore
+	 */
+	on E_SenseEnvironment {
+		agent_shouts("Start sensing the environment")
+		var step = 0 
+		
+		// While the environment is running, wait for new percpets, read them all per agent
+		while (MT_getStatus() == EnvironmentState.RUNNING) {
+			agent_says("Waiting for new percepts (blocking) for players {0}", MT_getPlayersNames())
+			MT_getConnectedPlayers().keySet().forEach([ playerName : String |
+				var allPercepts : Map<String, Collection<Percept>>
+				try {
+					allPercepts = MT_sensePlayerPercepts(playerName) 	// This is blocking!
+				} catch (e : PerceiveException) {
+						agent_shouts("I am sorry, there seems to be an error in perception. Killing myself..")
+						error(e.toString)
+						e.printStackTrace()
+						killMe
+					}
+				var percepts = allPercepts.values().get(0) // works if an agent is of only one entity, so allPercepts has just one map
+				agent_says("Player {0} (entity {1}) received {2} percepts.", playerName,
+					allPercepts.keySet().iterator().next(), Util.getNoOfPercepts(percepts))
+				
+
+				// TODO: Not clear why this is not working (https://groups.google.com/forum/?hl=en#!topic/sarl/isMGE9QKH7A):
+				//var percepts2 : List<Percept>
+				//percepts2 = new Vector<Percept>()
+				//ei.getAllPercepts(playerName).values().forEach(percepts2::addAll);
+				//ei.getAllPercepts(playerName).values().forEach[percepts2::add(it)];
+				
+
+				// Process the percepts: update this.agents and KB
+				MT_getConnectedPlayers().get(playerName).update(percepts) // update the player java-object data
+				agent_says(MT_getConnectedPlayers().get(playerName).reportState()) // report player state
+				
+				// assert percepts in the KB
+				kb_recordPercepts(playerName, MT_getConnectedPlayers().get(playerName).step, percepts.toString)
+			])
+
+			// Instruct the KB to process last percept for each player (and store each knowledge separately)
+			MT_getPlayersNames.forEach([ playerName : String |
+				kb_processLastPercept(playerName)
+				agent_says("Percepts for agent {0} have been processed in the SWI KB", playerName)
+			])
+	
+	
+			// All percepts per agent read. Report some information and do something per agent
+			emit(new E_ReportInfo())
+
+			// 5. Very finally, do some some movement per agent
+			MT_getPlayersNames.forEach([playerName2 : String | 
+				emit(new E_MoveRandomly => [playerName = playerName2]) // see compact way of assignment data in event
+			])
+
+		}
+		agent_shouts("I am finished sensing the environment")
+	}
+
+
+	/*
+	 * Just report whatever you want the user to know.. (presumably, done after perception cycle)
+	 */
+	on E_ReportInfo {
+
+		// 1. Report all the percepts/3 information available in the KB
+//		val query = new Query("percepts(Agent, Step, Percepts)")	// no need to format query
+//		for (solution : askForAllSolutions(query))
+//		{
+//			agent_says("There is percept information in KB for player {0} on step {1}",
+//				solution.get("Agent").toString(), solution.get("Step").intValue)
+//		}
+
+		// 2. Report current status of each player
+		MT_getPlayersNames.forEach([ playerName : String |
+			try {
+				val p : PrologContext = get_prolog_engine() as PrologContext
+				val solution = p.askForSolution(Query.format("percepts_self(@S, Step, Percept)", playerName))
+				agent_says(
+					"Player {0} percepts at step {1}: {2}",
+					playerName,
+					solution.get("Step").toString(),
+					solution.get("Percept").toString()
+				)
+			} catch (e : NoSuchSolutionException) {
+				agent_says("I do not have self information for player {0}",	playerName)
+			}
+		])
+		
+		// 3. Finally, save current KB to file (for the step)
+//		val query3 = Query.format("save_db")
+//		(get_prolog_engine() as PrologContext).prove(query3)
+		//
+		agent_says("I will dump all that I know so far....")
+		dump_kb() 	// Using Prolog-CAP directly
+	}
+
+
+
+	/*
+	 * Do something in the real world... (presumably, done after perception cycle)
+	 * 
+	 * This two behaviors make the player move towards any random facility
+	 */
+	on E_MoveRandomly [(MT_getConnectedPlayers().get(occurrence.playerName).routeLength > 0)] {
+		// we are still traveling, just continue following the path...		
+		val playerName = occurrence.playerName
+
+		agent_says("Seems player {0} is already am moving: {1} steps to go!", playerName,
+			MT_getConnectedPlayers().get(playerName).routeLength)
+			
+		performAction(playerName, new Action("continue"))
+	}
+	on E_MoveRandomly [!(MT_getConnectedPlayers().get(occurrence.playerName).routeLength > 0)] {
+		val playerName = occurrence.playerName
+
+		// Do some reasoning to pick up the next destination!		
+		var destination = kb_pickDestination(playerName)
+			
+		performAction(playerName, new Action("goto", new Identifier(destination)))
+		agent_says("I will start navigating towards {0}", destination)
+	}
+
+
+
+	/** 
+     * A basic method for sending actions the the EIS server
+	 * If sending fails, the exception is caught and logged. 
+	 */
+	def performAction(playerName : String, action : Action) {
+        try {
+        	// perform the action by agentName in the EIS
+			MT_executeAction(playerName, action)
+		} catch (e : ActException) {
+			if (action !== null)
+				warning("Could not perform action {0} for player {1}", action, playerName)
+		}
+	}
+
+}
+// /////////////////////////////////////////////////
+// END OF FILE
+// /////////////////////////////////////////////////

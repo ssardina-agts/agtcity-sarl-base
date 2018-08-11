@@ -1,0 +1,107 @@
+/** 
+ * SARL-AGTCITY-BASE - Team controller for Agents in City Game
+ * Copyright (C) 2018 Sebastian Sardina.
+
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package au.edu.rmit.agtgrp.sarl.agtcity.beliefs
+
+import io.sarl.core.Logging
+
+
+import io.sarl.extras.SWI_KB_Prolog
+
+import org.apache.commons.lang3.tuple.Pair
+import org.apache.commons.lang3.tuple.MutablePair;
+
+import java.util.Map
+
+import org.jpl7.Term
+import io.mochalog.bridge.prolog.query.Query
+
+/** 
+ * @author Sebastian Sardina (ssardina@gmail.com)
+ * 
+ */
+capacity KB_AgtCity {
+	def kb_load(file : String)
+	def kb_dump()
+
+	def kb_recordKBName(name : String)
+	
+	def kb_recordPercepts(playerName : String, stepNo : int, percepts : String)
+	def kb_processLastPercept(playerName : String)
+	def kb_pickDestination(playerName : String) : String
+}
+
+
+
+/**
+ * Skill for KB_AgtCity using SWI Prolog
+ */
+skill SWI_KB_AgtCity extends SWI_KB_Prolog implements KB_AgtCity {
+	uses Logging
+
+	val logging_level : int
+	
+	new (l : int = 0, name : String) {
+		super(name) // Call the super's constructor
+		logging_level = l
+//		setLogLevel(l)
+	}
+
+	def kb_load(file : String) {
+		consult_file(file)
+	}
+
+	def kb_dump() {
+		dump_kb()
+	}
+	
+
+	def kb_recordKBName(name : String) {
+		assertFirst("agentName(@S)", name)
+	}
+
+	def kb_recordPercepts(playerName : String, stepNo : int, percepts : String) {
+		assertFirst("percepts(@A, @I, @A)", playerName, stepNo, percepts)
+	}
+
+	def kb_processLastPercept(playerName : String) {
+		prove(String.format("process_last_percepts(%s)", playerName))
+	}
+
+	def kb_pickDestination(playerName : String) : String {
+		return askOnce(String.format("choose_destination(%s, Destination)", playerName), #["Destination"]).get("Destination").toString
+	}
+
+
+
+
+
+
+
+	def install {
+		// Function invoked when the skill is installed in the owner.
+		// You should put all the initialization statements in this block of code.
+		info("KB_AgtCity skill installed")
+	}
+
+	def uninstall {
+		// Function invoked when the skill is uninstalled from the owner.
+		// You should put all the resource release statements in this block of code.
+		info("KB_AgtCity skill uninstalled")
+	}
+
+}

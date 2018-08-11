@@ -1,0 +1,40 @@
+/** 
+ * SARL-AGTCITY-BASE - Team controller for Agents in City Game
+ * Copyright (C) 2017 The SARL-AGTCITY-BASE Authors.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package au.edu.rmit.agtgrp.sarl.agtcity.agents.dummy
+
+import io.sarl.core.Initialize
+import io.sarl.core.Lifecycle
+
+/** 
+ * This agent will spawn several single SWISingleFullAgents, each of the managing some subset
+ * of the players in the simulation
+
+ * @author Sebastian Sardina (ssardina@gmail.com) * 
+ */
+agent BootMultiSWIAgents {
+    uses Lifecycle
+
+    on Initialize {
+        spawn(SWISingleFullAgent, "team1", "conf/MultiAgents/", "eismassimconfig1.json", "agentsconfig1.json")
+        spawn(SWISingleFullAgent, "team2", "conf/MultiAgents/", "eismassimconfig2.json", "agentsconfig2.json")
+        killMe
+    }
+}
+
+
+
