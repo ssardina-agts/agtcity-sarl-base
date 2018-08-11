@@ -238,7 +238,6 @@ agent SWISingleFullAgent {
 	 * Just report whatever you want the user to know.. (presumably, done after perception cycle)
 	 */
 	on E_ReportInfo {
-
 		// 1. Report all the percepts/3 information available in the KB
 //		val query = new Query("percepts(Agent, Step, Percepts)")	// no need to format query
 //		for (solution : askForAllSolutions(query))
@@ -250,6 +249,7 @@ agent SWISingleFullAgent {
 		// 2. Report current status of each player
 		MT_getPlayersNames.forEach([ playerName : String |
 			try {
+				//	This is now directly using Mochalog, but getting the prolog engine and using it!
 				val p : PrologContext = get_prolog_engine() as PrologContext
 				val solution = p.askForSolution(Query.format("percepts_self(@S, Step, Percept)", playerName))
 				agent_says(
@@ -264,9 +264,6 @@ agent SWISingleFullAgent {
 		])
 		
 		// 3. Finally, save current KB to file (for the step)
-//		val query3 = Query.format("save_db")
-//		(get_prolog_engine() as PrologContext).prove(query3)
-		//
 		agent_says("I will dump all that I know so far....")
 		dump_kb() 	// Using Prolog-CAP directly
 	}
