@@ -65,6 +65,11 @@ So, to **run the system** you need to follow these general steps:
 
 These are all thin agent controllers for the players in the game, but they should provide a solid base for developing more sophisticated agent systems.
 
+This is the **default agent controller** for `BootMAS` class so it can be run by just:
+
+```
+java -jar target/sarl-agtcity-base-1.2.0.7.2-jar-with-dependencies.jar
+```
 
 ### SuperSingleAgent
 
