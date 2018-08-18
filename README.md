@@ -6,8 +6,9 @@ This project/package provides _basic_ SARL controllers for the [2017 MAC Agents 
 The project relies on:
 
 1. The [SARL Agents in City Middleware](https://bitbucket.org/ssardina-research/sarl-agtcity-mw) which provides SARL capacity and skill for teams to connect and play in the game simulator.
-2. The [MASSIM Agents in City EIS-HUB Interface](https://github.com/eishub/massim) module.
-	* Java-code providing a more high-level access to the game sever than low-level JSON messages.
+2. The [EISMASSim](https://github.com/eishub/massim) environment interface.
+	* A Java library using the [Environment Interface Standard (EIS)](https://github.com/eishub/eis) to communicate with the MASSim server that can be used with platforms which support the EIS.
+	* Provides a more high-level access to the game sever than low-level JSON messages.
 3. The [SARL-PROLOG-CAP](https://bitbucket.org/ssardina-research/sarl-prolog-cap) project that provides a capacity and a skill for SARL agents to use [SWI Prolog](http://www.swi-prolog.org/) for implementing the knowledge base of the agents. 
 
 Some dummy controllers are provided as templates to build from.
@@ -25,7 +26,9 @@ Some dummy controllers are provided as templates to build from.
 	* Obtained via Maven automatically from <http://mvnrepository.com/artifact/io.sarl.Maven>
 * The [SARL Agents in City SARL Middleware](https://bitbucket.org/ssardina-research/sarl-agtcity-mw). 
 	* Should be obtained automatically via Maven + Jitpack.
-	* Middleware uses the [Java EIS Hub project](https://github.com/eishub), an abstract interface to implement communication with the environment. In particular, modules [EIS](https://github.com/eishub/eis) and [massim](https://github.com/eishub/massim) are used. Their JAR sources are provided under `extras/` so they can be used to attach sources in ECLIPSE.
+	* Uses the [EISMASSim](https://github.com/eishub/massim) environment interface for abstracting protocol with game server. 
+		* Their JAR sources are provided under `extras/` so they can be used to attach sources in ECLIPSE.
+		* Tested on versions `massim-2017-1.3` and `massim-2017-1.7`.
 * The [SARL-PROLOG-CAP](https://bitbucket.org/ssardina-research/sarl-prolog-cap) capacity+skill for [SWI Prolog](http://www.swi-prolog.org/) system:
 	* Capacity and skill to allow the use of SWI Prolog knowledge-bases in SARL agents.
 	* Relies on [Mochalog](https://github.com/ssardina/mochalog) and [JPL](https://jpl7.org/) to have Prolog access from Java.
