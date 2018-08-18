@@ -19,7 +19,7 @@ class BootMAS {
 		var fullyQualifiedAgent : String
 		val basePackage = "au.edu.rmit.agtgrp.agtcity.sarl.agents"
 
-		val AGENTS_AVAILABLE : String[] = #["SuperSingleAgent", "SWISingleFullAgent"]
+		val AGENTS_AVAILABLE : String[] = #["SuperSingleAgent", "SWISingleFullAgent", "BootMultiSWIAgents"]
 		val DEFAULT_CONTROLLER : String = "SuperSingleAgent"
 
 		// Boot a specific one and that' s it
@@ -36,6 +36,8 @@ class BootMAS {
 		}
 
 		switch agentToLaunch {
+			case 'BootMultiSWIAgents':
+				fullyQualifiedAgent = basePackage + ".dummy.BootMultiSWIAgents"
 			case 'SWISingleFullAgent':
 				fullyQualifiedAgent = basePackage + ".dummy.SWISingleFullAgent"
 			case 'SuperSingleAgent':

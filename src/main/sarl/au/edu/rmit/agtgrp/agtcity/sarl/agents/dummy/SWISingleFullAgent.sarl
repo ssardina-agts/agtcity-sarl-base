@@ -97,7 +97,7 @@ agent SWISingleFullAgent {
 
 	val agentLogLevel = 3 
 	var myName = "swiSingleFullAgent" // Default value (if not given at creation as argument)
-
+	val kb_root_path = "src/main/sarl/au/edu/rmit/agtgrp/agtcity/sarl"
 	
 	/*
 	 * Agent may receive the path directory where the config files for server connection
@@ -133,9 +133,9 @@ agent SWISingleFullAgent {
 		// Set up a new Prolog belief base - load agent knowledge bases. 
 		val beliefSpace = String.format(myName)
 		setSkill(new SWI_KB_AgtCity(0, beliefSpace))
-		kb_load("src/main/sarl/au/edu/rmit/agtgrp/sarl/agtcity/beliefs/tools.pl")
-		kb_load("src/main/sarl/au/edu/rmit/agtgrp/sarl/agtcity/beliefs/percept-mgmt.pl")
-		kb_load("src/main/sarl/au/edu/rmit/agtgrp/sarl/agtcity/beliefs/decision-making.pl") 
+		kb_load(kb_root_path + "/beliefs/tools.pl")
+		kb_load(kb_root_path + "/beliefs/percept-mgmt.pl")
+		kb_load(kb_root_path + "/beliefs/decision-making.pl") 
 
 		// Assert my name in the KB
 		assertFirst("agentName(@S)", myName)
@@ -252,12 +252,13 @@ agent SWISingleFullAgent {
 				//	This is now directly using Mochalog, but getting the prolog engine and using it!
 				val p : PrologContext = get_prolog_engine() as PrologContext
 				val solution = p.askForSolution(Query.format("percepts_self(@S, Step, Percept)", playerName))
-				agent_says(
-					"Player {0} percepts at step {1}: {2}",
-					playerName,
-					solution.get("Step").toString(),
-					solution.get("Percept").toString()
-				)
+				agent_says("Player {0} has percept info in its KB for step {1}", playerName, solution.get("Step").intValue)
+//				agent_says(
+//					"Player {0} percepts at step {1}: {2}",
+//					playerName,
+//					solution.get("Step").toString(),
+//					solution.get("Percept").toString()
+//				)
 			} catch (e : NoSuchSolutionException) {
 				agent_says("I do not have self information for player {0}",	playerName)
 			}
@@ -268,31 +269,38 @@ agent SWISingleFullAgent {
 		dump_kb() 	// Using Prolog-CAP directly
 	}
 
+	on E_MoveRandomly {
+		val playerState = MT_getPlayerState(occurrence.playerName)
+		
+		if (playerState == null) {
+			System.out.println(String.format("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX %s", occurrence.playerName))
+		}
+		agent_says("I am instructed to move RANDOMLY player {0}.", occurrence.playerName)
+	}
 
-
-	/*
+	/* 
 	 * Do something in the real world... (presumably, done after perception cycle)
 	 * 
 	 * This two behaviors make the player move towards any random facility
 	 */
-	on E_MoveRandomly [(MT_getPlayerState(occurrence.playerName).routeLength > 0)] {
-		// we are still traveling, just continue following the path...		
-		val playerName = occurrence.playerName
-
-		agent_says("Seems player {0} is already am moving: {1} steps to go!", playerName,
-			MT_getPlayerState(playerName).routeLength)
-			
-		performAction(playerName, new Action("continue"))
-	}
-	on E_MoveRandomly [!(MT_getPlayerState(occurrence.playerName).routeLength > 0)] {
-		val playerName = occurrence.playerName
-
-		// Do some reasoning to pick up the next destination!		
-		var destination = kb_pickDestination(playerName)
-			
-		performAction(playerName, new Action("goto", new Identifier(destination)))
-		agent_says("I will start navigating towards {0}", destination)
-	}
+//	on E_MoveRandomly [(MT_getPlayerState(occurrence.playerName).routeLength > 0)] {
+//		// we are still traveling, just continue following the path...		
+//		val playerName = occurrence.playerName
+//
+//		agent_says("Seems player {0} is already am moving: {1} steps to go!", playerName,
+//			MT_getPlayerState(playerName).routeLength)
+//			
+//		performAction(playerName, new Action("continue"))
+//	}
+//	on E_MoveRandomly [!(MT_getPlayerState(occurrence.playerName).routeLength > 0)] {
+//		val playerName = occurrence.playerName
+//
+//		// Do some reasoning to pick up the next destination!		
+//		var destination = kb_pickDestination(playerName)
+//			
+//		performAction(playerName, new Action("goto", new Identifier(destination)))
+//		agent_says("I will start navigating towards {0}", destination)
+//	}
 
 
 
