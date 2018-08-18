@@ -21,19 +21,21 @@ Some dummy controllers are provided as templates to build from.
 * Java Runtime Environment (JRE) and Java Compiler (javac) v1.8 (Sun version recommended)
 * Maven project management and comprehension tool (to meet dependencies, compile, package, run).
 * SARL (SRE Janus) execution engine:
-	* Version defined via environment variable `SARL_VERSION` (make sure it is defined to the version to be used, e.g., 0.7.2)
-	* Version tested: 0.6.1, 0.7.2.
+	* Version defined via environment variable `SARL_VERSION` (e.g., `export SARL_VERSION=0.7.2`).
 	* Obtained via Maven automatically from <http://mvnrepository.com/artifact/io.sarl.Maven>
 * The [SARL Agents in City SARL Middleware](https://bitbucket.org/ssardina-research/sarl-agtcity-mw). 
 	* Should be obtained automatically via Maven + Jitpack.
-	* Uses the [EISMASSim](https://github.com/eishub/massim) environment interface for abstracting protocol with game server. 
-		* Their JAR sources are provided under `extras/` so they can be used to attach sources in ECLIPSE.
-		* Tested on versions `massim-2017-1.3` and `massim-2017-1.7`.
+* The [EISMASSim](https://github.com/agentcontest/massim)  a Java library using the Environment Interface Standard (EIS) to communicate with the MASSim server. 
+	* The JAR sources are provided under `extras/` so they can be used to attach sources in ECLIPSE.
+	* Comes with the game server. Using version `3.4` that comes with server `massim-2017-1.7` (Sept 2017)
+	* Uses the [eishub/EIS](https://github.com/eishub/eis) version `0.5` (sources also under `extras/`).
 * The [SARL-PROLOG-CAP](https://bitbucket.org/ssardina-research/sarl-prolog-cap) capacity+skill for [SWI Prolog](http://www.swi-prolog.org/) system:
 	* Capacity and skill to allow the use of SWI Prolog knowledge-bases in SARL agents.
 	* Relies on [Mochalog](https://github.com/ssardina/mochalog) and [JPL](https://jpl7.org/) to have Prolog access from Java.
 	* The right version (specified in the POM file) should be obtained automatically via [JitPack](https://jitpack.io/#org.bitbucket.ssardina-research/sarl-prolog-cap).
 	* **IMPORTANT**: Please refer to the instructions and examples in the [capacity+skill's page](https://bitbucket.org/ssardina-research/sarl-prolog-cap) to set-up and use it in your SARL application.
+
+
 
 ## INSTALL, RUN and DEVELOP
 
