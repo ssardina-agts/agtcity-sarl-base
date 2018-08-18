@@ -68,11 +68,8 @@ So, to **run the system** you need to follow these general steps:
 
 These are all thin agent controllers for the players in the game, but they should provide a solid base for developing more sophisticated agent systems.
 
-This is the **default agent controller** for `BootMAS` class so it can be run by just:
+All the agents can be run via the booting class `BootMAS`, which is the default execution class in the package JAR file. One has to give the name of the agent controller to start as an argument.
 
-```
-java -jar target/sarl-agtcity-base-1.2.0.7.2-jar-with-dependencies.jar
-```
 
 ### SuperSingleAgent
 
@@ -81,6 +78,18 @@ A simple central agent controlling all players in the simulator, receiving and p
 It uses the Java Percept Aggregator facility provided in the MW as percepts from players have a lot of shared content.
 
 All data is stored in Java.
+
+This is the **default** agent controller for `BootMAS` class so it can be run by just doing
+
+```
+java -jar target/sarl-agtcity-base-1.2.0.7.2-jar-with-dependencies.jar
+```
+
+or
+
+```
+java -jar target/sarl-agtcity-base-1.2.0.7.2-jar-with-dependencies.jar SuperSingleAgent
+```
 
 
 ### SWISingleFullAgent 
@@ -99,10 +108,10 @@ To run this agent, you can do:
 java -cp target/sarl-agtcity-extras-1.0.0.7.2-jar-with-dependencies.jar io.janusproject.Boot au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.SWISingleFullAgent
 ```
 
-or simply, if `io.janusproject.Boot` is set as the main class in execution plugin:
+or since `BootMAS` is the default execution class:
 
 ```
-java -jar target/sarl-agtcity-extras-1.0.0.7.2-jar-with-dependencies.jar au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.SWISingleFullAgent
+java -jar target/sarl-agtcity-extras-1.0.0.7.2-jar-with-dependencies.jar SWISingleFullAgent
 ```
 
 
@@ -120,10 +129,10 @@ To run this agent, you can do:
 java -cp target/sarl-agtcity-extras-1.0.0.7.2-jar-with-dependencies.jar io.janusproject.Boot au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.BootMultiSWIAgents
 ```
 
-or simply, if `io.janusproject.Boot` is set as the main class in execution plugin:
+or since `BootMAS` is the default execution class:
 
 ```
-java -jar target/sarl-agtcity-extras-1.0.0.7.2-jar-with-dependencies.jar au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.BootMultiSWIAgents
+java -jar target/sarl-agtcity-extras-1.0.0.7.2-jar-with-dependencies.jar BootMultiSWIAgents
 ```
 
 

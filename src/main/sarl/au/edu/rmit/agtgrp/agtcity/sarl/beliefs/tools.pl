@@ -1,6 +1,7 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TOOLS	
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This are just a set of Prolog tools convenient to have
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	
 % Concatenate a list of strings
 strings_concat([], "").
@@ -13,8 +14,7 @@ strings_concat([S|L], CS) :-
 %    get_time(X), 
 %    format_time(atom(T),'%Y-%m-%d--%H-%M-%S',X,posix).
 
-
-
+% Not used as we have a dumping mechanism in Prolog Capacity
 my_save_db :-
 	(agentName(Name) -> true ; Name = default),
 	(step(Step) ; Step = "none"), !,
@@ -25,6 +25,6 @@ my_save_db :-
 	close(F).
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % EOF
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
