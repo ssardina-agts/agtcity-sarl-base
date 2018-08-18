@@ -19,6 +19,8 @@ package au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy
 
 import io.sarl.core.Initialize
 import io.sarl.core.Lifecycle
+import io.sarl.core.Logging
+import io.sarl.core.Destroy
 
 /** 
  * This agent will spawn several single SWISingleFullAgents, each of the managing some subset
@@ -28,12 +30,20 @@ import io.sarl.core.Lifecycle
  */
 agent BootMultiSWIAgents {
     uses Lifecycle
+    uses Logging
 
     on Initialize {
-        spawn(SWISingleFullAgent, "team1", "conf/MultiAgents/", "eismassimconfig1.json", "agentsconfig1.json")
-        spawn(SWISingleFullAgent, "team2", "conf/MultiAgents/", "eismassimconfig2.json", "agentsconfig2.json")
+        spawn(SWISingleFullAgent, "team1Manager", "conf/MultiAgents/", "eismassimconfig1.json", "agentsconfig1.json")
+        spawn(SWISingleFullAgent, "team2Manager", "conf/MultiAgents/", "eismassimconfig2.json", "agentsconfig2.json")
         killMe
     }
+
+	on Destroy {
+		// Event trigger when the agent is destroyed from the system.
+		// You should put all the resource releasing statements in this block of code.
+		info("Boot-Multi-SWI-Agents is now dying, have booted all agents, all done! Bye bye...")
+	}
+
 }
 
 

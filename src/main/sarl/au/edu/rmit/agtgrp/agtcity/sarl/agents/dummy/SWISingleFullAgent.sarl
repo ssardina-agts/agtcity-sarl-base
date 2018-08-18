@@ -41,16 +41,19 @@ import java.nio.file.Paths
 import javax.management.relation.RelationException
 import org.json.JSONObject
 
-// Middleware for Agent City
+// Agents in City SARL MIDDLEWARE
 // from https://bitbucket.org/ssardina-research/sarl-agtcity-mw
-import au.edu.rmit.agtgrp.agtcity.sarl.mw.utils.ConfHandler
-import au.edu.rmit.agtgrp.agtcity.sarl.mw.aggregator.Util
-import au.edu.rmit.agtgrp.agtcity.sarl.mw.entities.PlayerState
-
 import au.edu.rmit.agtgrp.agtcity.sarl.mw.capacities.C_Reporting
 import au.edu.rmit.agtgrp.agtcity.sarl.mw.capacities.C_MassimTalking
 import au.edu.rmit.agtgrp.agtcity.sarl.mw.skills.S_ConsoleReporting
 import au.edu.rmit.agtgrp.agtcity.sarl.mw.skills.S_MassimTalking17
+
+import au.edu.rmit.agtgrp.agtcity.sarl.mw.utils.ConfHandler
+import au.edu.rmit.agtgrp.agtcity.sarl.mw.aggregator.Util
+import au.edu.rmit.agtgrp.agtcity.sarl.mw.entities.PlayerState
+
+import eis.iilang.Identifier
+import eis.exceptions.PerceiveException
 
 
 // Events
@@ -59,19 +62,16 @@ import au.edu.rmit.agtgrp.agtcity.sarl.events.E_ReportInfo
 import au.edu.rmit.agtgrp.agtcity.sarl.events.E_SenseEnvironment
 
 
-
-import au.edu.rmit.agtgrp.agtcity.sarl.beliefs.KB_AgtCity
-
-
-import eis.iilang.Identifier
-
-import eis.exceptions.PerceiveException
-
+// SARL PROLOG CAPACITY (and MOCHALOG)
+// https://bitbucket.org/ssardina-research/sarl-prolog-cap
+// https://github.com/ssardina/mochalog
 import io.sarl.extras.SWI_KB_Prolog
 import io.sarl.extras.KB_Prolog
+import au.edu.rmit.agtgrp.agtcity.sarl.beliefs.KB_AgtCity
+import au.edu.rmit.agtgrp.agtcity.sarl.beliefs.SWI_KB_AgtCity
+
 import io.mochalog.bridge.prolog.query.exception.NoSuchSolutionException
 import io.mochalog.bridge.prolog.query.Query
-import au.edu.rmit.agtgrp.agtcity.sarl.beliefs.SWI_KB_AgtCity
 import io.mochalog.bridge.prolog.SandboxedPrologContext
 import io.mochalog.bridge.prolog.PrologContext
 
@@ -79,16 +79,15 @@ import io.mochalog.bridge.prolog.PrologContext
  * This is a single SARL agent that uses the S_MassimTalking07 skill 
  * to manage ALL the players in the  game simulation.
  * 
- * Agent also uses a SWI Knowledge base via this.prolog KB
+ * Agent also uses a SWI Knowledge base via a prolog KB
  * 
  * When created it can receive the following arguments (in order);
  * - SARL agent name
- * - directory where server and players configuration files are stored
- * - file name of the server configuration 
- * - file name of the players configuration (where credentials are placed)
+ * - Directory where server and players configuration files are stored
+ * - File name of the server configuration 
+ * - File name of the players configuration (where credentials are placed)
  * 
  * @author Sebastian Sardina (ssardina@gmail.com)
- *  
  */
 agent SWISingleFullAgent {
     uses Logging, Lifecycle, DefaultContextInteractions 
@@ -106,10 +105,10 @@ agent SWISingleFullAgent {
     on Initialize { // Should only be initializing with the EIS as a parameter.
 	{
 		// There could be many arguments passed, in this order:
-		//	1. Agent name
-		//	2. Directory with EI configuration files (eiConfigDir)
-		// 	3. EI configuration json file (eiMassimConfigFile)
-		//	4. Authentication configuration json file (eiMassimAuthConfigFile)
+		//	args.get(0): Agent name
+		//	Args.get(1):  Directory with EI configuration files (eiConfigDir)
+		//  args.get(2):  EI configuration json file - team information, which players -> entity for team (eiMassimConfigFile)
+		//  args.get(3):  Authentication and game configuration configuration json file (eiMassimAuthConfigFile)
         var args = newArrayList(occurrence.parameters) 
 		var eiConfigDir : String = "./"						// default value
 		var eiMassimConfigFile = "eismassimconfig.json" 	// default value
@@ -120,15 +119,28 @@ agent SWISingleFullAgent {
 		if (args.length >= 1) {
 			myName = args.get(0) as String
 		}
-		// Give reporting skill via console
-		setSkill(new S_ConsoleReporting(myName), C_Reporting)
-		setLogLevel(4)
-
+		if (args.length >= 2)
+			eiConfigDir = args.get(1) as String
+		else {
+			// There is no 3rd argument, so search in directory and try to get it
+			eiConfigDir = ConfHandler.getConfDir()		// search for $eiConfigDir/conf to see if there are EIS config packages
+		}
 		// If eiMassimConfigFile and eiMassimAuthConfigFile are included in 3rd and 4rth args
+		// These are the configuration files storing team formation and authorization credentials in server per agent
 		if (args.length >= 4) {
 			eiMassimConfigFile = args.get(2) as String
 			eiMassimAuthConfigFile = args.get(3) as String
 		}
+		debug("Gather all configuration options: 
+				\t My SARL agent name: {0}
+				\t Directory of configuration files: {1}
+				\t File with team configuration (player lists): {2}
+				\t File containing authentication and sever info: {3}", myName, eiConfigDir, eiMassimConfigFile,
+				eiMassimAuthConfigFile)
+			
+		// Give reporting skill via console
+		setSkill(new S_ConsoleReporting(myName), C_Reporting)
+		setLogLevel(4)
 		
 		// Set up a new Prolog belief base - load agent knowledge bases. 
 		val beliefSpace = String.format(myName)
@@ -136,20 +148,15 @@ agent SWISingleFullAgent {
 		kb_load(kb_root_path + "/beliefs/tools.pl")
 		kb_load(kb_root_path + "/beliefs/percept-mgmt.pl")
 		kb_load(kb_root_path + "/beliefs/decision-making.pl") 
+		agent_says("I have loaded all my knowledge bases!")
 
 		// Assert my name in the KB
-		assertFirst("agentName(@S)", myName)
-//		kb_recordKBName(myName)
+		assertFirst("agentName(@A)", myName)	// this uses the tools provided in generic KB_Prolog skill
+		//kb_recordKBName(myName)	// this uses the current KB domain capacity KB_AgtCity
 
 
-		agent_says("PHASE 1: REGISTERING MASSIM TALKING SKILL VIA CONFIGURATION FILES {0} AND {1}", 
+		agent_says("PHASE 1: REGISTERING MASSIM-TALKING SKILL VIA CONF. FILES {0} AND {1}", 
 				eiMassimConfigFile, eiMassimAuthConfigFile)
-        if (args.length >= 2)
-            eiConfigDir = args.get(1) as String
-        else {
-        	// There is no 3rd argument, so search in directory and try to get it
-            eiConfigDir = ConfHandler.getConfDir()
-        }
   		// Give agent ability to talk to MASSIM server
 		setSkill(
 			new S_MassimTalking17(Paths.get(eiConfigDir, eiMassimConfigFile),
@@ -225,8 +232,8 @@ agent SWISingleFullAgent {
 			emit(new E_ReportInfo())
 
 			// 5. Very finally, do some some movement per agent
-			MT_getPlayersNames.forEach([playerName2 : String | 
-				emit(new E_MoveRandomly => [playerName = playerName2]) // see compact way of assignment data in event
+			MT_getPlayersNames.forEach([name  : String | 
+				emit(new E_MoveRandomly => [playerName = name]) // see compact way of assignment data in event
 			])
 
 		}
@@ -269,13 +276,8 @@ agent SWISingleFullAgent {
 		dump_kb() 	// Using Prolog-CAP directly
 	}
 
-	on E_MoveRandomly {
-		val playerState = MT_getPlayerState(occurrence.playerName)
-		
-		if (playerState == null) {
-			System.out.println(String.format("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX %s", occurrence.playerName))
-		}
-		agent_says("I am instructed to move RANDOMLY player {0}.", occurrence.playerName)
+	on E_MoveRandomly [occurrence.fromMe] {
+		agent_shouts("I am instructed to move RANDOMLY player {0}", occurrence.playerName)
 	}
 
 	/* 
@@ -283,24 +285,24 @@ agent SWISingleFullAgent {
 	 * 
 	 * This two behaviors make the player move towards any random facility
 	 */
-//	on E_MoveRandomly [(MT_getPlayerState(occurrence.playerName).routeLength > 0)] {
-//		// we are still traveling, just continue following the path...		
-//		val playerName = occurrence.playerName
-//
-//		agent_says("Seems player {0} is already am moving: {1} steps to go!", playerName,
-//			MT_getPlayerState(playerName).routeLength)
-//			
-//		performAction(playerName, new Action("continue"))
-//	}
-//	on E_MoveRandomly [!(MT_getPlayerState(occurrence.playerName).routeLength > 0)] {
-//		val playerName = occurrence.playerName
-//
-//		// Do some reasoning to pick up the next destination!		
-//		var destination = kb_pickDestination(playerName)
-//			
-//		performAction(playerName, new Action("goto", new Identifier(destination)))
-//		agent_says("I will start navigating towards {0}", destination)
-//	}
+	on E_MoveRandomly [occurrence.fromMe && (MT_getPlayerState(occurrence.playerName).routeLength > 0)] {
+		// we are still traveling, just continue following the path...		
+		val playerName = occurrence.playerName
+
+		agent_says("Seems player {0} is already am moving: {1} steps to go!", playerName,
+			MT_getPlayerState(playerName).routeLength)
+			
+		performAction(playerName, new Action("continue"))
+	}
+	on E_MoveRandomly [occurrence.fromMe && !(MT_getPlayerState(occurrence.playerName).routeLength > 0)] {
+		val playerName = occurrence.playerName
+
+		// Do some reasoning to pick up the next destination!		
+		var destination = kb_pickDestination(playerName)
+			
+		performAction(playerName, new Action("goto", new Identifier(destination)))
+		agent_says("I will start navigating towards {0}", destination)
+	}
 
 
 
