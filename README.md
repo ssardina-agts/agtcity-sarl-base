@@ -5,12 +5,12 @@ This project/package provides _basic_ SARL controllers for the [2017 MAC Agents 
 
 The project relies on:
 
-1. The [MASSIM Agents in City SARL Connectivity Interface](https://bitbucket.org/ssardina-research/sarl-agtcity-intf).
+1. The [SARL Agents in City Middleware](https://bitbucket.org/ssardina-research/sarl-agtcity-mw) which provides SARL capacity and skill for teams to connect and play in the game simulator.
+2. The [MASSIM Agents in City EIS-HUB Interface](https://github.com/eishub/massim) module.
 	* Java-code providing a more high-level access to the game sever than low-level JSON messages.
-2. The [SARL Agents in City Middleware](https://bitbucket.org/ssardina-research/sarl-agtcity-mw) which provides SARL capacity and skill for teams to connect and play in the game simulator.
-2. The [SARL-PROLOG-CAP](https://bitbucket.org/ssardina-research/sarl-prolog-cap) project that provides a capacity and a skill for SARL agents to use [SWI Prolog](http://www.swi-prolog.org/) for implementing the knowledge base of the agents. 
+3. The [SARL-PROLOG-CAP](https://bitbucket.org/ssardina-research/sarl-prolog-cap) project that provides a capacity and a skill for SARL agents to use [SWI Prolog](http://www.swi-prolog.org/) for implementing the knowledge base of the agents. 
 
-Two dummy controllers, one of them using SWI Prolog, are provided.
+Some dummy controllers are provided as templates to build from.
 
 **IMPORTANT:** A comprehensive set of instructions how to run SARL systems can be found [here](https://bitbucket.org/snippets/ssardina/6eybMg/sarl-application-general-information-setup)
 
