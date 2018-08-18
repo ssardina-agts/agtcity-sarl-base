@@ -24,26 +24,22 @@ Two dummy controllers, one of them using SWI Prolog, are provided.
 	* Version tested: 0.6.1, 0.7.2.
 	* Obtained via Maven automatically from <http://mvnrepository.com/artifact/io.sarl.Maven>
 * The [SARL Agents in City SARL Middleware](https://bitbucket.org/ssardina-research/sarl-agtcity-mw). 
+	* Should be obtained automatically via Maven + Jitpack.
+	* Middleware uses the [Java EIS Hub project](https://github.com/eishub), an abstract interface to implement communication with the environment. In particular, modules [EIS](https://github.com/eishub/eis) and [massim](https://github.com/eishub/massim) are used. Their JAR sources are provided under `extras/` so they can be used to attach sources in ECLIPSE.
 * The [SARL-PROLOG-CAP](https://bitbucket.org/ssardina-research/sarl-prolog-cap) capacity+skill for [SWI Prolog](http://www.swi-prolog.org/) system:
 	* Capacity and skill to allow the use of SWI Prolog knowledge-bases in SARL agents.
 	* Relies on [Mochalog](https://github.com/ssardina/mochalog) and [JPL](https://jpl7.org/) to have Prolog access from Java.
 	* The right version (specified in the POM file) should be obtained automatically via [JitPack](https://jitpack.io/#org.bitbucket.ssardina-research/sarl-prolog-cap).
 	* **IMPORTANT**: Please refer to the instructions and examples in the [capacity+skill's page](https://bitbucket.org/ssardina-research/sarl-prolog-cap) to set-up and use it in your SARL application.
 
-
-
 ## INSTALL, RUN and DEVELOP
 
 You can run the SARL controller, either from ECLIPSE or from CLI (via Java or Maven), please refer to [this instructions](https://bitbucket.org/snippets/ssardina/6eybMg#markdown-header-4-running-the-sarl-application).
 
-When developing your agent in ECLIPSE, you may want to navigate the sources of *eis* and *eismassim* modules (for environment interface). 
-However, their sources are not available via Maven. So their JAR sources are both provided under  `extras/` and they can be used to attach sources.
-
-Also remember the [SARL MASSIM Agents in City SARL Middleware](https://bitbucket.org/ssardina-research/sarl-agtcity-mw) must be installed in your local Maven repo (e.g., `~/.m2`).
-Refer to instructions there to install it manually or automatically via Maven + Jitpack.
+You can use the source JAR files for modules [EIS](https://github.com/eishub/eis) and [massim](https://github.com/eishub/massim) provided in `extras/` to attah sources in ECLIPSE (their sources are not available via Maven).
 
 
-So, to run the system you need to follow these general steps:
+So, to **run the system** you need to follow these general steps:
 
 1. Start MAC17 Game Server. For example, from `server/` subdir:
 
@@ -56,7 +52,7 @@ So, to run the system you need to follow these general steps:
 	* One way to run it from CLI directly once it has been packaged is as follows:
 	
 		```
-		java -cp target/sarl-agtcity-extras-1.0.0.7.2-jar-with-dependencies.jar io.janusproject.Boot au.edu.rmit.agtgrp.sarl.agtcity.agents.dummy.SWISingleFullAgent
+		java -cp target/sarl-agtcity-extras-1.0.0.7.2-jar-with-dependencies.jar io.janusproject.Boot au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.SWISingleFullAgent
 		```
 		
 3. Start the MASSIM Simulation by just hitting *ENTER* in the Game Server console
@@ -67,12 +63,21 @@ So, to run the system you need to follow these general steps:
 
 ## EXAMPLE AGENTS ##
 
+These are all thin agent controllers for the players in the game, but they should provide a solid base for developing more sophisticated agent systems.
+
+
+### SuperSingleAgent
+
+A simple central agent controlling all players in the simulator, receiving and processing the sensing from the environment, and then making all players navigate to random facilities.
+
+It uses the Java Percept Aggregator facility provided in the MW as percepts from players have a lot of shared content.
+
+All data is stored in Java.
+
 
 ### SWISingleFullAgent 
 
 This is one single SARL agent controlling all players in the game and, importantly, using an SWI Prolog Knowledge Base via the [Mochalog Framework](https://github.com/ssardina/mochalog).
-
-This agent is very thin, but should provide a solid base for  developing an agent whose sophisticated reasoning happens on SWI Prolog, for example using constraints.
 
 To help understand how the SWI Knowledge Base is updated, every percept cycle the agent prints out some results from queries and then dumps its entire KB into file `swiSingleFullAgent-<n>.pl`, where `<n>` is the step number.
 
@@ -83,13 +88,13 @@ It also contains simple logic to continously select a random destination and go 
 To run this agent, you can do:
 
 ```
-java -cp target/sarl-agtcity-extras-1.0.0.7.2-jar-with-dependencies.jar io.janusproject.Boot au.edu.rmit.agtgrp.sarl.agtcity.agents.dummy.SWISingleFullAgent
+java -cp target/sarl-agtcity-extras-1.0.0.7.2-jar-with-dependencies.jar io.janusproject.Boot au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.SWISingleFullAgent
 ```
 
 or simply, if `io.janusproject.Boot` is set as the main class in execution plugin:
 
 ```
-java -jar target/sarl-agtcity-extras-1.0.0.7.2-jar-with-dependencies.jar au.edu.rmit.agtgrp.sarl.agtcity.agents.dummy.SWISingleFullAgent
+java -jar target/sarl-agtcity-extras-1.0.0.7.2-jar-with-dependencies.jar au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.SWISingleFullAgent
 ```
 
 
@@ -104,13 +109,13 @@ This is a perfect example of versatility where a SARL agent can be given the tas
 To run this agent, you can do:
 
 ```
-java -cp target/sarl-agtcity-extras-1.0.0.7.2-jar-with-dependencies.jar io.janusproject.Boot au.edu.rmit.agtgrp.sarl.agtcity.agents.dummy.BootMultiSWIAgents
+java -cp target/sarl-agtcity-extras-1.0.0.7.2-jar-with-dependencies.jar io.janusproject.Boot au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.BootMultiSWIAgents
 ```
 
 or simply, if `io.janusproject.Boot` is set as the main class in execution plugin:
 
 ```
-java -jar target/sarl-agtcity-extras-1.0.0.7.2-jar-with-dependencies.jar au.edu.rmit.agtgrp.sarl.agtcity.agents.dummy.BootMultiSWIAgents
+java -jar target/sarl-agtcity-extras-1.0.0.7.2-jar-with-dependencies.jar au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.BootMultiSWIAgents
 ```
 
 

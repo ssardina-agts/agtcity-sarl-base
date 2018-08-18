@@ -15,26 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package au.edu.rmit.agtgrp.sarl.agtcity.agents.dummy
-
-import io.sarl.core.Initialize
-import io.sarl.core.Lifecycle
+package au.edu.rmit.agtgrp.agtcity.sarl.events
 
 /** 
- * This agent will spawn several single SWISingleFullAgents, each of the managing some subset
- * of the players in the simulation
-
- * @author Sebastian Sardina (ssardina@gmail.com) * 
+ * @author ssardina
+ * 
  */
-agent BootMultiSWIAgents {
-    uses Lifecycle
+event E_DomainEvent
+event E_MoveRandomly extends E_DomainEvent {
 
-    on Initialize {
-        spawn(SWISingleFullAgent, "team1", "conf/MultiAgents/", "eismassimconfig1.json", "agentsconfig1.json")
-        spawn(SWISingleFullAgent, "team2", "conf/MultiAgents/", "eismassimconfig2.json", "agentsconfig2.json")
-        killMe
-    }
+	var playerName : String
 }
-
+event E_ReportInfo extends E_DomainEvent 
+event E_SenseEnvironment extends E_DomainEvent 
 
 

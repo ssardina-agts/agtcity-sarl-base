@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package au.edu.rmit.agtgrp.sarl.agtcity.agents.dummy
+package au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy
 
 // MASSIM EIS imports
 import eis.EnvironmentInterfaceStandard
@@ -43,24 +43,24 @@ import org.json.JSONObject
 
 // Middleware for Agent City
 // from https://bitbucket.org/ssardina-research/sarl-agtcity-mw
-import au.edu.rmit.agtgrp.sarl.mw.agtcity.utils.ConfHandler
-import au.edu.rmit.agtgrp.sarl.mw.agtcity.aggregator.Util
-import au.edu.rmit.agtgrp.sarl.mw.agtcity.entities.PlayerState
+import au.edu.rmit.agtgrp.agtcity.sarl.mw.utils.ConfHandler
+import au.edu.rmit.agtgrp.agtcity.sarl.mw.aggregator.Util
+import au.edu.rmit.agtgrp.agtcity.sarl.mw.entities.PlayerState
 
-import au.edu.rmit.agtgrp.sarl.mw.agtcity.capacities.C_Reporting
-import au.edu.rmit.agtgrp.sarl.mw.agtcity.capacities.C_MassimTalking
-import au.edu.rmit.agtgrp.sarl.mw.agtcity.skills.S_ConsoleReporting
-import au.edu.rmit.agtgrp.sarl.mw.agtcity.skills.S_MassimTalking17
+import au.edu.rmit.agtgrp.agtcity.sarl.mw.capacities.C_Reporting
+import au.edu.rmit.agtgrp.agtcity.sarl.mw.capacities.C_MassimTalking
+import au.edu.rmit.agtgrp.agtcity.sarl.mw.skills.S_ConsoleReporting
+import au.edu.rmit.agtgrp.agtcity.sarl.mw.skills.S_MassimTalking17
 
 
 // Events
-import au.edu.rmit.agtgrp.sarl.agtcity.events.E_MoveRandomly
-import au.edu.rmit.agtgrp.sarl.agtcity.events.E_ReportInfo
-import au.edu.rmit.agtgrp.sarl.agtcity.events.E_SenseEnvironment
+import au.edu.rmit.agtgrp.agtcity.sarl.events.E_MoveRandomly
+import au.edu.rmit.agtgrp.agtcity.sarl.events.E_ReportInfo
+import au.edu.rmit.agtgrp.agtcity.sarl.events.E_SenseEnvironment
 
 
 
-import au.edu.rmit.agtgrp.sarl.agtcity.beliefs.KB_AgtCity
+import au.edu.rmit.agtgrp.agtcity.sarl.beliefs.KB_AgtCity
 
 
 import eis.iilang.Identifier
@@ -71,7 +71,7 @@ import io.sarl.extras.SWI_KB_Prolog
 import io.sarl.extras.KB_Prolog
 import io.mochalog.bridge.prolog.query.exception.NoSuchSolutionException
 import io.mochalog.bridge.prolog.query.Query
-import au.edu.rmit.agtgrp.sarl.agtcity.beliefs.SWI_KB_AgtCity
+import au.edu.rmit.agtgrp.agtcity.sarl.beliefs.SWI_KB_AgtCity
 import io.mochalog.bridge.prolog.SandboxedPrologContext
 import io.mochalog.bridge.prolog.PrologContext
 
@@ -184,7 +184,7 @@ agent SWISingleFullAgent {
 		// While the environment is running, wait for new percpets, read them all per agent
 		while (MT_getStatus() == EnvironmentState.RUNNING) {
 			agent_says("Waiting for new percepts (blocking) for players {0}", MT_getPlayersNames())
-			MT_getConnectedPlayers().keySet().forEach([ playerName : String |
+			MT_getPlayersNames.forEach([ playerName : String |
 				var allPercepts : Map<String, Collection<Percept>>
 				try {
 					allPercepts = MT_sensePlayerPercepts(playerName) 	// This is blocking!
@@ -207,11 +207,11 @@ agent SWISingleFullAgent {
 				
 
 				// Process the percepts: update this.agents and KB
-				MT_getConnectedPlayers().get(playerName).update(percepts) // update the player java-object data
-				agent_says(MT_getConnectedPlayers().get(playerName).reportState()) // report player state
+				MT_getPlayerState(playerName).update(percepts) // update the player java-object data
+				agent_says(MT_getPlayerState(playerName).reportState()) // report player state
 				
 				// assert percepts in the KB
-				kb_recordPercepts(playerName, MT_getConnectedPlayers().get(playerName).step, percepts.toString)
+				kb_recordPercepts(playerName, MT_getPlayerState(playerName).step, percepts.toString)
 			])
 
 			// Instruct the KB to process last percept for each player (and store each knowledge separately)
@@ -275,16 +275,16 @@ agent SWISingleFullAgent {
 	 * 
 	 * This two behaviors make the player move towards any random facility
 	 */
-	on E_MoveRandomly [(MT_getConnectedPlayers().get(occurrence.playerName).routeLength > 0)] {
+	on E_MoveRandomly [(MT_getPlayerState(occurrence.playerName).routeLength > 0)] {
 		// we are still traveling, just continue following the path...		
 		val playerName = occurrence.playerName
 
 		agent_says("Seems player {0} is already am moving: {1} steps to go!", playerName,
-			MT_getConnectedPlayers().get(playerName).routeLength)
+			MT_getPlayerState(playerName).routeLength)
 			
 		performAction(playerName, new Action("continue"))
 	}
-	on E_MoveRandomly [!(MT_getConnectedPlayers().get(occurrence.playerName).routeLength > 0)] {
+	on E_MoveRandomly [!(MT_getPlayerState(occurrence.playerName).routeLength > 0)] {
 		val playerName = occurrence.playerName
 
 		// Do some reasoning to pick up the next destination!		

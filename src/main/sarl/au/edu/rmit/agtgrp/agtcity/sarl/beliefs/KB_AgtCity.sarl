@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package au.edu.rmit.agtgrp.sarl.agtcity.beliefs
+package au.edu.rmit.agtgrp.agtcity.sarl.beliefs
 
 import io.sarl.core.Logging
 
