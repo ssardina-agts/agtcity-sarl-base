@@ -21,6 +21,9 @@ import io.sarl.core.Initialize
 import io.sarl.core.Lifecycle
 import io.sarl.core.Logging
 import io.sarl.core.Destroy
+import io.sarl.core.AgentSpawned
+import java.util.Collection
+import java.util.ArrayList
 
 /** 
  * This agent will spawn several single SWISingleFullAgents, each of the managing some subset
@@ -32,11 +35,43 @@ agent BootMultiSWIAgents {
     uses Lifecycle
     uses Logging
 
-    on Initialize {
-        spawn(SWISingleFullAgent, "team1Manager", "conf/MultiAgents/", "eismassimconfig1.json", "agentsconfig1.json")
-        spawn(SWISingleFullAgent, "team2Manager", "conf/MultiAgents/", "eismassimconfig2.json", "agentsconfig2.json")
-        killMe
-    }
+	var teamManagers : Collection<String[]> = new ArrayList<String[]>()
+	var noSpawn : int
+	val lock1 : Object = new Object()
+	
+     on Initialize {
+		teamManagers.add(#["team1Manager", "conf/MultiAgents/", "eismassimconfig1.json", "agentsconfig1.json"])
+		teamManagers.add(#["team2Manager", "conf/MultiAgents/", "eismassimconfig2.json", "agentsconfig2.json"])
+
+		noSpawn = 0
+		teamManagers.forEach([ teamManagerOptions : String[] |
+			spawn(SWISingleFullAgent, teamManagerOptions)
+		])
+
+		// EQUIVALENT TO:		
+		//	spawn(SWISingleFullAgent, "team1Manager", "conf/MultiAgents/", "eismassimconfig1.json", "agentsconfig1.json")
+		// spawn(SWISingleFullAgent, "team2Manager", "conf/MultiAgents/", "eismassimconfig2.json", "agentsconfig2.json")
+	}
+
+	on AgentSpawned {
+		val agent_ids = occurrence.agentIdentifiers
+		val agent_type = occurrence.agentType
+		info("An Agent {0} (of type: {1}) has been created successfully and is now alive!", agent_ids, agent_type)
+
+		// This code gives validation error at compile, it should not!
+		// // see bug report : https://github.com/sarl/sarl/issues/847
+		// info("Agent {0} of type {1} has been created successfully and is now alive!",
+		// occurrence.agentIdentifiers, occurrence.agentType)
+
+		synchronized(lock1) {
+			noSpawn++
+		}
+		if (noSpawn == teamManagers.length) {
+			info("All agent have been created, now dying... From BootMultiSWIAgents, bye bye....")
+			killMe
+		}
+
+	}
 
 	on Destroy {
 		// Event trigger when the agent is destroyed from the system.
