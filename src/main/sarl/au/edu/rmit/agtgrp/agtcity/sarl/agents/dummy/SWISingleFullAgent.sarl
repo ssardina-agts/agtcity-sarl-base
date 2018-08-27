@@ -143,7 +143,7 @@ agent SWISingleFullAgent {
 		// Give reporting skill via console & set log level (-Dllevel=n to change level)
 		setSkill(new S_ConsoleReporting(myName), C_Reporting)
 		val log_level : int = Integer.parseInt(System.getProperty("llevel", String.valueOf(DEFAULT_LOG_LEVEL)))
-		System.out.println("============+> SETTING LOG LEVEL TO: " + log_level)
+		info("============+> SETTING LOG LEVEL TO: {0}", log_level)
 		setLogLevel(log_level)
 	
 		info("This is an INFO test message (level 3)....")
@@ -193,8 +193,9 @@ agent SWISingleFullAgent {
 
 	/**
 	 * Start a cycle to continously sense the environment until EI is not running anymore
+	 * We need to guard it to fire only if it is my event as there may be many other similar SARL agents doing the same!
 	 */
-	on E_SenseEnvironment {
+	on E_SenseEnvironment [occurrence.fromMe] {
 		agent_shouts("Start sensing the environment")
 		var step = 0 
 		
@@ -252,7 +253,7 @@ agent SWISingleFullAgent {
 	/*
 	 * Just report whatever you want the user to know.. (presumably, done after perception cycle)
 	 */
-	on E_ReportInfo {
+	on E_ReportInfo [occurrence.fromMe] {
 		// 1. Report all the percepts/3 information available in the KB
 //		val query = new Query("percepts(Agent, Step, Percepts)")	// no need to format query
 //		for (solution : askForAllSolutions(query))
@@ -262,12 +263,16 @@ agent SWISingleFullAgent {
 //		}
 
 		// 2. Report current status of each player
+		// This is using Mochalog directly: get the PrologContext engine, and operate on it via Mohalog API
+		// Would be best to factor this out into the domain capacity/skill
 		MT_getPlayersNames.forEach([ playerName : String |
 			try {
 				//	This is now directly using Mochalog, but getting the prolog engine and using it!
 				val p : PrologContext = get_prolog_engine() as PrologContext
 				val solution = p.askForSolution(Query.format("percepts_self(@S, Step, Percept)", playerName))
 				agent_says("Player {0} has percept info in its KB for step {1}", playerName, solution.get("Step").intValue)
+				
+				// In case you want to also see the percepts				
 //				agent_says(
 //					"Player {0} percepts at step {1}: {2}",
 //					playerName,

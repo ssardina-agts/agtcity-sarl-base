@@ -160,6 +160,30 @@
             </plugin>
             
             
+           <!-- download sources and javadoc -->
+	       <!--
+	        <plugin>
+	            <artifactId>maven-dependency-plugin</artifactId>
+	            <executions>
+	                <execution>
+	                    <id>download-sources</id>
+	                    <goals>
+	                        <goal>sources</goal>
+	                    </goals>
+	                </execution>
+	                <execution>
+	                    <id>download-javadoc</id>
+	                    <configuration>
+	                        <classifier>javadoc</classifier>
+	                    </configuration>
+	                    <goals>
+	                        <goal>resolve</goal>
+	                    </goals>
+	                </execution>
+	            </executions>
+	        </plugin>
+            -->
+            
 			<!--  Aggregate project into a JAR package
 			https://maven.apache.org/plugins/maven-assembly-plugin/
 			-->

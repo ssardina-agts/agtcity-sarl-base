@@ -161,6 +161,7 @@ For general links check [here](https://bitbucket.org/snippets/ssardina/6eybMg#ma
 	* Multi-Agent Contest Home Page: https://multiagentcontest.org/
 	* Main git repository: https://github.com/agentcontest/massim
 	* Documentation: https://github.com/agentcontest/massim/tree/master/docs
+	* Scenario description: https://github.com/agentcontest/massim/blob/master/docs/scenario.md
 	* EISMASSim Documentation (the interface provided to communicate with game server): https://github.com/agentcontest/massim/blob/master/docs/eismassim.md
 		* Web page of the Environment Interface Standard (EIS): https://github.com/eishub/
 
