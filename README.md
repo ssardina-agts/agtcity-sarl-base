@@ -72,6 +72,8 @@ These are all thin agent controllers for the players in the game, but they shoul
 
 All the agents can be run via the booting class `BootMAS`, which is the default execution class in the package JAR file. One has to give the name of the agent controller to start as an argument.
 
+To change the log level, pass `-Dllevel=n` option (DEBUG=4; INFO=3; WARNING=2; ERROR=1). Defaults to level 3.
+
 
 ### SuperSingleAgent
 
@@ -90,7 +92,7 @@ java -jar target/sarl-agtcity-base-1.3.0.7.2-jar-with-dependencies.jar
 or
 
 ```
-java -jar target/sarl-agtcity-base-1.3.0.7.2-jar-with-dependencies.jar SuperSingleAgent
+java -jar target/sarl-agtcity-base-1.3.0.7.2-jar-with-dependencies.jar SuperSingleAgent -Dllevel=4
 ```
 
 or via the standard SARL booting mechanism:
@@ -121,7 +123,7 @@ java -cp target/sarl-agtcity-base-1.0.0.7.2-jar-with-dependencies.jar io.januspr
 or since `BootMAS` is the default execution class:
 
 ```
-java -jar target/sarl-agtcity-base-1.3.0.7.2-jar-with-dependencies.jar SWISingleFullAgent
+java -jar target/sarl-agtcity-base-1.3.0.7.2-jar-with-dependencies.jar SWISingleFullAgent -Dllevel=4
 ```
 
 and then select the `conf/SingleAgent` configuration files, as all players are controlled by one SARL agent.
