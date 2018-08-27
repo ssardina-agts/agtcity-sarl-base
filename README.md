@@ -35,8 +35,8 @@ Some dummy controllers are provided as templates to build from.
 	* The right version (specified in the POM file) should be obtained automatically via [JitPack](https://jitpack.io/#org.bitbucket.ssardina-research/sarl-prolog-cap).
 	* **IMPORTANT**: Please refer to the instructions and examples in the [capacity+skill's page](https://bitbucket.org/ssardina-research/sarl-prolog-cap) to set-up and use it in your SARL application.
 * The [MASSIM Agents in City Game server](https://github.com/agentcontest/massim): to run the game.
-	* Server version `2017-0.7` that comes with massim package distribution `massim-2017-1.7` (check  release [here](https://github.com/agentcontest/massim/releases/tag/massim-2017-1.7))
-
+	* Server version `2017-0.7` that comes with massim package distribution `massim-2017-1.7` (check  release [here](https://github.com/agentcontest/massim/releases/tag/massim-2017-1.7)).
+	* You can also get the pre-pack binary from [download](https://bitbucket.org/ssardina-research/sarl-agtcity-base/downloads/) section. You can also clone the version and run `mvn clean package` to build the massim package, including server, completely.
 
 
 ## INSTALL, RUN and DEVELOP
