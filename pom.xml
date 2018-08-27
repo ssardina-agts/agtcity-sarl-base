@@ -16,7 +16,7 @@
 
     <groupId>org.bitbucket.ssardina-research</groupId>
     <artifactId>sarl-agtcity-base</artifactId>
-    <version>1.2.${env.SARL_VERSION}</version>
+    <version>1.3.${env.SARL_VERSION}</version>
 
 	<name>SARL Agents in City Base Controllers</name>
     <description>
@@ -90,7 +90,7 @@
 
     <!-- Project dependencies -->
     <dependencies>
-        <!-- Janus Project kernel (contains SARL language core) -->
+        <!-- JANUS Project kernel (contains SARL language core) -->
         <dependency>
             <groupId>io.janusproject</groupId>
             <artifactId>io.janusproject.kernel</artifactId>
@@ -101,14 +101,17 @@
         <dependency>
             <groupId>com.github.agentcontest.massim</groupId>
             <artifactId>eismassim</artifactId>
-            <version>massim-2017-1.3</version>
+            <version>massim-2017-1.7</version>
         </dependency>
         
         <!--  SARL Agent City Middleware  -->
 		<dependency>
 		    <groupId>org.bitbucket.ssardina-research</groupId>
 		    <artifactId>sarl-agtcity-mw</artifactId>
-	    	<version>1.2.${sarl.version}</version>
+			<!-- 
+	    	<version>4788212</version>
+	    	 -->
+	    	<version>1.3.${sarl.version}</version>
 		</dependency>
 	       
         <!--  SARL-PROLOG CAPACITY -->

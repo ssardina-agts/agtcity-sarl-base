@@ -5,10 +5,17 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 :- dynamic 
 	id/1, 			% id
+	percepts/3,		% main percept data
 	percepts_nonself/2, 	% Stores percepts of others
 	percepts_self/3, 	% Stores percepts about myself
 	step/1, 		% Stores current simulator step number
 	agentName/1.		% Stores the name of the agent who owns the KB
+
+:- dynamic storage/6, 
+	dump/3,
+	chargingStation/4,
+	workshop/3,
+	resourceNode/4.
 
 %% Here is an example of a percepts/3 predicate:
 %%

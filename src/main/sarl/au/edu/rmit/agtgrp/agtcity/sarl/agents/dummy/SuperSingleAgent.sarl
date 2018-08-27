@@ -82,18 +82,18 @@ agent SuperSingleAgent {
 			var args = newArrayList(occurrence.parameters) // may receive directory conf directory
 			var eiConfigDir : String = ""
 			val eiMassimConfigFile = "eismassimconfig.json"
-			val eiMassimAuthConfigFile = "agentsconfig.json"
+			val eiMassimPlayerAgentsConfigFile = "agentsconfig.json"
 
 			rand = new Random()
 
 
-		aggregator = new PerceptAggregator() // collect all the percepts from all agents
+			aggregator = new PerceptAggregator() // collect all the percepts from all agents
 			// Give reporting skill via console
 			setSkill(new S_ConsoleReporting("Super-Single-Agent"), C_Reporting)
 			setLogLevel(4)
 
 			agent_says("PHASE 1: REGISTERING MASSIM TALKING SKILL VIA CONFIGURATION FILES {0} AND {1}",
-				eiMassimConfigFile, eiMassimAuthConfigFile)
+				eiMassimConfigFile, eiMassimPlayerAgentsConfigFile)
 			if (args.length != 0)
 				eiConfigDir = args.get(0) as String
 			else {
@@ -101,18 +101,18 @@ agent SuperSingleAgent {
 			}
 			// Give agent ability to talk to MASSIM server
 			setSkill(new S_MassimTalking17(Paths.get(eiConfigDir, eiMassimConfigFile),
-					Paths.get(eiConfigDir, eiMassimAuthConfigFile)), C_MassimTalking)
+					Paths.get(eiConfigDir, eiMassimPlayerAgentsConfigFile)), C_MassimTalking)
 
 			agent_says("PHASE 2: INITIALIZING ENVIRONMENT INTERFACE USING CONFIGURATION FILE {0} ", eiMassimConfigFile)
 			if (MT_initialize()) {
-        	agent_says("I have initialized the EI successfully!")
+				agent_says("The EI is now initialized, entities are being authenticated...")
 			} else {
-			agent_says("Something wrong when registering the game server, I am finished...")
+				agent_says("Something wrong when registering the game server, I am finished...")
 				killMe
 			}
 
 			agent_says("PHASE 3: REGISTERING AGENTS INTO ENVIRONMENT (GAME ENGINE) VIA FILE {0}",
-				eiMassimAuthConfigFile)
+				eiMassimPlayerAgentsConfigFile)
 			MT_registerPlayersFromConfig()
 
 			agent_shouts("I am now alive! Will start working now (sending and acting!)...")
@@ -136,66 +136,55 @@ agent SuperSingleAgent {
 			warning("For some reason I was not able to initialize the data buffers")
 		}
 
-		// While the environment is running, wait for new percepts (read percepts for each player registered/connnected)
+	// While the environment is running, wait for new percepts (read percepts for each player registered/connnected)
 		while (MT_getStatus() == EnvironmentState.RUNNING) {
 			MT_getPlayersNames().forEach([ playerName : String |
-
+	
 				// all percepts for the player: (role/entity of agent --> collection of single percepts)
-				// In this game, players usually are of one role/entity, so we will store that single set of percepts
-				// in variable percepts (the first value of allPercepts)
-				var allPercepts : Map<String, Collection<Percept>>
-				var percepts : Collection<Percept>	
+					// In this game, players usually are of one role/entity, so we will store that single set of percepts
+					// in variable percepts (the first value of allPercepts)
+					var allPercepts : Map<String, Collection<Percept>>
+				var percepts : Collection<Percept>
 				try {
-					allPercepts = MT_sensePlayerPercepts(playerName) // This is blocking!
-
-					// Now get just the first set of percepts for the first entity type
-					// as players are in the game of just one entity/role
-					percepts = allPercepts.values().get(0)
+					percepts = MT_sensePlayerPercepts(playerName) // This is blocking!
+					// Process the percepts by updating the PlayerState of the player in question
+					// The skill S_MassimTalking17 maintains a PlayerState object per player
+					MT_getPlayerState(playerName).update(percepts) // update the agent data
+					// FACILITIES: Aggregate all facilities information that are the same info for everyone
+					// (shop, workshops, charging stations, dump, storage, resourceNodes)
+					if (Util.populateDataBuffers(percepts)) {
+					} else {
+						warning("For some reason I was not able to populate the data buffers with the percepts")
+					}
+					aggregator.addFacilities(percepts)
+					facilities = aggregator.getFacilitiesNames()
+	
+					// update the last step if the percept just processed has a higher step number
+					if(last_step < MT_getPlayerState(playerName).step) last_step = MT_getPlayerState(playerName).step
+	
+					agent_shouts("I am finished sensing the environment - Step {0} for player {1}",
+						MT_getPlayerState(playerName).step, playerName)
 				} catch (e : PerceiveException) {
-					agent_shouts("I am sorry, there seems to be an error in perception. Killing myself..")
-						error(e.toString)
-					e.printStackTrace()
-					killMe
+					agent_shouts("There was an error in perception ({0}), maybe not yet connected? Will try later...",
+						e.message)
 				}
-
-				// Process the percepts by updating the PlayerState of the player in question
-				// The skill S_MassimTalking17 maintains a PlayerState object per player
-				MT_getPlayerState(playerName).update(percepts) // update the agent data
-
-				// FACILITIES: Aggregate all facilities information that are the same info for everyone
-				// (shop, workshops, charging stations, dump, storage, resourceNodes)
-				if (Util.populateDataBuffers(percepts)) {
-				} else {
-					warning("For some reason I was not able to populate the data buffers with the percepts")
-				}
-				aggregator.addFacilities(percepts)
-				facilities = aggregator.getFacilitiesNames()
-
-				// update the last step if the percept just processed has a higher step number
-				if(last_step < MT_getPlayerState(playerName).step) last_step = MT_getPlayerState(playerName).step
-				agent_shouts("I am finished sensing the environment - Step {0} for player {1}",
-					MT_getPlayerState(playerName).step, playerName)
 			])
 
-			agent_shouts(
-				"I am finished sensing the environment for all the players. I will instruct action for step {0}!",
+			agent_shouts("Finished sensing the environment for all the players. I will instruct action for step {0}!",
 				last_step)
-
-			// All percepts per agent read. Report some information and do something per agent
+	
+			// 1 - Report some information per agent
 			emit(new E_ReportInfo())
-
-//			// All percepts per agent read, now do some actions in the world
-//			emit(new E_Act())
-
-			// 5. Very finally, do some some movement per agent
+	
+			// 2 - Travel to some random facility
 			MT_getPlayersNames.forEach([ playerName2 : String |
 				emit(new E_MoveRandomly => [playerName = playerName2]) // see compact way of assignment data in event
-			])
-
-		}
-
+				])
+		} // END OF WHILE
 		agent_shouts("Environment Interface not running anymore, done sensing....")
-	}
+	}	// END OF BEHAVIOR
+
+
 
 	/**
 	 * NAVIGATE TO RAMDOM FACILITY
@@ -218,7 +207,7 @@ agent SuperSingleAgent {
 		// we are still traveling, just continue following the path...
 		val playerName = occurrence.playerName
 
-		agent_says("Seems player {0} is already am moving: {1} steps to go!", playerName,
+		agent_says("Seems player {0} is already travelling: {1} steps to go!", playerName,
 			MT_getPlayerState(playerName).routeLength)
 
 		performAction(playerName, new Action("continue"))
@@ -228,11 +217,11 @@ agent SuperSingleAgent {
 		// We are not following any route, just go somewhere!	
 		val playerName = occurrence.playerName
 
-		if (facilities.length > 0) {
+		if (facilities !== null && facilities.length > 0) {
 			// Pick some random facility and go!
 			val destination = facilities.get(rand.nextInt(facilities.length - 1))
 			performAction(playerName, new Action("goto", new Identifier(destination)))
-			agent_says("I will start navigating towards {0}", destination)
+			agent_says("I will send player {1} to navigating towards destination {0}", destination, playerName)
 		} else {
 			agent_shouts("I just don't know any facility to go, sorry...!")
 		}

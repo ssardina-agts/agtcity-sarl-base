@@ -112,7 +112,7 @@ agent SWISingleFullAgent {
         var args = newArrayList(occurrence.parameters) 
 		var eiConfigDir : String = "./"						// default value
 		var eiMassimConfigFile = "eismassimconfig.json" 	// default value
-		var eiMassimAuthConfigFile = "agentsconfig.json" 	// default value
+		var eiMassimPlayerAgentsConfigFile = "agentsconfig.json" 	// default value
 
 		// First parameter is agent name - Get it and set it!!!
 		// Agent name will be used to register agent-specific capabilities, like logging or knowledgebases
@@ -129,14 +129,14 @@ agent SWISingleFullAgent {
 		// These are the configuration files storing team formation and authorization credentials in server per agent
 		if (args.length >= 4) {
 			eiMassimConfigFile = args.get(2) as String
-			eiMassimAuthConfigFile = args.get(3) as String
+			eiMassimPlayerAgentsConfigFile = args.get(3) as String
 		}
 		debug("Gather all configuration options: 
 				\t My SARL agent name: {0}
 				\t Directory of configuration files: {1}
 				\t File with team configuration (player lists): {2}
 				\t File containing authentication and sever info: {3}", myName, eiConfigDir, eiMassimConfigFile,
-				eiMassimAuthConfigFile)
+				eiMassimPlayerAgentsConfigFile)
 			
 		// Give reporting skill via console
 		setSkill(new S_ConsoleReporting(myName), C_Reporting)
@@ -156,25 +156,27 @@ agent SWISingleFullAgent {
 
 
 		agent_says("PHASE 1: REGISTERING MASSIM-TALKING SKILL VIA CONF. FILES {0} AND {1}", 
-				eiMassimConfigFile, eiMassimAuthConfigFile)
+				eiMassimConfigFile, eiMassimPlayerAgentsConfigFile)
   		// Give agent ability to talk to MASSIM server
 		setSkill(
 			new S_MassimTalking17(Paths.get(eiConfigDir, eiMassimConfigFile),
-				Paths.get(eiConfigDir, eiMassimAuthConfigFile)), C_MassimTalking
+				Paths.get(eiConfigDir, eiMassimPlayerAgentsConfigFile)), C_MassimTalking
 		)
 
 		agent_says("PHASE 2: INITIALIZING ENVIRONMENT INTERFACE USING CONFIGURATION FILE {0} ", eiMassimConfigFile)
         if (MT_initialize()) {
-        	agent_says("I have initialized the EI successfully!")
-        } else {
+				agent_says("The EI is now initialized, entities are being authenticated...")
+		} else {
 			agent_says("Something wrong when registering the game server, I am finished...")
 			killMe
         }
 
-        agent_says("PHASE 3: REGISTERING AGENTS INTO ENVIRONMENT (GAME ENGINE) VIA FILE {0}", eiMassimAuthConfigFile)
+        agent_says("PHASE 3: REGISTERING AGENTS INTO ENVIRONMENT (GAME ENGINE) VIA FILE {0}", eiMassimPlayerAgentsConfigFile)
 		MT_registerPlayersFromConfig()
 		agent_shouts("I am now alive! Will start working now (sending and acting!)...")
-                
+
+
+//		wait(5000)                
         // Signal that all SARL agents have been created - Communicator will start working!        
         emit(new E_SenseEnvironment())
 	}
@@ -192,41 +194,39 @@ agent SWISingleFullAgent {
 		while (MT_getStatus() == EnvironmentState.RUNNING) {
 			agent_says("Waiting for new percepts (blocking) for players {0}", MT_getPlayersNames())
 			MT_getPlayersNames.forEach([ playerName : String |
-				var allPercepts : Map<String, Collection<Percept>>
+				var percepts : Collection<Percept>
 				try {
-					allPercepts = MT_sensePlayerPercepts(playerName) 	// This is blocking!
+					percepts = MT_sensePlayerPercepts(playerName) // This is blocking!
+
+					agent_says("Player {0} received {1} percepts.", playerName, Util.getNoOfPercepts(percepts))
+
+					// Process the percepts: update this.agents and KB
+					MT_getPlayerState(playerName).update(percepts) // update the player java-object data
+					agent_says(MT_getPlayerState(playerName).reportState()) // report player state
+					
+					// assert percepts in the KB
+					kb_recordPercepts(playerName, MT_getPlayerState(playerName).step, percepts.toString)
+
+					// TODO: Not clear why this is not working (https://groups.google.com/forum/?hl=en#!topic/sarl/isMGE9QKH7A):
+					// var percepts2 : List<Percept>
+					// percepts2 = new Vector<Percept>()
+					// ei.getAllPercepts(playerName).values().forEach(percepts2::addAll);
+					// ei.getAllPercepts(playerName).values().forEach[percepts2::add(it)];
+
+				
 				} catch (e : PerceiveException) {
-						agent_shouts("I am sorry, there seems to be an error in perception. Killing myself..")
-						error(e.toString)
-						e.printStackTrace()
-						killMe
-					}
-				var percepts = allPercepts.values().get(0) // works if an agent is of only one entity, so allPercepts has just one map
-				agent_says("Player {0} (entity {1}) received {2} percepts.", playerName,
-					allPercepts.keySet().iterator().next(), Util.getNoOfPercepts(percepts))
-				
-
-				// TODO: Not clear why this is not working (https://groups.google.com/forum/?hl=en#!topic/sarl/isMGE9QKH7A):
-				//var percepts2 : List<Percept>
-				//percepts2 = new Vector<Percept>()
-				//ei.getAllPercepts(playerName).values().forEach(percepts2::addAll);
-				//ei.getAllPercepts(playerName).values().forEach[percepts2::add(it)];
-				
-
-				// Process the percepts: update this.agents and KB
-				MT_getPlayerState(playerName).update(percepts) // update the player java-object data
-				agent_says(MT_getPlayerState(playerName).reportState()) // report player state
-				
-				// assert percepts in the KB
-				kb_recordPercepts(playerName, MT_getPlayerState(playerName).step, percepts.toString)
+					agent_shouts("There was an error in perception ({0}), maybe not yet connected? Will try later...",
+						e.message)
+				}
 			])
+			// AT THIS POINT all percepts from all players have been processed
 
-			// Instruct the KB to process last percept for each player (and store each knowledge separately)
+
+			// Instruct the SWI-KB to process last percept for each player (and store each knowledge separately)
 			MT_getPlayersNames.forEach([ playerName : String |
 				kb_processLastPercept(playerName)
 				agent_says("Percepts for agent {0} have been processed in the SWI KB", playerName)
 			])
-	
 	
 			// All percepts per agent read. Report some information and do something per agent
 			emit(new E_ReportInfo())
@@ -299,9 +299,13 @@ agent SWISingleFullAgent {
 
 		// Do some reasoning to pick up the next destination!		
 		var destination = kb_pickDestination(playerName)
-			
-		performAction(playerName, new Action("goto", new Identifier(destination)))
-		agent_says("I will start navigating towards {0}", destination)
+		
+		if (destination !== null) {
+			performAction(playerName, new Action("goto", new Identifier(destination)))
+			agent_says("I will send player {1} to navigating towards destination {0}", destination, playerName)
+		} else {
+			agent_says("Sorry, but no good destination was found to navigate to...")
+		}
 	}
 
 

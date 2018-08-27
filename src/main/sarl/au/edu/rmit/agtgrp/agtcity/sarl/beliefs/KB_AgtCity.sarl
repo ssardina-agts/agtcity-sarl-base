@@ -19,7 +19,6 @@ package au.edu.rmit.agtgrp.agtcity.sarl.beliefs
 
 import io.sarl.core.Logging
 
-
 import io.sarl.extras.SWI_KB_Prolog
 
 import org.apache.commons.lang3.tuple.Pair
@@ -83,11 +82,11 @@ skill SWI_KB_AgtCity extends SWI_KB_Prolog implements KB_AgtCity {
 	}
 
 	def kb_pickDestination(playerName : String) : String {
-		return askOnce(String.format("choose_destination(%s, Destination)", playerName), #["Destination"]).get("Destination").toString
+		val solution = askOnce(String.format("choose_destination(%s, Destination)", playerName))
+//		solution = askOnce("choose_destination(@S, Destination)", playerName)	// Using Mochalog query builder formatter
+		
+		if (solution !==null) return solution.get("Destination").toString else return null
 	}
-
-
-
 
 
 

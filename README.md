@@ -27,7 +27,7 @@ Some dummy controllers are provided as templates to build from.
 	* Should be obtained automatically via Maven + Jitpack.
 * The [EISMASSim](https://github.com/agentcontest/massim)  a Java library using the Environment Interface Standard (EIS) to communicate with the MASSim server. 
 	* The JAR sources are provided under `extras/` so they can be used to attach sources in ECLIPSE.
-	* Comes with the game server. Using version `3.4` that comes with server `massim-2017-1.7` (Sept 2017)
+	* Comes with the game server. Using version `3.4` that comes with server `massim-2017-1.7` (Sept 2017). Check [here](https://github.com/agentcontest/massim/releases/tag/massim-2017-1.7)
 	* Uses the [eishub/EIS](https://github.com/eishub/eis) version `0.5` (sources also under `extras/`).
 * The [SARL-PROLOG-CAP](https://bitbucket.org/ssardina-research/sarl-prolog-cap) capacity+skill for [SWI Prolog](http://www.swi-prolog.org/) system:
 	* Capacity and skill to allow the use of SWI Prolog knowledge-bases in SARL agents.
@@ -57,7 +57,7 @@ So, to **run the system** you need to follow these general steps:
 	* One way to run it from CLI directly once it has been packaged is as follows:
 	
 		```
-		java -cp target/sarl-agtcity-extras-1.0.0.7.2-jar-with-dependencies.jar io.janusproject.Boot au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.SWISingleFullAgent
+		java -cp target/sarl-agtcity-base-1.3.0.7.2-jar-with-dependencies.jar io.janusproject.Boot au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.SWISingleFullAgent
 		```
 		
 3. Start the MASSIM Simulation by just hitting *ENTER* in the Game Server console
@@ -84,14 +84,22 @@ All data is stored in Java.
 This is the **default** agent controller for `BootMAS` class so it can be run by just doing
 
 ```
-java -jar target/sarl-agtcity-base-1.2.0.7.2-jar-with-dependencies.jar
+java -jar target/sarl-agtcity-base-1.3.0.7.2-jar-with-dependencies.jar
 ```
 
 or
 
 ```
-java -jar target/sarl-agtcity-base-1.2.0.7.2-jar-with-dependencies.jar SuperSingleAgent
+java -jar target/sarl-agtcity-base-1.3.0.7.2-jar-with-dependencies.jar SuperSingleAgent
 ```
+
+or via the standard SARL booting mechanism:
+
+```
+java -cp target/sarl-agtcity-base-1.3.0.7.2-jar-with-dependencies.jar io.janusproject.Boot au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.SuperSingleAgent
+```
+
+and then select the `conf/SingleAgent` configuration files, as all players are controlled by one SARL agent.
 
 
 ### SWISingleFullAgent 
@@ -107,14 +115,16 @@ It also contains simple logic to continously select a random destination and go 
 To run this agent, you can do:
 
 ```
-java -cp target/sarl-agtcity-extras-1.0.0.7.2-jar-with-dependencies.jar io.janusproject.Boot au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.SWISingleFullAgent
+java -cp target/sarl-agtcity-base-1.0.0.7.2-jar-with-dependencies.jar io.janusproject.Boot au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.SWISingleFullAgent
 ```
 
 or since `BootMAS` is the default execution class:
 
 ```
-java -jar target/sarl-agtcity-extras-1.0.0.7.2-jar-with-dependencies.jar SWISingleFullAgent
+java -jar target/sarl-agtcity-base-1.3.0.7.2-jar-with-dependencies.jar SWISingleFullAgent
 ```
+
+and then select the `conf/SingleAgent` configuration files, as all players are controlled by one SARL agent.
 
 
 ### Multi Agent System
@@ -128,14 +138,16 @@ This is a perfect example of versatility where a SARL agent can be given the tas
 To run this agent, you can do:
 
 ```
-java -cp target/sarl-agtcity-extras-1.0.0.7.2-jar-with-dependencies.jar io.janusproject.Boot au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.BootMultiSWIAgents
+java -cp target/sarl-agtcity-base-1.3.0.7.2-jar-with-dependencies.jar io.janusproject.Boot au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.BootMultiSWIAgents
 ```
 
 or since `BootMAS` is the default execution class:
 
 ```
-java -jar target/sarl-agtcity-extras-1.0.0.7.2-jar-with-dependencies.jar BootMultiSWIAgents
+java -jar target/sarl-agtcity-base-1.3.0.7.2-jar-with-dependencies.jar BootMultiSWIAgents
 ```
+
+This will use the multi-team configuration `conf/MultiAgents` as the whole team of players is divided into two sub-teams. Check `Initialize` in `BootMultiSWIAgents` SARL agent.
 
 
 
