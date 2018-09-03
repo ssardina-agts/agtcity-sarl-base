@@ -108,17 +108,17 @@
 		<dependency>
 		    <groupId>org.bitbucket.ssardina-research</groupId>
 		    <artifactId>sarl-agtcity-mw</artifactId>
+	    	<version>d1fbd22</version>
 			<!-- 
-	    	<version>4788212</version>
-	    	 -->
 	    	<version>1.3.${sarl.version}</version>
+	    	 -->
 		</dependency>
 	       
         <!--  SARL-PROLOG CAPACITY -->
         <dependency>
             <groupId>org.bitbucket.ssardina-research</groupId>
             <artifactId>sarl-prolog-cap</artifactId>
-            <version>1.3.${sarl.version}</version>
+            <version>9807289</version>
         </dependency>
 
         <!--  MOCHALOG interface for SWI-Prolog -->
