@@ -30,21 +30,21 @@ class BootMAS {
 				String.format("No controller specified from the available ones %s. Using controller \"%s\"",
 				AGENTS_AVAILABLE.toString, DEFAULT_CONTROLLER))
 				agentToLaunch = DEFAULT_CONTROLLER
-				fullyQualifiedAgent = basePackage + "." + agentToLaunch
 		} 
 		else {
 			agentToLaunch = args.get(0) // get the agent name from CLI first argument
-			switch agentToLaunch {
-				case 'BootMultiSWIAgents':
-					fullyQualifiedAgent = basePackage + ".dummy.BootMultiSWIAgents"
-				case 'SWISingleFullAgent':
-					fullyQualifiedAgent = basePackage + ".dummy.SWISingleFullAgent"
-				case 'SuperSingleAgent': {
-					fullyQualifiedAgent = basePackage + ".dummy.SuperSingleAgent"
-					}
-				default:
-					throw new IllegalArgumentException("Invalid agent to start: " + agentToLaunch)
-			}
+		}
+
+		switch agentToLaunch {
+			case 'BootMultiSWIAgents':
+				fullyQualifiedAgent = basePackage + ".dummy.BootMultiSWIAgents"
+			case 'SWISingleFullAgent':
+				fullyQualifiedAgent = basePackage + ".dummy.SWISingleFullAgent"
+			case 'SuperSingleAgent': {
+				fullyQualifiedAgent = basePackage + ".dummy.SuperSingleAgent"
+				}
+			default:
+				throw new IllegalArgumentException("Invalid agent to start: " + agentToLaunch)
 		}
 		
 		// now get agent class for fullQualifiedAgent and boot it
