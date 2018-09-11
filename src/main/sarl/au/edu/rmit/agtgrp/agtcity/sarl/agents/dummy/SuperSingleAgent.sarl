@@ -159,6 +159,7 @@ agent SuperSingleAgent {
 				var percepts : Collection<Percept>
 				try {
 					percepts = MT_sensePlayerPercepts(playerName) // This is blocking!
+					
 
 					// Process the percepts by updating the PlayerState of the player in question
 					// The skill S_MassimTalking17 maintains a PlayerState object per player
@@ -181,10 +182,11 @@ agent SuperSingleAgent {
 					// (shop, workshops, charging stations, dump, storage, resourceNodes)
 					sensingAggregator.addFacilities(percepts)
 
+
 					// OTHER ENTITIES:
                     //	Add to aggregator the info of all other entities that are not part of the team (not agents)
-                    sensingAggregator.addEntities()
-	
+					sensingAggregator.addEntities()
+
 					// JOBS: Aggregate all jobs (job, auction, mission, or posted)
 					sensingAggregator.addJobs(percepts)
 	
