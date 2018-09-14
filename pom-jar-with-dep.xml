@@ -159,6 +159,60 @@
             </plugin>
             
             
+           <!-- download sources and javadoc -->
+	       <!--
+	        <plugin>
+	            <artifactId>maven-dependency-plugin</artifactId>
+	            <executions>
+	                <execution>
+	                    <id>download-sources</id>
+	                    <goals>
+	                        <goal>sources</goal>
+	                    </goals>
+	                </execution>
+	                <execution>
+	                    <id>download-javadoc</id>
+	                    <configuration>
+	                        <classifier>javadoc</classifier>
+	                    </configuration>
+	                    <goals>
+	                        <goal>resolve</goal>
+	                    </goals>
+	                </execution>
+	            </executions>
+	        </plugin>
+            -->
+            
+			<!--  Aggregate project into a JAR package
+			https://maven.apache.org/plugins/maven-assembly-plugin/
+			
+			Commented out because it compiles too slow....
+			-->
+		    <plugin>
+		    <artifactId>maven-assembly-plugin</artifactId>
+		    <version>3.1.0</version>
+		    <configuration>
+		        <archive>
+		            <manifest>
+		                <addClasspath>true</addClasspath>
+		                <mainClass>BootMAS</mainClass>
+		            </manifest>
+		        </archive>
+		        <descriptorRefs>
+		            <descriptorRef>jar-with-dependencies</descriptorRef>
+		        </descriptorRefs>
+		    </configuration>
+		    <executions>
+		        <execution>
+		            <id>make-my-jar-with-dependencies</id>
+		            <phase>package</phase>
+		            <goals>
+		                <goal>single</goal>
+		            </goals>
+		        </execution>
+		    </executions>
+		    </plugin>
+ 			
 			<!--  Class to execute via maven exec:java 
 			https://www.mojohaus.org/exec-maven-plugin/
 			-->
