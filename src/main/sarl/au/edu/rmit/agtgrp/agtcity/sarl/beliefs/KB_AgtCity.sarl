@@ -27,7 +27,8 @@ import org.apache.commons.lang3.tuple.MutablePair;
 import java.util.Map
 
 import org.jpl7.Term
-import io.mochalog.bridge.prolog.query.Query
+
+import io.mochalog.bridge.prolog.query.MQuery
 
 /** 
  * @author Sebastian Sardina (ssardina@gmail.com)
@@ -54,8 +55,8 @@ skill SWI_KB_AgtCity extends SWI_KB_Prolog implements KB_AgtCity {
 
 	val logging_level : int
 	
-	new (l : int = 0, name : String) {
-		super(name) // Call the super's constructor
+	new (l : int = 0, name : String, dump_loc : String = "kb_dump_agtcity") {
+		super(name, dump_loc) // Call the super's constructor
 		logging_level = l
 //		setLogLevel(l)
 	}
@@ -85,7 +86,7 @@ skill SWI_KB_AgtCity extends SWI_KB_Prolog implements KB_AgtCity {
 		val solution = askOnce(String.format("choose_destination(%s, Destination)", playerName))
 //		solution = askOnce("choose_destination(@S, Destination)", playerName)	// Using Mochalog query builder formatter
 		
-		if (solution !==null) return solution.get("Destination").toString else return null
+		if (solution !== null) return solution.get("Destination").toString else return null
 	}
 
 

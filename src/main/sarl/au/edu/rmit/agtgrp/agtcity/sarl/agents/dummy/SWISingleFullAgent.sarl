@@ -31,6 +31,7 @@ import io.sarl.core.DefaultContextInteractions
 import io.sarl.core.Initialize
 import io.sarl.core.Lifecycle
 import io.sarl.core.Logging
+import io.sarl.core.Schedules
 
 // General Java tools
 import java.util.*;
@@ -70,11 +71,11 @@ import io.sarl.extras.KB_Prolog
 import au.edu.rmit.agtgrp.agtcity.sarl.beliefs.KB_AgtCity
 import au.edu.rmit.agtgrp.agtcity.sarl.beliefs.SWI_KB_AgtCity
 
+
 import io.mochalog.bridge.prolog.query.exception.NoSuchSolutionException
-import io.mochalog.bridge.prolog.query.Query
+import io.mochalog.bridge.prolog.query.MQuery
 import io.mochalog.bridge.prolog.SandboxedPrologContext
 import io.mochalog.bridge.prolog.PrologContext
-import io.sarl.core.Schedules
 
 /** 
  * This is a single SARL agent that uses the S_MassimTalking07 skill 
@@ -269,7 +270,7 @@ agent SWISingleFullAgent {
 			try {
 				//	This is now directly using Mochalog, but getting the prolog engine and using it!
 				val p : PrologContext = get_prolog_engine() as PrologContext
-				val solution = p.askForSolution(Query.format("percepts_self(@S, Step, Percept)", playerName))
+				val solution = p.askForSolution(MQuery.format("percepts_self(@S, Step, Percept)", playerName))
 				agent_says("Player {0} has percept info in its KB for step {1}", playerName, solution.get("Step").intValue)
 				
 				// In case you want to also see the percepts				
