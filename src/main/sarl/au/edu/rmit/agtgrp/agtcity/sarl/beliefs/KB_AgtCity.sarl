@@ -79,11 +79,11 @@ skill SWI_KB_AgtCity extends SWI_KB_Prolog implements KB_AgtCity {
 	}
 
 	def kb_processLastPercept(playerName : String) {
-		prove(String.format("process_last_percepts(%s)", playerName))
+		prove("process_last_percepts(@A)", playerName)
 	}
 
 	def kb_pickDestination(playerName : String) : String {
-		val solution = askOnce(String.format("choose_destination(%s, Destination)", playerName))
+		val solution = askOnce(String.format("choose_destination('%s', Destination)", playerName))
 //		solution = askOnce("choose_destination(@S, Destination)", playerName)	// Using Mochalog query builder formatter
 		
 		if (solution !== null) return solution.get("Destination").toString else return null
