@@ -84,7 +84,8 @@ You will find there the process how SARL systems can connect to the game server 
 
 If your solution will use Prolog as knolwedgebase, we suggest carefully understanding how the [SARL PROLOG CAP](https://bitbucket.org/ssardina-research/sarl-prolog-cap) framework, which provides the skill to
 manipulate a Prolog knowledgebase, works. Some initial code for a domain knowledge base is already provided in this base system, including substantial Prolog code to process all percepts.
-It is also important to understand what [Mochalog](https://github.com/ssardina/mochalog) provides to build goal queries; please check its readme.
+It is also important to understand what [Mochalog](https://github.com/ssardina/mochalog) provides to build goal queries; please check its readme. 
+In particular, it is important to understand how to build queries using using @-placeholders `@A`, `@I`, and `@S` and the various query methods (prove, one solution, all solutions, iterators) provided.
 
 ## EXAMPLE AGENTS ##
 
