@@ -67,7 +67,7 @@ So, to **run the system** you need to follow these general steps:
 
 			java -jar target/sarl-agtcity-base-1.5.0.7.2-jar-with-dependencies.jar SWISingleFullAgent -Dloglevel=4
 
-	or via the SARL booting class `io.janusproject.Boot`:	
+		or via the SARL booting class `io.janusproject.Boot`:	
 	
 			java -cp target/sarl-agtcity-base-1.5.0.7.2-jar-with-dependencies.jar io.janusproject.Boot au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.SWISingleFullAgent -Dloglevel=4
 		
