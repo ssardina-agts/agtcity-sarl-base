@@ -118,7 +118,7 @@
         <dependency>
             <groupId>org.bitbucket.ssardina-research</groupId>
             <artifactId>sarl-prolog-cap</artifactId>
-            <version>1.5.${sarl.version}</version>
+            <version>4547317</version>
         </dependency>
 
         <!--  MOCHALOG interface for SWI-Prolog -->
