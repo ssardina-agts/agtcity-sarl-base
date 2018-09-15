@@ -90,23 +90,29 @@ agent SuperSingleAgent {
 			var eiConfigDir : String = ""
 			val eiMassimConfigFile = "eismassimconfig.json"
 			val eiMassimPlayerAgentsConfigFile = "agentsconfig.json"
-
 			rand = new Random()
-
-
 			sensingAggregator = new PerceptAggregator() // collect all the percepts from all agents
 
-			// Give reporting skill via console & set debug level (
+			/* 
+			 * 1 - Give reporting skill via console & set log level
+			 */
 			setSkill(new S_ConsoleReporting("Super-Single-Agent"), C_Reporting)
-			val log_level : int = Integer.parseInt(System.getProperty("llevel", String.valueOf(DEFAULT_LOG_LEVEL)))
+			val log_level : int = Integer.parseInt(System.getProperty("loglevel", String.valueOf(DEFAULT_LOG_LEVEL)))
 			info("============+> SETTING LOG LEVEL TO: {0}", log_level)
 			setLogLevel(log_level)
 
-			info("This is an INFO test message (level 3)....")
-			warning("This is a WARNING test message (level 2)....")
-			error("This is an ERROR test message (level 1)....")
-			
-			
+			info("This is an INFO TEST message (level 3)....")
+			warning("This is a WARNING TEST message (level 2)....")
+			error("This is an ERROR TEST message (level 1)....")
+
+			/* 
+			 * 2 - Next, we equip the SARL agent with the MassinTalking capability to control some agents.
+			 * We provide two pieces of information:
+			 * The server configuration is in file eiMassimConfigFile
+			 * The agents to control are specified in file eiMassimPlayerAgentsConfigFile
+			 * 
+			 * Note this does not connect or start the EI, it just stores the information in the skill
+			 */
 			agent_says("PHASE 1: REGISTERING MASSIM TALKING SKILL VIA CONFIGURATION FILES {0} AND {1}",
 				eiMassimConfigFile, eiMassimPlayerAgentsConfigFile)
 			if (args.length != 0)
@@ -118,6 +124,11 @@ agent SuperSingleAgent {
 			setSkill(new S_MassimTalking17(Paths.get(eiConfigDir, eiMassimConfigFile),
 					Paths.get(eiConfigDir, eiMassimPlayerAgentsConfigFile)), C_MassimTalking)
 
+			/* 
+			 * 3 - Time to really create and initialize the EI. 
+			 * No player connections are yet register. 
+			 * This only uses the server configuration file (e.g., host and ip of serer): eiMassimConfigFile
+			 */
 			agent_says("PHASE 2: INITIALIZING ENVIRONMENT INTERFACE USING CONFIGURATION FILE {0} ", eiMassimConfigFile)
 			if (MT_initialize()) {
 				agent_says("The EI is now initialized, entities are being authenticated...")
@@ -126,6 +137,10 @@ agent SuperSingleAgent {
 				killMe
 			}
 
+			/* 
+			 * 6 - Once the EIS is started, we finally register the players we will control
+			 * This uses the player agent configuration file: eiMassimPlayerAgentsConfigFile
+			 */
 			agent_says("PHASE 3: REGISTERING AGENTS INTO ENVIRONMENT (GAME ENGINE) VIA FILE {0}",
 				eiMassimPlayerAgentsConfigFile)
 			MT_registerPlayersFromConfig()

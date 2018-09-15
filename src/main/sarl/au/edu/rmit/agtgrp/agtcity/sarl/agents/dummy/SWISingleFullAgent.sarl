@@ -107,18 +107,21 @@ agent SWISingleFullAgent {
     on Initialize { // Should only be initializing with the EIS as a parameter.
 	{
 		// There could be many arguments passed, in this order:
-		//	args.get(0): Agent name
+		//	args.get(0):  Agent name
 		//	Args.get(1):  Directory with EI configuration files (eiConfigDir)
-		//  args.get(2):  EI configuration json file - team information, which players -> entity for team (eiMassimConfigFile)
-		//  args.get(3):  Authentication and game configuration configuration json file (eiMassimAuthConfigFile)
+		//  args.get(2):  EI configuration JSON file - team information, which players -> entity for team (eiMassimConfigFile)
+		//  args.get(3):  Authentication and game configuration configuration JSON file (eiMassimAuthConfigFile)
         var args = newArrayList(occurrence.parameters) 
-		var eiConfigDir : String = "./"						// default value
-		var eiMassimConfigFile = "eismassimconfig.json" 	// default value
-			var eiMassimPlayerAgentsConfigFile = "agentsconfig.json" 	// default value
+		var eiConfigDir : String = "./"						// default value - where server and agent JSON config files live
+		var eiMassimConfigFile = "eismassimconfig.json" 	// default value - Connection info: server data, entities communication
+		var eiMassimPlayerAgentsConfigFile = "agentsconfig.json" 	// default value - player agents (which connection, which team)
 
-
-		// First parameter is agent name - Get it and set it!!!
-		// Agent name will be used to register agent-specific capabilities, like logging or knowledgebases
+	
+		/*
+		 * 1 - OPTIONAL PARAMETERS: AGENT NAME, CONFIG DIR, SERVER CONFIG FILE, AGENT CONFIG FILE
+		 * First parameter is agent name - Get it and set it!!!
+		 * Agent name will be used to register agent-specific capabilities, like logging or knowledgebases 
+		 */
 		if (args.length >= 1) {
 			myName = args.get(0) as String
 		}
@@ -134,36 +137,46 @@ agent SWISingleFullAgent {
 			eiMassimConfigFile = args.get(2) as String
 			eiMassimPlayerAgentsConfigFile = args.get(3) as String
 		}
-		debug("Gather all configuration options: 
+		debug("Configuration settings: 
 				\t My SARL agent name: {0}
 				\t Directory of configuration files: {1}
 				\t File with team configuration (player lists): {2}
 				\t File containing authentication and sever info: {3}", myName, eiConfigDir, eiMassimConfigFile,
 				eiMassimPlayerAgentsConfigFile)
-			
-		// Give reporting skill via console & set log level (-Dllevel=n to change level)
+		
+		/*
+		 * 2 - Give reporting skill via console & set log level
+		 */
 		setSkill(new S_ConsoleReporting(myName), C_Reporting)
-		val log_level : int = Integer.parseInt(System.getProperty("llevel", String.valueOf(DEFAULT_LOG_LEVEL)))
+		val log_level : int = Integer.parseInt(System.getProperty("loglevel", String.valueOf(DEFAULT_LOG_LEVEL)))
 		info("============+> SETTING LOG LEVEL TO: {0}", log_level)
 		setLogLevel(log_level)
-	
-		info("This is an INFO test message (level 3)....")
-		warning("This is a WARNING test message (level 2)....")
-		error("This is an ERROR test message (level 1)....")
+
+		info("This is an INFO TEST message (level 3)....")
+		warning("This is a WARNING TEST message (level 2)....")
+		error("This is an ERROR TEST message (level 1)....")
 		
-		// Set up a new Prolog belief base - load agent knowledge bases. 
+		/*
+		 * 3 - Set up a new Prolog belief base - load agent knowledge bases.
+		 */
 		val beliefSpace = String.format(myName)
 		setSkill(new SWI_KB_AgtCity(0, beliefSpace))
 		kb_load(kb_root_path + "/beliefs/tools.pl")
 		kb_load(kb_root_path + "/beliefs/percept-mgmt.pl")
 		kb_load(kb_root_path + "/beliefs/decision-making.pl") 
 		agent_says("I have loaded all my knowledge bases!")
-
-		// Assert my name in the KB
-		assertFirst("agentName(@A)", myName)	// this uses the tools provided in generic KB_Prolog skill
-		//kb_recordKBName(myName)	// this uses the current KB domain capacity KB_AgtCity
+		assertFirst("agentName(@A)", myName)	// assert my name in the KB (using SWI_KB_Prolog skill directly)
+		//kb_recordKBName(myName)				// same but using the current KB domain capacity KB_AgtCity
 
 
+		/*
+		 * 4 - Next ,we equip the SARL agent with the MassinTalking capability to control some agents.
+		 * We provide two pieces of information:
+		 * 		The server configuration is in file eiMassimConfigFile
+		 * 		The agents to control are specified in file eiMassimPlayerAgentsConfigFile
+		 * 
+		 * Note this does not connect or start the EI, it just stores the information in the skill
+		 */
 		agent_says("PHASE 1: REGISTERING MASSIM-TALKING SKILL VIA CONF. FILES {0} AND {1}", 
 				eiMassimConfigFile, eiMassimPlayerAgentsConfigFile)
   		// Give agent ability to talk to MASSIM server
@@ -172,6 +185,11 @@ agent SWISingleFullAgent {
 				Paths.get(eiConfigDir, eiMassimPlayerAgentsConfigFile)), C_MassimTalking
 		)
 
+		/*
+		 * 5 - Time to really create and initialize the EI. 
+		 * 		No player connections are yet register. 
+		 * This only uses the server configuration file (e.g., host and ip of serer): eiMassimConfigFile
+		 */
 		agent_says("PHASE 2: INITIALIZING ENVIRONMENT INTERFACE USING CONFIGURATION FILE {0} ", eiMassimConfigFile)
         if (MT_initialize()) {
 				agent_says("The EI is now initialized, entities are being authenticated...")
@@ -180,17 +198,26 @@ agent SWISingleFullAgent {
 			killMe
         }
 
+		/*
+		 * 6 - Once the EIS is started, we finally register the players we will control
+		 * This uses the player agent configuration file: eiMassimPlayerAgentsConfigFile
+		 */
         agent_says("PHASE 3: REGISTERING AGENTS INTO ENVIRONMENT (GAME ENGINE) VIA FILE {0}", eiMassimPlayerAgentsConfigFile)
 		MT_registerPlayersFromConfig()
 		agent_shouts("I am now alive! Will start working now (sending and acting!)...")
 
-		// Wait 2 seconds for all players to Authenticate to game server
+		/*
+		 * 7 - Finally, we emit an event to start sensing the environment
+		 * 
+		 * 	NOTE: we wait 2 seconds to give time in step 6 for all players to authenticate to server
+		 */
 		in(2000)[emit(new E_SenseEnvironment())]
         // Signal that all SARL agents have been created - Communicator will start working!        
         
 	}
-
 }
+
+
 
 	/**
 	 * Start a cycle to continously sense the environment until EI is not running anymore

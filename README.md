@@ -59,17 +59,17 @@ So, to **run the system** you need to follow these general steps:
 	* By dafault, the JAR file built does not carry all dependencies as the compilation is too slow. Hence you need to execute via Maven execution plugin, which will run the default `BootMAS` class:
 	
 	
-			mvn exec:java -Dexec.args=SuperSingleAgent -Dllevel=4
-			mvn exec:java -Dexec.args=SWISingleFullAgent -Dllevel=4
-			mvn exec:java -Dexec.args=BootMultiSWIAgents -Dllevel=4
+			mvn exec:java -Dexec.args=SuperSingleAgent -Dloglevel=4
+			mvn exec:java -Dexec.args=SWISingleFullAgent -Dloglevel=4
+			mvn exec:java -Dexec.args=BootMultiSWIAgents -Dloglevel=4
 		
 	* You can package a JAR with dependencies using `mvn -f pon-jar-with-dep.xml clean package`. We can then use the built JAR file as follows:
 
-			java -jar target/sarl-agtcity-base-1.5.0.7.2-jar-with-dependencies.jar SWISingleFullAgent -Dllevel=4
+			java -jar target/sarl-agtcity-base-1.5.0.7.2-jar-with-dependencies.jar SWISingleFullAgent -Dloglevel=4
 
 	or via the SARL booting class `io.janusproject.Boot`:	
 	
-			java -cp target/sarl-agtcity-base-1.5.0.7.2-jar-with-dependencies.jar io.janusproject.Boot au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.SWISingleFullAgent -Dllevel=4
+			java -cp target/sarl-agtcity-base-1.5.0.7.2-jar-with-dependencies.jar io.janusproject.Boot au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.SWISingleFullAgent -Dloglevel=4
 		
 		
 3. Start the MASSIM Simulation by just hitting *ENTER* in the Game Server console
@@ -84,7 +84,7 @@ These are all thin agent controllers for the players in the game, but they shoul
 
 All the agents can be run via the booting class `BootMAS`, which is the default execution class in the package JAR file. One has to give the name of the agent controller to start as an argument.
 
-To change the log level, pass `-Dllevel=n` option (DEBUG=4; INFO=3; WARNING=2; ERROR=1). Defaults to level 3.
+To change the log level, pass `-Dloglevel=n` option (DEBUG=4; INFO=3; WARNING=2; ERROR=1). Defaults to level 3.
 
 
 ### SuperSingleAgent
@@ -100,7 +100,7 @@ All data is stored in Java.
 This is the **default** agent controller for `BootMAS` class so it can be run by just doing
 
 ```
-mvn exec:java -Dexec.args=SuperSingleAgent -Dllevel=4
+mvn exec:java -Dexec.args=SuperSingleAgent -Dloglevel=4
 ```
 
 or
@@ -134,7 +134,7 @@ It also contains simple logic to continously select a random destination and go 
 To run this agent, you can do:
 
 ```
-mvn exec:java -Dexec.args=SWISingleFullAgent -Dllevel=4 
+mvn exec:java -Dexec.args=SWISingleFullAgent -Dloglevel=4 
 ```
 
 
@@ -155,7 +155,7 @@ This is a perfect example of versatility where a SARL agent can be given the tas
 To run this agent, you can do:
 
 ```
-mvn exec:java -Dexec.args=BootMultiSWIAgents -Dllevel=4 
+mvn exec:java -Dexec.args=BootMultiSWIAgents -Dloglevel=4 
 ```
 
 or since `BootMAS` is the default execution class (after compiling with all dependencies):
