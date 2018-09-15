@@ -24,7 +24,7 @@
 	    It includes the connectivity to the game simulator via the SARL Agents in City Middleware and 
 	    the SWI-Prolog Capacity/Skill.
     </description>
-  	<url>https://bitbucket.org/ssardina-research/sarl-agtcity-mw</url>
+  	<url>https://bitbucket.org/ssardina-research/sarl-agtcity-base</url>
 
     <licenses>
 	    <license>
