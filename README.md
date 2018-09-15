@@ -77,6 +77,14 @@ So, to **run the system** you need to follow these general steps:
     * You can see the simulation on the web browser.
 
 
+### Developing SARL agents
+
+You can check the example template agents (see below) that are in package `au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy` to start your new development.
+You will find there the process how SARL systems can connect to the game server and manipulate a team in the game.
+
+If your solution will use Prolog as knolwedgebase, we suggest carefully understanding how the [SARL PROLOG CAP](https://bitbucket.org/ssardina-research/sarl-prolog-cap) framework, which provides the skill to
+manipulate a Prolog knowledgebase, works. Some initial code for a domain knowledge base is already provided in this base system, including substantial Prolog code to process all percepts.
+It is also important to understand what [Mochalog](https://github.com/ssardina/mochalog) provides to build goal queries; please check its readme.
 
 ## EXAMPLE AGENTS ##
 
