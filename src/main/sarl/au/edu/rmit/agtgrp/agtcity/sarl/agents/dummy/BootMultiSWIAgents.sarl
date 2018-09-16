@@ -50,11 +50,11 @@ agent BootMultiSWIAgents {
 	
      on Initialize {
 		teamManagers.add(
-			new PlayersManager("team1Manager", "conf/SingleAgent/", "eismassimconfig.json", "agentsconfig.json", 
+			new PlayersManager("team1Manager", "conf/SingleAgent/", "eismassimconfig.json", 
 				#["connectionA1", "connectionA2", "connectionA3"]))
-//		teamManagers.
-//			add(new PlayersManager("team2Manager", "conf/SingleAgent/", "eismassimconfig.json", "agentsconfig.json", 
-//				#["agentA4", "agentA5", "agentA6"]))
+		teamManagers.
+			add(new PlayersManager("team2Manager", "conf/SingleAgent/", "eismassimconfig.json",
+			#["connectionA4", "connectionA5", "connectionA6"]))
 
 		noToSpawn = teamManagers.size
 		noSpawn = 0
@@ -64,10 +64,6 @@ agent BootMultiSWIAgents {
 				agentsToComplete.add(UUID)
 			}
 		])
-
-		// EQUIVALENT TO:		
-		//	spawn(SWISingleFullAgent, "team1Manager", "conf/MultiAgents/", "eismassimconfig1.json", "agentsconfig1.json")
-		// spawn(SWISingleFullAgent, "team2Manager", "conf/MultiAgents/", "eismassimconfig2.json", "agentsconfig2.json")
 	}
 
 	on AgentSpawned [!(occurrence.agentIdentifiers.get(0) == this.ID)]  {

@@ -1,0 +1,23 @@
+package au.edu.rmit.agtgrp.agtcity.sarl.utils
+
+import java.util.Collection
+import java.util.ArrayList
+
+class PlayersManager {
+	public var myName = "bigBoss"
+
+	public var dirConfigFiles = "conf/SingleAgent/"
+	public var eisMassimConfig = "eismassimconfig.json"
+	public var playersMassimConfig = "agentsconfig.json"
+
+	public var myConnections : String[] = #["connectionA1", "connectionA2", "connectionA3", "connectionA4",
+	"connectionA5", "connectionA6"]	
+	new (myName : String, dirConfigFiles : String, eisMassimConfig : String, myConnections: String[]) {
+			
+		this.myName = myName
+		this.dirConfigFiles = dirConfigFiles
+		this.eisMassimConfig = eisMassimConfig
+		this.myConnections = myConnections
+	}
+
+}

@@ -174,7 +174,7 @@ agent SuperSingleAgent {
 				var percepts : Collection<Percept>
 				try {
 					percepts = MT_sensePlayerPercepts(playerName) // This is blocking!
-					
+					val myServerName = Util.getAgentName(percepts)
 
 					// Process the percepts by updating the PlayerState of the player in question
 					// The skill S_MassimTalking17 maintains a PlayerState object per player
@@ -189,7 +189,7 @@ agent SuperSingleAgent {
 					//	Add the action results of playerName(self) to percept aggregator
 					//	Add an the agent state for the playerNamein the aggregator (contains location, items holding, etc)
 					sensingAggregator.addActionResults(playerName, percepts)
-					var PlayerState = PlayerStateBuilder.build(playerName, percepts) // build a new agent state from percept
+					var PlayerState = PlayerStateBuilder.build(myServerName, percepts) // build a new agent state from percept
 					sensingAggregator.addTeamMember(playerName, PlayerState) // Fill the aggregator with this agent state for playerName
 
 

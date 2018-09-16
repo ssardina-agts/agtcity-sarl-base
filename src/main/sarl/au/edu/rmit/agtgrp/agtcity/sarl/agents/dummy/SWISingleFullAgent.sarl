@@ -56,6 +56,8 @@ import au.edu.rmit.agtgrp.agtcity.sarl.mw.entities.PlayerState
 import eis.iilang.Identifier
 import eis.exceptions.PerceiveException
 
+import au.edu.rmit.agtgrp.agtcity.sarl.utils.PlayersManager
+
 
 // Events
 import au.edu.rmit.agtgrp.agtcity.sarl.events.E_MoveRandomly
@@ -97,10 +99,18 @@ agent SWISingleFullAgent {
 	uses KB_AgtCity, KB_Prolog // We can use KB_Prolog directly!
 
 	val DEFAULT_LOG_LEVEL = 3 // debug = 4 ; info = 3 ; warning = 2 ; error = 1
-	var myName = "swiSingleFullAgent" // Default value (if not given at creation as argument)
+	var mySARLname = "swiSingleFullAgent" // Default value (if not given at creation as argument)
 	val kb_root_path = "src/main/sarl/au/edu/rmit/agtgrp/agtcity/sarl"
+
+	// array of entity connection names that I will control 
+	// By default,  null = ALL listed in server JSON config file
+	var myEntityConnections : String[] 
 	
-	/*
+	
+	
+	
+	
+	/* 
 	 * Agent may receive the path directory where the config files for server connection
 	 * and player authentications are located. Otherwise, will query via terminal.
 	 */
@@ -113,41 +123,36 @@ agent SWISingleFullAgent {
 		//  args.get(3):  Authentication and game configuration configuration JSON file (eiMassimAuthConfigFile)
         var args = newArrayList(occurrence.parameters) 
 		var eiConfigDir : String = "./"						// default value - where server and agent JSON config files live
-		var eiMassimConfigFile = "eismassimconfig.json" 	// default value - Connection info: server data, entities communication
-		var eiMassimPlayerAgentsConfigFile = "agentsconfig.json" 	// default value - player agents (which connection, which team)
-
+		var eiMassimConfigFile = "eismassimconfig.json" 	// default value - Connection info: server data, connection entities authentication details
 	
 		/*
 		 * 1 - OPTIONAL PARAMETERS: AGENT NAME, CONFIG DIR, SERVER CONFIG FILE, AGENT CONFIG FILE
 		 * First parameter is agent name - Get it and set it!!!
-		 * Agent name will be used to register agent-specific capabilities, like logging or knowledgebases 
+		 * Agent name will be used to register agent-specific capabilities, like logging or knowledgebase 
 		 */
 		if (args.length >= 1) {
-			myName = args.get(0) as String
-		}
-		if (args.length >= 2)
-			eiConfigDir = args.get(1) as String
-		else {
-			// There is no 3rd argument, so search in directory and try to get it
-			eiConfigDir = ConfHandler.getConfDir()		// search for $eiConfigDir/conf to see if there are EIS config packages
-		}
-		// If eiMassimConfigFile and eiMassimAuthConfigFile are included in 3rd and 4rth args
-		// These are the configuration files storing team formation and authorization credentials in server per agent
-		if (args.length >= 4) {
-			eiMassimConfigFile = args.get(2) as String
-			eiMassimPlayerAgentsConfigFile = args.get(3) as String
-		}
+			val playerManagerDetails = args.get(0) as PlayersManager
+			
+			mySARLname = playerManagerDetails.myName
+			
+			if(playerManagerDetails.dirConfigFiles !== null) (eiConfigDir = playerManagerDetails.
+					dirConfigFiles) else (eiConfigDir = ConfHandler.getConfDir())
+
+			eiMassimConfigFile = playerManagerDetails.eisMassimConfig
+			myEntityConnections = playerManagerDetails.myConnections				
+		} else
+				// Ask the user which subdirectory in conf/ we need to use to find the server config JSON file
+				eiConfigDir = ConfHandler.getConfDir()
+				
 		debug("Configuration settings: 
 				\t My SARL agent name: {0}
 				\t Directory of configuration files: {1}
-				\t File with team configuration (player lists): {2}
-				\t File containing authentication and sever info: {3}", myName, eiConfigDir, eiMassimConfigFile,
-				eiMassimPlayerAgentsConfigFile)
+				\t File containing authentication and sever info: {2}", mySARLname, eiConfigDir, eiMassimConfigFile)
 		
 		/*
 		 * 2 - Give reporting skill via console & set log level
 		 */
-		setSkill(new S_ConsoleReporting(myName), C_Reporting)
+		setSkill(new S_ConsoleReporting(mySARLname), C_Reporting)
 		val log_level : int = Integer.parseInt(System.getProperty("loglevel", String.valueOf(DEFAULT_LOG_LEVEL)))
 		info("============+> SETTING LOG LEVEL TO: {0}", log_level)
 		setLogLevel(log_level)
@@ -159,14 +164,14 @@ agent SWISingleFullAgent {
 		/*
 		 * 3 - Set up a new Prolog belief base - load agent knowledge bases.
 		 */
-		val beliefSpace = String.format(myName)
+		val beliefSpace = String.format(mySARLname)
 		setSkill(new SWI_KB_AgtCity(0, beliefSpace))
 		kb_load(kb_root_path + "/beliefs/tools.pl")
 		kb_load(kb_root_path + "/beliefs/percept-mgmt.pl")
 		kb_load(kb_root_path + "/beliefs/decision-making.pl") 
 		agent_says("I have loaded all my knowledge bases!")
-		assertFirst("agentName(@A)", myName)	// assert my name in the KB (using SWI_KB_Prolog skill directly)
-		//kb_recordKBName(myName)				// same but using the current KB domain capacity KB_AgtCity
+		assertFirst("agentName(@A)", mySARLname)	// assert my name in the KB (using SWI_KB_Prolog skill directly)
+		// kb_recordKBName(mySARLname)				// same but using the current KB domain capacity KB_AgtCity
 
 
 		/*
@@ -177,33 +182,27 @@ agent SWISingleFullAgent {
 		 * 
 		 * Note this does not connect or start the EI, it just stores the information in the skill
 		 */
-		agent_says("PHASE 1: REGISTERING MASSIM-TALKING SKILL VIA CONF. FILES {0} AND {1}", 
-				eiMassimConfigFile, eiMassimPlayerAgentsConfigFile)
+		agent_says("PHASE 1: REGISTERING MASSIM-TALKING SKILL VIA CONF. FILES {0} AND {1}", eiMassimConfigFile)
   		// Give agent ability to talk to MASSIM server
-		setSkill(
-			new S_MassimTalking17(Paths.get(eiConfigDir, eiMassimConfigFile),
-				Paths.get(eiConfigDir, eiMassimPlayerAgentsConfigFile)), C_MassimTalking
-		)
+		setSkill(new S_MassimTalking17(Paths.get(eiConfigDir, eiMassimConfigFile)), C_MassimTalking)
 
 		/*
 		 * 5 - Time to really create and initialize the EI. 
-		 * 		No player connections are yet register. 
-		 * This only uses the server configuration file (e.g., host and ip of serer): eiMassimConfigFile
+		 * 
+		 * This only uses the server configuration file (e.g., host and port of server): eiMassimConfigFile
+		 * It will create the network connection to the server and authenticate each player entity (using username/password) 
 		 */
 		agent_says("PHASE 2: INITIALIZING ENVIRONMENT INTERFACE USING CONFIGURATION FILE {0} ", eiMassimConfigFile)
+
+		// if myEntityConnections not null, then register them as players to control; otherwise it will be ALL in config file
+		if (myEntityConnections !== null) myEntityConnections.forEach( [entityConnection : String|MT_addPlayerByName(entityConnection)]) // entities to control
         if (MT_initialize()) {
-				agent_says("The EI is now initialized, entities are being authenticated...")
+				agent_says("EI has been created and initialized. ")
 		} else {
 			agent_says("Something wrong when registering the game server, I am finished...")
 			killMe
         }
 
-		/*
-		 * 6 - Once the EIS is started, we finally register the players we will control
-		 * This uses the player agent configuration file: eiMassimPlayerAgentsConfigFile
-		 */
-        agent_says("PHASE 3: REGISTERING AGENTS INTO ENVIRONMENT (GAME ENGINE) VIA FILE {0}", eiMassimPlayerAgentsConfigFile)
-		MT_registerPlayersFromConfig()
 		agent_shouts("I am now alive! Will start working now (sending and acting!)...")
 
 		/*
@@ -227,22 +226,23 @@ agent SWISingleFullAgent {
 		agent_shouts("Start sensing the environment")
 		var step = 0 
 		
-		// While the environment is running, wait for new percpets, read them all per agent
+		// While the environment is running, wait for new percepts, read them all per agent
 		while (MT_getStatus() == EnvironmentState.RUNNING) {
 			agent_says("Waiting for new percepts (blocking) for players {0}", MT_getPlayersNames())
 			MT_getPlayersNames.forEach([ playerName : String |
 				var percepts : Collection<Percept>
 				try {
 					percepts = MT_sensePlayerPercepts(playerName) // This is blocking!
-
-					agent_says("Player {0} received {1} percepts.", playerName, Util.getNoOfPercepts(percepts))
+					val myServerName = Util.getAgentName(percepts)
+					agent_says("Player {0} (game entity {3}) received {1} percepts.", playerName,
+						Util.getNoOfPercepts(percepts), myServerName)
 
 					// Process the percepts: update this.agents and KB
 					MT_getPlayerState(playerName).update(percepts) // update the player java-object data
 					agent_says(MT_getPlayerState(playerName).reportState()) // report player state
 					
 					// assert percepts in the KB
-					kb_recordPercepts(playerName, MT_getPlayerState(playerName).step, percepts.toString)
+					kb_recordPercepts(playerName, MT_getPlayerState(playerName).step, percepts)
 
 					// TODO: Not clear why this is not working (https://groups.google.com/forum/?hl=en#!topic/sarl/isMGE9QKH7A):
 					// var percepts2 : List<Percept>
@@ -252,8 +252,8 @@ agent SWISingleFullAgent {
 
 				
 				} catch (e : PerceiveException) {
-					agent_shouts("There was an error in perception ({0}), maybe not yet connected? Will try later...",
-						e.message)
+					agent_shouts("There was an error in perception for player {0} (message: {1}), maybe not yet connected? Will try later...",
+						playerName, e.message)
 				}
 			])
 			// AT THIS POINT all percepts from all players have been processed
