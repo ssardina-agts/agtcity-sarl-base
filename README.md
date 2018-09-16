@@ -52,7 +52,14 @@ So, to **run the system** you need to follow these general steps:
 
 		java -jar target/server-2017-0.7-jar-with-dependencies.jar --monitor 8001 -conf conf/Mexico-City-Test.json
 
-	Note that the configuration file (here, `conf/Mexico-City-Test.json`) makes a reference to the team configuration file at the bottom (e.g., `conf/teams/A.json`) which is the file containing all agents allowed to connect and with which id and password. These are the ones your system will use in your agent configuraition file.
+
+	Please note the following important aspects of your game server configuration:
+		
+	* The configuration file (here, `conf/Mexico-City-Test.json`) makes a reference to the team configuration file at the bottom (e.g., `conf/teams/A.json`) which is the file containing all agents allowed to connect and with which id and password. These are the ones your system will use in your agent configuration file.
+	* Configure the game server so that Prolog compatible terms are generated. In particular it is important to have names not starting with capital letters, as they will be undertood as variables. 
+		* Rename "2017-Mexico-City-Test` to `2017-mexico-city-test`.
+		* Rename team names. Instead of team `A`, use team `teamA`.	
+		
 
 2. Start the SARL Controller, either via ECLIPSE or through the CLI (again, see [general SARL instructions](https://bitbucket.org/snippets/ssardina/6eybMg#markdown-header-4-running-the-sarl-application)).
 	* System will generally need a json configuration file for the game server and one for the teams. 
