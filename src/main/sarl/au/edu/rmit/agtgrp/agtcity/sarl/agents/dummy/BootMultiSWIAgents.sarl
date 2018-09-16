@@ -28,6 +28,8 @@ import java.util.HashSet
 import java.util.Set
 import java.util.UUID
 
+import au.edu.rmit.agtgrp.agtcity.sarl.utils.PlayersManager
+
 /** 
  * This agent will spawn several single SWISingleFullAgents, each of the managing some subset
  * of the players in the simulation
@@ -38,20 +40,29 @@ agent BootMultiSWIAgents {
     uses Lifecycle
     uses Logging
 
-	var teamManagers : Collection<String[]> = new ArrayList<String[]>()
+	val configFileDetails = #["conf/SingleAgent/", "eismassimconfig.json", "agentsconfig.json"]
+	var teamManagers : Collection<PlayersManager> = new ArrayList<PlayersManager>()
 
 	var agentsToComplete : Set<UUID> = new HashSet<UUID>() // set of all SARL agents in the system
-	var noSpawn : int
+	var noToSpawn : int	// total agents to spawn
+	var noSpawn : int	// agents already spawn
 	val lock1 : Object = new Object()
 	
      on Initialize {
-		teamManagers.add(#["team1Manager", "conf/MultiAgents/", "eismassimconfig1.json", "agentsconfig1.json"])
-		teamManagers.add(#["team2Manager", "conf/MultiAgents/", "eismassimconfig2.json", "agentsconfig2.json"])
+		teamManagers.add(
+			new PlayersManager("team1Manager", "conf/SingleAgent/", "eismassimconfig.json", "agentsconfig.json", 
+				#["connectionA1", "connectionA2", "connectionA3"]))
+//		teamManagers.
+//			add(new PlayersManager("team2Manager", "conf/SingleAgent/", "eismassimconfig.json", "agentsconfig.json", 
+//				#["agentA4", "agentA5", "agentA6"]))
 
+		noToSpawn = teamManagers.size
 		noSpawn = 0
-		teamManagers.forEach([ teamManagerOptions : String[] |
-			val UUID = spawn(SWISingleFullAgent, teamManagerOptions)
-			agentsToComplete.add(UUID)
+		teamManagers.forEach([ teamManager : PlayersManager |
+			val UUID = spawn(SWISingleFullAgent, teamManager)
+			synchronized (agentsToComplete) {
+				agentsToComplete.add(UUID)
+			}
 		])
 
 		// EQUIVALENT TO:		
@@ -73,11 +84,11 @@ agent BootMultiSWIAgents {
 				noSpawn++
 				info("Agent {0} (no. {1}; type: {2}) has been created successfully and is now alive!", agent_UUID,
 					noSpawn, agent_type)
-				// no more to agents to wait, start sensing!
-				if (agentsToComplete.empty) {
+
+				// No more to agents to wait, start sensing!
+				if (agentsToComplete.empty && noSpawn == noToSpawn) {
 					info("All {0} agents have been created, now dying... From BootMultiSWIAgents, bye bye....", noSpawn)
 					killMe
-					
 				}
 			} else {
 				warning("Strange, an agent {0} has spawned but I was not waiting for it....", agent_UUID, agent_type)
