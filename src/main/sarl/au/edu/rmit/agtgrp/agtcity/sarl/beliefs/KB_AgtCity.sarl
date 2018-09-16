@@ -29,6 +29,10 @@ import java.util.Map
 import org.jpl7.Term
 
 import io.mochalog.bridge.prolog.query.MQuery
+import java.util.Collection
+import eis.iilang.Percept
+import java.util.HashSet
+import java.util.ArrayList
 
 /** 
  * @author Sebastian Sardina (ssardina@gmail.com)
@@ -39,8 +43,9 @@ capacity KB_AgtCity {
 	def kb_dump()
 
 	def kb_recordKBName(name : String)
-	
+
 	def kb_recordPercepts(playerName : String, stepNo : int, percepts : String)
+	def kb_recordPercepts(playerName : String, stepNo : int, percepts : Collection<Percept>)
 	def kb_processLastPercept(playerName : String)
 	def kb_pickDestination(playerName : String) : String
 }
@@ -76,6 +81,15 @@ skill SWI_KB_AgtCity extends SWI_KB_Prolog implements KB_AgtCity {
 
 	def kb_recordPercepts(playerName : String, stepNo : int, percepts : String) {
 		assertFirst("percepts(@A, @I, @A)", playerName, stepNo, percepts)
+		
+	}
+
+	def kb_recordPercepts(playerName : String, stepNo : int, percepts : Collection<Percept>) {
+		val perceptsProlog : Collection<String> = new ArrayList<String>
+
+		percepts.forEach[percept : Percept|perceptsProlog.add(percept.toProlog())]
+		
+		assertFirst("percepts(@A, @I, @A)", playerName, stepNo, perceptsProlog.toString)
 	}
 
 	def kb_processLastPercept(playerName : String) {

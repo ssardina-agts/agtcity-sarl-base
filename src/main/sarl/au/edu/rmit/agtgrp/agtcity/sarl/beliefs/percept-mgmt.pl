@@ -25,11 +25,11 @@
 %% Defines the TYPE of each single percept that may come in as json data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 percept_simStart_type(simStart).
-percept_simStart_type(id(_)).	% problem with arguments in capital treated as vars
-percept_simStart_type(map(_)).	% problem with arguments in capital treated as vars
+percept_simStart_type(id(_)).		% problem with arguments in capital treated as vars
+percept_simStart_type(map(_)).		% problem with arguments in capital treated as vars
 percept_simStart_type(seedCapital(_)).
 percept_simStart_type(steps(_)).
-percept_simStart_type(team(_)).	% problem with arguments in capital treated as vars
+percept_simStart_type(team(_)).		% problem with arguments in capital treated as vars
 percept_simStart_type(role(_, _, _, _, _)).
 percept_simStart_type(item(_, _, _, _)).
 percept_simStart_type(proximity(_)).
@@ -41,10 +41,12 @@ percept_simStart_type(maxLon(_)).
 percept_simStart_type(minLon(_)).
 percept_simStart_type(centerLon(_)).
 
+
 percept_simEnd_type(simEnd).
 percept_simEnd_type(ranking(_)).
 percept_simEnd_type(score(_)).
 
+percept_self_type(name(_)). 
 percept_self_type(actionID(_)).
 percept_self_type(timestamp(_)).
 percept_self_type(deadline(_)).
@@ -114,14 +116,19 @@ facility(F, resourceNode) :- resourceNode(F, _, _, _).
 % Several get operations from percepts
 % This assumes percepts/3 have been recorded
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-getPlayerData(Player, Step, Lat, Long, Charge, Load, Money, Facility) :- 
+getPlayerData(Player, Name, Step, Lat, Long, Charge, Load, Money, Facility) :- 
 	percepts(Player, Step, Percepts),
+	member(name(Name), Percepts),
 	member(lat(Lat), Percepts),
 	member(lon(Long), Percepts),
 	member(load(Load), Percepts),
 	member(charge(Charge), Percepts),
 	member(money(Money), Percepts),
 	(member(facility(Facility), Percepts) - true ; Facility = none).
+getPlayerName(Player, Name) :-
+	get_last_step(Step), !, 
+	percepts(Player, Step, Percepts),
+	member(name(Name), Percepts).
 getPlayerLocation(Player, Step, Lat, Long) :- 
 	percepts(Player, Step, Percepts),
 	member(lat(Lat), Percepts),
@@ -137,6 +144,9 @@ get_last_self_percepts(Player, Step, Percepts) :-
 get_last_self_percepts(Player, Step, Percepts) :- 
 	\+ ground(Player),
 	percepts_self(Player, Step, Percepts), !.
+	
+get_last_step(Step) :-
+	percepts(_Player, Step, _Percepts), !.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
