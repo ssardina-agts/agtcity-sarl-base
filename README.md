@@ -56,7 +56,7 @@ So, to **run the system** you need to follow these general steps:
 
 2. Start the SARL Controller, either via ECLIPSE or through the CLI (again, see [general SARL instructions](https://bitbucket.org/snippets/ssardina/6eybMg#markdown-header-4-running-the-sarl-application)).
 	* System will generally need a json configuration file for the game server and one for the teams. 
-	* By dafault, the JAR file built does not carry all dependencies as the compilation is too slow. Hence you need to execute via Maven execution plugin, which will run the default `BootMAS` class:
+	* By default, the JAR file built does not carry all dependencies as the compilation is too slow. Hence you need to execute via Maven execution plugin, which will run the default `BootMAS` class:
 	
 	
 			mvn exec:java -Dexec.args=SuperSingleAgent -Dloglevel=4
