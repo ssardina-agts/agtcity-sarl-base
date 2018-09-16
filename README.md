@@ -89,92 +89,35 @@ In particular, it is important to understand how to build queries using using @-
 
 ## EXAMPLE AGENTS ##
 
-These are all thin agent controllers for the players in the game, but they should provide a solid base for developing more sophisticated agent systems.
+These are all "thin" agent controllers for the players in the game, but they should provide a solid base for developing more sophisticated agent systems.
 
 All the agents can be run via the booting class `BootMAS`, which is the default execution class in the package JAR file. One has to give the name of the agent controller to start as an argument.
 
-To change the log level, pass `-Dloglevel=n` option (DEBUG=4; INFO=3; WARNING=2; ERROR=1). Defaults to level 3.
+To change the log level, pass `-Dloglevel=n` option (FINE/DEBUG=4; INFO=3; WARNING=2; ERROR=1). Defaults to level 3.
 
+The agent examples are:
 
-### SuperSingleAgent
+1. **SuperSingleAgent**: A simple central agent controlling _all players_ in the simulator, receiving and processing the sensing from the environment, and then making all players navigate to random facilities. It uses the Java Percept Aggregator facility provided in the MW as percepts from players have a lot of shared content.
+	* _Class_: `au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.SuperSingleAgent`
+	* This is the **default** agent controller for `BootMAS` class so it can be run by just doing
+	* To run: 
+		* Using Maven: `mvn exec:java -Dexec.args=SuperSingleAgent -Dloglevel=4`
+		* Via main `BootMAS` class: `java -jar target/sarl-agtcity-base-1.5.0.7.2-jar-with-dependencies.jar  SuperSingleAgent`
+		* Via SARL booting class: `java -cp target/sarl-agtcity-base-1.3.0.7.2-jar-with-dependencies.jar io.janusproject.Boot au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.SuperSingleAgent`
+		* Then, select the location where `eismassimconfig.json` server configuration file is located.
 
-_Class_: `au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.SuperSingleAgent`
+2. **SWISingleFullAgent**: This is one single SARL agent controlling _all players_ in the game and, importantly, using an SWI Prolog Knowledge Base via the [Mochalog Framework](https://github.com/ssardina/mochalog).
+	* _Class_: `au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.SWISingleFullAgent`
+	* To help understand how the SWI Knowledge Base is updated, every percept cycle the agent prints out some results from queries and then dumps its entire KB into file `swiSingleFullAgent-<n>.pl`, where `<n>` is the step number. The agent contains a few example uses of how to assert in the KB and query it. It also contains simple logic to continously select a random destination and go there. For achieving this, both SARL (emitting and handling event **E_MoveRandomly**) and SWI Prolog (for choosing the destination) is used.
+	* To run this agent: `mvn exec:java -Dexec.args=SWISingleFullAgent -Dloglevel=4`, and then select the location where `eismassimconfig.json` server configuration file is located.
 
-A simple central agent controlling all players in the simulator, receiving and processing the sensing from the environment, and then making all players navigate to random facilities.
-
-It uses the Java Percept Aggregator facility provided in the MW as percepts from players have a lot of shared content.
-
-All data is stored in Java.
-
-This is the **default** agent controller for `BootMAS` class so it can be run by just doing
-
-```
-mvn exec:java -Dexec.args=SuperSingleAgent -Dloglevel=4
-```
-
-or
-
-```
-java -jar target/sarl-agtcity-base-1.5.0.7.2-jar-with-dependencies.jar  SuperSingleAgent
-```
-
-
-or via the standard SARL booting mechanism:
-
-```
-java -cp target/sarl-agtcity-base-1.3.0.7.2-jar-with-dependencies.jar io.janusproject.Boot au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.SuperSingleAgent
-```
-
-and then select the `conf/SingleAgent` configuration files, as all players are controlled by one SARL agent.
-
-
-### SWISingleFullAgent 
-
-_Class_: `au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.SWISingleFullAgent`
-
-This is one single SARL agent controlling all players in the game and, importantly, using an SWI Prolog Knowledge Base via the [Mochalog Framework](https://github.com/ssardina/mochalog).
-
-To help understand how the SWI Knowledge Base is updated, every percept cycle the agent prints out some results from queries and then dumps its entire KB into file `swiSingleFullAgent-<n>.pl`, where `<n>` is the step number.
-
-The agent contains a few example uses of how to assert in the KB and query it. 
-
-It also contains simple logic to continously select a random destination and go there. For achieving this, both SARL (emitting and handling event **E_MoveRandomly**) and SWI Prolog (for choosing the destination) is used.
-
-To run this agent, you can do:
-
-```
-mvn exec:java -Dexec.args=SWISingleFullAgent -Dloglevel=4 
-```
-
-
-and then select the `conf/SingleAgent` configuration files, as all players are controlled by one SARL agent.
-
-
-### Multi Agent System
-
-_Class_: `au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.BootMultiSWIAgents`
-
-
-This is a multi SARL agent team started with agent **BootMultiSWIAgents** which starts a set of agents of type **SWISingleFullAgent**. Each of them is assigned a configuration file to control a set of player  in the simulation.
-
-To do so, the **BootMultiSWIAgents** overrides the default values of **SWISingleFullAgent** to provide authentication files directly as arguments to the initialization.
-
-This is a perfect example of versatility where a SARL agent can be given the task to controll all players or just a subset. 
-
-To run this agent, you can do:
-
-```
-mvn exec:java -Dexec.args=BootMultiSWIAgents -Dloglevel=4 
-```
-
-or since `BootMAS` is the default execution class (after compiling with all dependencies):
-
-```
-java -jar target/sarl-agtcity-base-1.3.0.7.2-jar-with-dependencies.jar BootMultiSWIAgents
-```
-
-This will use the multi-team configuration `conf/MultiAgents` as the whole team of players is divided into two sub-teams. Check `Initialize` in `BootMultiSWIAgents` SARL agent.
-
+3. **Multi Agent System**: This is a multi SARL agent team started with agent **BootMultiSWIAgents** which starts a set of agents of type **SWISingleFullAgent**. Each of them is assigned a configuration file to control a set of player  in the simulation. To do so, the **BootMultiSWIAgents** overrides the default values of **SWISingleFullAgent** to provide authentication files directly as arguments to the initialization.
+	* _Class_: `au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.BootMultiSWIAgents`
+	* This is a perfect example of versatility where a SARL agent can be given the task to control all players or just a subset. 
+	* To run this agent: 
+		* Usinv Maven: `mvn exec:java -Dexec.args=BootMultiSWIAgents -Dloglevel=4` 
+		* Using the main class `BootMAS` (after compiling with all dependencies): `java -jar target/sarl-agtcity-base-1.3.0.7.2-jar-with-dependencies.jar BootMultiSWIAgents`
+	* Then, select the location where `eismassimconfig.json` server configuration file is located.
 
 
 ## LINKS 
