@@ -67,9 +67,8 @@ agent BootMultiSWIAgents {
 	}
 
 	on AgentSpawned [!(occurrence.agentIdentifiers.get(0) == this.ID)]  {
-		val agent_UUID = occurrence.agentIdentifiers
+		val agent_UUID = occurrence.agentIdentifiers.get(0)
 		val agent_type = occurrence.agentType
-		info("An Agent {0} (of type: {1}) has been created successfully and is now alive!", agent_UUID, agent_type)
 
 		// This code gives validation error at compile, it should not!
 		// // see bug report : https://github.com/sarl/sarl/issues/847
