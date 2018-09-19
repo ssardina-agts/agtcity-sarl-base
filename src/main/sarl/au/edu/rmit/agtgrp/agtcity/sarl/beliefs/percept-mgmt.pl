@@ -9,7 +9,8 @@
 	percepts_nonself/2, 	% Stores percepts of others
 	percepts_self/3, 	% Stores percepts about myself
 	step/1, 		% Stores current simulator step number
-	agentName/1.		% Stores the name of the agent who owns the KB
+	agentName/1,		% Stores the name of the agent who owns the KB
+	player/1.		% Stores names of connection players controlled
 
 :- dynamic storage/6, 
 	dump/3,
@@ -115,8 +116,9 @@ facility(F, resourceNode) :- resourceNode(F, _, _, _).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Several get operations from percepts
 % This assumes percepts/3 have been recorded
+% Will yield info for all steps recorded
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-getPlayerData(Player, Name, Step, Lat, Long, Charge, Load, Money, Facility) :- 
+get_player_data(Player, Name, Step, Lat, Long, Charge, Load, Money, Facility) :- 
 	percepts(Player, Step, Percepts),
 	member(name(Name), Percepts),
 	member(lat(Lat), Percepts),
@@ -125,29 +127,35 @@ getPlayerData(Player, Name, Step, Lat, Long, Charge, Load, Money, Facility) :-
 	member(charge(Charge), Percepts),
 	member(money(Money), Percepts),
 	(member(facility(Facility), Percepts) - true ; Facility = none).
-getPlayerName(Player, Name) :-
-	get_last_step(Step), !, 
-	percepts(Player, Step, Percepts),
+get_player_name(Player, Name) :-
+	get_last_step(Player, Step),  
+	percepts(Player, Step, Percepts), 
 	member(name(Name), Percepts).
-getPlayerLocation(Player, Step, Lat, Long) :- 
+get_player_loc(Player, Step, Lat, Long) :- 
 	percepts(Player, Step, Percepts),
 	member(lat(Lat), Percepts),
 	member(lon(Long), Percepts).
-getPlayerCharge(Player, Step, Charge) :- 
+get_player_charge(Player, Step, Charge) :- 
 	percepts(Player, Step, Percepts),
 	member(charge(Charge), Percepts).
 
 
-get_last_self_percepts(Player, Step, Percepts) :- 
-	ground(Player), !, 
-	once(percepts_self(Player, Step, Percepts)).
-get_last_self_percepts(Player, Step, Percepts) :- 
-	\+ ground(Player),
-	percepts_self(Player, Step, Percepts), !.
-	
-get_last_step(Step) :-
-	percepts(_Player, Step, _Percepts), !.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Get operations from the last percept recorded
+% Using once(G) will yield just the first success of G
+% See once/1 doc: http://www.swi-prolog.org/pldoc/man?predicate=once/1
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+get_last_self_percepts(Player, Step, Percepts) :- 
+	player(Player),
+	once(percepts_self(Player, Step, Percepts)).
+get_last_step(Player, Step) :-
+	player(Player),
+	once(percepts(Player, Step, _)).
+get_player_last_loc(Player, Step, Lat, Long) :- 
+	player(Player),
+	once(get_player_loc(Player, Step, Lat, Long)).
+	
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Extract each percept type from a general percept

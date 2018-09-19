@@ -195,7 +195,11 @@ agent SWISingleFullAgent {
 		agent_says("PHASE 2: INITIALIZING ENVIRONMENT INTERFACE USING CONFIGURATION FILE {0} ", eiMassimConfigFile)
 
 		// if myEntityConnections not null, then register them as players to control; otherwise it will be ALL in config file
-		if (myEntityConnections !== null) myEntityConnections.forEach( [entityConnection : String|MT_addPlayerByName(entityConnection)]) // entities to control
+		if (myEntityConnections !== null) 
+			myEntityConnections.forEach( [entityConnection : String | 
+				MT_registerEntityByName(entityConnection)	// will register a EI player called player_<entity name> (e.g., playyer_connectionA2)
+			]) // entities to control
+			
         if (MT_initialize()) {
 				agent_says("EI has been created and initialized. ")
 		} else {
@@ -203,6 +207,12 @@ agent SWISingleFullAgent {
 			killMe
         }
 
+		// Store in the KB the names of the EI players we are controlling
+		MT_getPlayersNames.forEach [ playerName : String |
+			assertFirst("player(@A)", playerName)
+			]
+				
+		
 		agent_shouts("I am now alive! Will start working now (sending and acting!)...")
 
 		/*
@@ -249,7 +259,6 @@ agent SWISingleFullAgent {
 					// percepts2 = new Vector<Percept>()
 					// ei.getAllPercepts(playerName).values().forEach(percepts2::addAll);
 					// ei.getAllPercepts(playerName).values().forEach[percepts2::add(it)];
-
 				
 				} catch (e : PerceiveException) {
 					agent_shouts("There was an error in perception for player {0} (message: {1}), maybe not yet connected? Will try later...",
