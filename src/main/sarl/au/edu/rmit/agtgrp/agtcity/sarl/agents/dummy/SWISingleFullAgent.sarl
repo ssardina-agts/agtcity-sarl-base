@@ -78,6 +78,8 @@ import io.mochalog.bridge.prolog.query.exception.NoSuchSolutionException
 import io.mochalog.bridge.prolog.query.MQuery
 import io.mochalog.bridge.prolog.SandboxedPrologContext
 import io.mochalog.bridge.prolog.PrologContext
+import java.text.SimpleDateFormat
+import au.edu.rmit.agtgrp.util.TimestampedDir
 
 /** 
  * This is a single SARL agent that uses the S_MassimTalking07 skill 
@@ -101,14 +103,14 @@ agent SWISingleFullAgent {
 	val DEFAULT_LOG_LEVEL = 3 // debug = 4 ; info = 3 ; warning = 2 ; error = 1
 	var mySARLname = "swiSingleFullAgent" // Default value (if not given at creation as argument)
 	val kb_root_path = "src/main/sarl/au/edu/rmit/agtgrp/agtcity/sarl"
+	var eiConfigDir : String = "./"						// default value - where server and agent JSON config files live
+	var eiMassimConfigFile = "eismassimconfig.json" 	// default value - Connection info: server data, connection entities authentication details
+	var kb_dump_dir : String // directory where KB database is to be dumped
 
 	// array of entity connection names that I will control 
 	// By default,  null = ALL listed in server JSON config file
 	var myEntityConnections : String[] 
-	
-	
-	
-	
+
 	
 	/* 
 	 * Agent may receive the path directory where the config files for server connection
@@ -117,18 +119,13 @@ agent SWISingleFullAgent {
     on Initialize { // Should only be initializing with the EIS as a parameter.
 	{
 		// There could be many arguments passed, in this order:
-		//	args.get(0):  Agent name
-		//	Args.get(1):  Directory with EI configuration files (eiConfigDir)
-		//  args.get(2):  EI configuration JSON file - team information, which players -> entity for team (eiMassimConfigFile)
-		//  args.get(3):  Authentication and game configuration configuration JSON file (eiMassimAuthConfigFile)
+		//	args.get(0):  PlayersManager information (generally if spawn by BootMultiSWIAgent)
+		//	Args.get(1):  Directory for dumping the KB
         var args = newArrayList(occurrence.parameters) 
-		var eiConfigDir : String = "./"						// default value - where server and agent JSON config files live
-		var eiMassimConfigFile = "eismassimconfig.json" 	// default value - Connection info: server data, connection entities authentication details
 	
 		/*
-		 * 1 - OPTIONAL PARAMETERS: AGENT NAME, CONFIG DIR, SERVER CONFIG FILE, AGENT CONFIG FILE
-		 * First parameter is agent name - Get it and set it!!!
-		 * Agent name will be used to register agent-specific capabilities, like logging or knowledgebase 
+		 * 1 - SET THE SERVER JSON CONFIGURATION FILE
+		 * Either it is given as first parameter or ask the user via console based on the directory
 		 */
 		if (args.length >= 1) {
 			val playerManagerDetails = args.get(0) as PlayersManager
@@ -143,11 +140,26 @@ agent SWISingleFullAgent {
 		} else
 				// Ask the user which subdirectory in conf/ we need to use to find the server config JSON file
 				eiConfigDir = ConfHandler.getConfDir()
-				
-		debug("Configuration settings: 
+		
+		// Is there a paramter for the KB dumping directory?
+		if (args.length >= 2) {
+			kb_dump_dir = args.get(1) as String
+		} else {
+			TimestampedDir.setRoot("kb_dump_SWISingle")
+			if (!TimestampedDir.exists) {
+				TimestampedDir.create
+				}
+			kb_dump_dir = TimestampedDir.getDir()
+		}
+	
+		debug("========> Ready to go - Configuration settings: 
 				\t My SARL agent name: {0}
-				\t Directory of configuration files: {1}
-				\t File containing authentication and sever info: {2}", mySARLname, eiConfigDir, eiMassimConfigFile)
+				\t Game server configuration file: {1}
+				\t Directory to dump KB: {2}", 
+					mySARLname, 
+					Paths.get(eiConfigDir, eiMassimConfigFile),
+					Paths.get(kb_dump_dir))
+		
 		
 		/*
 		 * 2 - Give reporting skill via console & set log level
@@ -165,7 +177,7 @@ agent SWISingleFullAgent {
 		 * 3 - Set up a new Prolog belief base - load agent knowledge bases.
 		 */
 		val beliefSpace = String.format(mySARLname)
-		setSkill(new SWI_KB_AgtCity(0, beliefSpace))
+		setSkill(new SWI_KB_AgtCity(beliefSpace, 0, kb_dump_dir))
 		kb_load(kb_root_path + "/beliefs/tools.pl")
 		kb_load(kb_root_path + "/beliefs/percept-mgmt.pl")
 		kb_load(kb_root_path + "/beliefs/decision-making.pl") 

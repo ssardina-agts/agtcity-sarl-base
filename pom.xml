@@ -16,7 +16,7 @@
 
     <groupId>org.bitbucket.ssardina-research</groupId>
     <artifactId>sarl-agtcity-base</artifactId>
-    <version>1.3.${env.SARL_VERSION}</version>
+    <version>1.4.${env.SARL_VERSION}</version>
 
 	<name>SARL Agents in City Base Controllers</name>
     <description>
@@ -118,7 +118,7 @@
         <dependency>
             <groupId>org.bitbucket.ssardina-research</groupId>
             <artifactId>sarl-prolog-cap</artifactId>
-            <version>34e932b</version>
+            <version>d154aa3</version>
         </dependency>
 
         <!--  MOCHALOG interface for SWI-Prolog -->

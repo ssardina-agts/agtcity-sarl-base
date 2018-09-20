@@ -33,6 +33,7 @@ import java.util.Collection
 import eis.iilang.Percept
 import java.util.HashSet
 import java.util.ArrayList
+import au.edu.rmit.agtgrp.util.TimestampedDir
 
 /** 
  * @author Sebastian Sardina (ssardina@gmail.com)
@@ -41,13 +42,13 @@ import java.util.ArrayList
 capacity KB_AgtCity {
 	def kb_load(file : String)
 	def kb_dump()
-
 	def kb_recordKBName(name : String)
-
 	def kb_recordPercepts(playerName : String, stepNo : int, percepts : String)
 	def kb_recordPercepts(playerName : String, stepNo : int, percepts : Collection<Percept>)
 	def kb_processLastPercept(playerName : String)
 	def kb_pickDestination(playerName : String) : String
+
+	def kb_setLogLevel(logLevel : int)
 }
 
 
@@ -58,14 +59,24 @@ capacity KB_AgtCity {
 skill SWI_KB_AgtCity extends SWI_KB_Prolog implements KB_AgtCity {
 	uses Logging
 
-	val logging_level : int
+	// Logging level for the skill
+	var logLevel : int
 	
-	new (l : int = 0, name : String, dump_loc : String = "kb_dump_agtcity") {
-		super(name, dump_loc) // Call the super's constructor
-		logging_level = l
-//		setLogLevel(l)
+	new (name : String, logLevel : int = 0, kb_dump_dir : String) {
+		super(name, kb_dump_dir) // Call the super's constructor
+		kb_setLogLevel(logLevel)
 	}
 
+	new (name : String, logLevel : int = 0) {
+		super(name) // Call the super's constructor
+		kb_setLogLevel(logLevel)
+	}
+
+	def kb_setLogLevel(logLevel : int) {
+		this.logLevel = logLevel 
+	}
+
+	
 	def kb_load(file : String) {
 		consult_file(file)
 	}
