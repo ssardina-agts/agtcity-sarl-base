@@ -1,0 +1,79 @@
+package au.edu.rmit.agtgrp.util
+
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.nio.file.Path
+import java.nio.file.Paths
+import java.io.File
+
+class TimestampedDir {
+	val timestamp_format = "'%Y-%m-%d--%H-%M-%S'"
+	
+	static val formatter = new SimpleDateFormat("yyyy-MM-dd--HH-mm-ss")
+	static var runtime_timestamp = formatter.format(new Date()) // store runtime date time as a string
+	static var rootDir : String = "./"
+	static var timestampedLogDir : String = String.format("%s/%s", rootDir, runtime_timestamp)
+
+	/**
+	 * Reset timestamp to date now!
+	 */
+	static def reset() {
+		runtime_timestamp = formatter.format(new Date()) 
+	}
+
+	/* 
+	 * Get the current timestamp of the the log dir 
+	 */
+	static def getTimestamp() : String {
+		return runtime_timestamp
+	}
+
+	/* 
+	 * Set the root of the current log dir 
+	 */
+	static def setRoot(rootDir : String) : String {
+		timestampedLogDir = String.format("%s/%s", rootDir, runtime_timestamp)
+	}
+
+	/* 
+	 * Get current log dir as a String
+	 */
+	static def getDir() : String {
+		return timestampedLogDir
+	}
+
+	/* 
+	 * Get current log dir as a Path
+	 */
+	static def getPath() : Path {
+		return Paths.get(timestampedLogDir)
+	}
+
+	/*
+	 * Get a log dir with the rootDir as root (use stored runtime timestamp though)
+	 */
+	static def getDir(rootDir : String) : String {
+		return String.format("%s/%s", rootDir, runtime_timestamp)
+	}
+
+	static def getPath(rootDir : String) : Path {
+		return Paths.get(rootDir, runtime_timestamp)
+	}
+
+	/**
+	 * Does the current log dir exist?
+	 */
+	static def exists() : boolean {
+		return new File(timestampedLogDir).exists()
+	}
+	
+	/**
+	 * Create the log dir if it does not exist
+	 */
+	static def create() {
+		if (!exists()) new File(timestampedLogDir).mkdirs
+	}
+
+
+
+}
