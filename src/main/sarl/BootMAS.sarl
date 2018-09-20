@@ -6,6 +6,7 @@ import au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.SuperSingleAgent
 import au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.SWISingleFullAgent
 
 import io.sarl.lang.core.Agent
+import java.util.Scanner
 
 /** 
  * @author Sebastian Sardina (ssardina@gmail.com)
@@ -19,23 +20,40 @@ class BootMAS {
 		var fullyQualifiedAgent : String
 		val basePackage = "au.edu.rmit.agtgrp.agtcity.sarl.agents"
 
-		val AGENTS_AVAILABLE : String[] = #["SuperSingleAgent", "SWISingleFullAgent", "BootMultiSWIAgents"]
+		val AGENTS_AVAILABLE : String[] = #["default", "SuperSingleAgent", "SWISingleFullAgent", "BootMultiSWIAgents"]
 		val DEFAULT_CONTROLLER : String = "SuperSingleAgent"
 
 		// Boot a specific one and that' s it
 		// Boot.startJanus(typeof(DummyMultiCarController))
-		var agentToLaunch : String 
-		if (args.length == 0) {	// if not agent given in CLI argument, use default
-			System.out.println(
-				String.format("No controller specified from the available ones %s. Using controller \"%s\"",
-				AGENTS_AVAILABLE.toString, DEFAULT_CONTROLLER))
-				agentToLaunch = DEFAULT_CONTROLLER
-		} 
+		var agentToLaunch : String
+		if (args.length == 0) { // if not agent given in CLI argument, list the available ones and ask user for one
+	            System.out.println("Choose the controller to run: ");
+	            for (var i = 0; i < AGENTS_AVAILABLE.size; i++) {
+	            	System.out.println(String.format("%d. %s", i+1, AGENTS_AVAILABLE.get(i)))
+	            	}
+				val in : Scanner = new Scanner(System.in)
+				var confNum : Integer = null
+				while (confNum === null) {
+					try {
+						confNum = Integer.parseInt(in.next())
+						if (confNum < 1 || confNum > AGENTS_AVAILABLE.size) {
+							System.out.println("No agent for that number, try again:")
+			                confNum = null
+			                }
+		             } catch (e : Exception) {
+		                System.out.println("Invalid number, try again:")
+					}
+				}
+				agentToLaunch = AGENTS_AVAILABLE.get(confNum.intValue-1)
+		}
 		else {
 			agentToLaunch = args.get(0) // get the agent name from CLI first argument
 		}
 
+		System.out.println(String.format("Running controller: \"%s\"", agentToLaunch))
 		switch agentToLaunch {
+			case 'default':
+				fullyQualifiedAgent = basePackage + DEFAULT_CONTROLLER
 			case 'BootMultiSWIAgents':
 				fullyQualifiedAgent = basePackage + ".dummy.BootMultiSWIAgents"
 			case 'SWISingleFullAgent':
