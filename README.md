@@ -123,7 +123,7 @@ The agent examples are:
 	* _Class_: `au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.BootMultiSWIAgents`
 	* This is a perfect example of versatility where a SARL agent can be given the task to control all players or just a subset. 
 	* To run this agent: 
-		* Usinv Maven: `mvn exec:java -Dexec.args=BootMultiSWIAgents -Dloglevel=4` 
+		* Using Maven: `mvn exec:java -Dexec.args=BootMultiSWIAgents -Dloglevel=4` 
 		* Using the main class `BootMAS` (after compiling with all dependencies): `java -jar target/sarl-agtcity-base-1.3.0.7.2-jar-with-dependencies.jar BootMultiSWIAgents`
 	* Then, select the location where `eismassimconfig.json` server configuration file is located.
 

@@ -108,7 +108,7 @@
 		<dependency>
 		    <groupId>org.bitbucket.ssardina-research</groupId>
 		    <artifactId>sarl-agtcity-mw</artifactId>
-	    	<version>7a3e808</version>
+	    	<version>97112ea</version>
 			<!-- 
 	    	<version>1.3.${sarl.version}</version>
 	    	 -->
