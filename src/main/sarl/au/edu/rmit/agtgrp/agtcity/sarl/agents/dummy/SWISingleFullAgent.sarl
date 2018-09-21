@@ -256,7 +256,7 @@ agent SWISingleFullAgent {
 				try {
 					percepts = MT_sensePlayerPercepts(playerName) // This is blocking!
 					val userName = Util.getAgentName(percepts)
-					agent_says("Player **{0}** (game entity {3}) received {1} percepts.", playerName,
+					agent_says("Player **{0}** (game username {2}) received {1} percepts.", playerName,
 						Util.getNoOfPercepts(percepts), userName)
 
 					// Process the percepts by updating the PlayerState of the player in question
