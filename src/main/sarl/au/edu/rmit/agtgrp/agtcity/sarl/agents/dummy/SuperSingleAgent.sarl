@@ -165,7 +165,7 @@ agent SuperSingleAgent {
 		if (Util.initDataBuffers()) {}
 
 		// While the environment is running, wait for new percepts (read percepts for each player registered/connnected)
-		while (MT_getStatus() == EnvironmentState.RUNNING) {
+		while (MT_getStatus() === EnvironmentState.RUNNING) {
 			MT_getPlayersNames().forEach([ playerName : String |
 	
 				// all percepts for the player: (role/entity of agent --> collection of single percepts)
@@ -265,7 +265,7 @@ agent SuperSingleAgent {
 		val playerName = occurrence.playerName
 		val facilities = sensingAggregator.getFacilitiesNames()
 		
-		if (facilities == null || sensingAggregator.getFacilitiesNames().length == 0 ) {
+		if (facilities === null || sensingAggregator.getFacilitiesNames().length == 0 ) {
 			agent_shouts("I just don't know any facility to go, sorry...!")
 		} else {
 			// Pick some random facility and go!
