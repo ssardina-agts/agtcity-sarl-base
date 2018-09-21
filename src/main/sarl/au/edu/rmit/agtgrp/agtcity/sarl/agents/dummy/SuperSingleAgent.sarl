@@ -89,7 +89,6 @@ agent SuperSingleAgent {
 			var args = newArrayList(occurrence.parameters) // may receive directory conf directory
 			var eiConfigDir : String = ""
 			val eiMassimConfigFile = "eismassimconfig.json"
-			val eiMassimPlayerAgentsConfigFile = "agentsconfig.json"
 			rand = new Random()
 			sensingAggregator = new PerceptAggregator() // collect all the percepts from all agents
 
@@ -113,16 +112,14 @@ agent SuperSingleAgent {
 			 * 
 			 * Note this does not connect or start the EI, it just stores the information in the skill
 			 */
-			agent_says("PHASE 1: REGISTERING MASSIM TALKING SKILL VIA CONFIGURATION FILES {0} AND {1}",
-				eiMassimConfigFile, eiMassimPlayerAgentsConfigFile)
+			agent_says("PHASE 1: REGISTERING MASSIM-TALKING SKILL VIA CONF. FILES {0} AND {1}", eiMassimConfigFile)
 			if (args.length != 0)
 				eiConfigDir = args.get(0) as String
 			else {
 				eiConfigDir = ConfHandler.getConfDir()
 			}
 			// Give agent ability to talk to MASSIM server
-			setSkill(new S_MassimTalking17(Paths.get(eiConfigDir, eiMassimConfigFile),
-					Paths.get(eiConfigDir, eiMassimPlayerAgentsConfigFile)), C_MassimTalking)
+			setSkill(new S_MassimTalking17(Paths.get(eiConfigDir, eiMassimConfigFile)), C_MassimTalking)
 
 			/* 
 			 * 3 - Time to really create and initialize the EI. 
@@ -131,19 +128,11 @@ agent SuperSingleAgent {
 			 */
 			agent_says("PHASE 2: INITIALIZING ENVIRONMENT INTERFACE USING CONFIGURATION FILE {0} ", eiMassimConfigFile)
 			if (MT_initialize()) {
-				agent_says("The EI is now initialized, entities are being authenticated...")
+				agent_says("EI has been created and initialized. ")
 			} else {
 				agent_says("Something wrong when registering the game server, I am finished...")
 				killMe
 			}
-
-			/* 
-			 * 6 - Once the EIS is started, we finally register the players we will control
-			 * This uses the player agent configuration file: eiMassimPlayerAgentsConfigFile
-			 */
-			agent_says("PHASE 3: REGISTERING AGENTS INTO ENVIRONMENT (GAME ENGINE) VIA FILE {0}",
-				eiMassimPlayerAgentsConfigFile)
-			MT_registerPlayersFromConfig()
 
 			agent_shouts("I am now alive! Will start working now (sending and acting!)...")
 			// We are ready, now start the cycle for sensing the environment (and thus acting)!
@@ -174,12 +163,13 @@ agent SuperSingleAgent {
 				var percepts : Collection<Percept>
 				try {
 					percepts = MT_sensePlayerPercepts(playerName) // This is blocking!
-					val myServerName = Util.getAgentName(percepts)
+					val userName = Util.getAgentName(percepts)
 
 					// Process the percepts by updating the PlayerState of the player in question
 					// The skill S_MassimTalking17 maintains a PlayerState object per player
 					// But this is already done automatically when the player senses! So not needed to do it again
-					// MT_getPlayerState(playerName).update(percepts) // update the agent data
+					MT_getPlayerState(playerName).update(percepts) // update the agent data
+					agent_says(MT_getPlayerState(playerName).reportState()) // report player state
 
 					// Populate general data (entity, team, simstart) static buffers
 					if (Util.populateDataBuffers(percepts)) {
@@ -189,7 +179,7 @@ agent SuperSingleAgent {
 					//	Add the action results of playerName(self) to percept aggregator
 					//	Add an the agent state for the playerNamein the aggregator (contains location, items holding, etc)
 					sensingAggregator.addActionResults(playerName, percepts)
-					var PlayerState = PlayerStateBuilder.build(myServerName, percepts) // build a new agent state from percept
+					var PlayerState = PlayerStateBuilder.build(userName, percepts) // build a new agent state from percept
 					sensingAggregator.addTeamMember(playerName, PlayerState) // Fill the aggregator with this agent state for playerName
 
 
@@ -254,7 +244,7 @@ agent SuperSingleAgent {
 		// we are still traveling, just continue following the path...
 		val playerName = occurrence.playerName
 
-		agent_says("Seems player {0} is already travelling: {1} steps to go!", playerName,
+		agent_says("Seems player **{0}** is already travelling: {1} steps to go!", playerName,
 			MT_getPlayerState(playerName).routeLength)
 
 		performAction(playerName, new Action("continue"))
@@ -271,7 +261,7 @@ agent SuperSingleAgent {
 			// Pick some random facility and go!
 			val destination = facilities.get(rand.nextInt(facilities.length - 1))
 			performAction(playerName, new Action("goto", new Identifier(destination)))
-			agent_says("I will send player {1} to navigating towards destination {0}", destination, playerName)
+			agent_says("=========> I will send player **{1}** to navigating towards destination {0}", destination, playerName)
 		}
 	}
 
@@ -281,13 +271,13 @@ agent SuperSingleAgent {
 	 * If sending fails, the exception is caught and logged. 
 	 */
 	def performAction(playerName : String, action : Action) {
-		agent_says("Performing action {1} for player {0}", playerName, action.toProlog())
+		agent_says("Performing action **{1}** for player **{0}**", playerName, action.toProlog())
 		try {
 			// perform the action by agentName in the EIS
 			MT_executeAction(playerName, action)
 		} catch (e : ActException) {
 			if (action !== null)
-				warning("Could not perform action {0} for player {1}", action, playerName)
+				warning("Could not perform action {0} for player **{1}**", action, playerName)
 		}
 	}
 
