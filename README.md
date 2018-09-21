@@ -62,7 +62,7 @@ So, to **run the system** you need to follow these general steps:
 		
 
 2. Start the SARL Controller, either via ECLIPSE or through the CLI (again, see [general SARL instructions](https://bitbucket.org/snippets/ssardina/6eybMg#markdown-header-4-running-the-sarl-application)).
-	* System will generally need a json configuration file for the game server and one for the teams. 
+	* System will generally need a JSON configuration file for the game server and one for the teams. 
 	* By default, the JAR file built does not carry all dependencies as the compilation is too slow. Hence you need to execute via Maven execution plugin, which will run the default `BootMAS` class:
 	
 	
@@ -70,15 +70,16 @@ So, to **run the system** you need to follow these general steps:
 			mvn exec:java -Dexec.args=SWISingleFullAgent -Dloglevel=4
 			mvn exec:java -Dexec.args=BootMultiSWIAgents -Dloglevel=4
 		
-	* You can package a JAR with dependencies using `mvn -f pon-jar-with-dep.xml clean package`. We can then use the built JAR file as follows:
+	* If you package the JAR with dependencies. then:
 
 			java -jar target/sarl-agtcity-base-1.5.0.7.2-jar-with-dependencies.jar SWISingleFullAgent -Dloglevel=4
 
 		or via the SARL booting class `io.janusproject.Boot`:	
 	
 			java -cp target/sarl-agtcity-base-1.5.0.7.2-jar-with-dependencies.jar io.janusproject.Boot au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.SWISingleFullAgent -Dloglevel=4
-		
-		
+	* You may want to grep to avoid the logging of all the XML messages: `grep -v \<.*\>` 
+			
+			
 3. Start the MASSIM Simulation by just hitting *ENTER* in the Game Server console
 4. Enjoy! You should start seeing the agent reporting things in the console. 
     * You can see the simulation on the web browser.
