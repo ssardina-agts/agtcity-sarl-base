@@ -17,50 +17,30 @@ class BootMAS {
 	def static main(args : String[]) : void {
 		Boot.offline = true
 		Boot.verboseLevel = 7 //ALL
-		var fullyQualifiedAgent : String
 		val basePackage = "au.edu.rmit.agtgrp.agtcity.sarl.agents"
-
 		val AGENTS_AVAILABLE : String[] = #["default", "SuperSingleAgent", "SWISingleFullAgent", "BootMultiSWIAgents"]
-		val DEFAULT_CONTROLLER : String = "SuperSingleAgent"
 
 		// Boot a specific one and that' s it
 		// Boot.startJanus(typeof(DummyMultiCarController))
 		var agentToLaunch : String
 		if (args.length == 0) { // if not agent given in CLI argument, list the available ones and ask user for one
-	            System.out.println("Choose the controller to run: ");
-	            for (var i = 0; i < AGENTS_AVAILABLE.size; i++) {
-	            	System.out.println(String.format("%d. %s", i+1, AGENTS_AVAILABLE.get(i)))
-	            	}
-				val in : Scanner = new Scanner(System.in)
-				var confNum : Integer = null
-				while (confNum === null) {
-					try {
-						confNum = Integer.parseInt(in.next())
-						if (confNum < 1 || confNum > AGENTS_AVAILABLE.size) {
-							System.out.println("No agent for that number, try again:")
-			                confNum = null
-			                }
-		             } catch (e : Exception) {
-		                System.out.println("Invalid number, try again:")
-					}
-				}
-				agentToLaunch = AGENTS_AVAILABLE.get(confNum.intValue-1)
+			agentToLaunch = getSelectionFromuser("Choose the controller to run: ", AGENTS_AVAILABLE)
 		}
 		else {
 			agentToLaunch = args.get(0) // get the agent name from CLI first argument
 		}
 
 		System.out.println(String.format("Running controller: \"%s\"", agentToLaunch))
+		var fullyQualifiedAgent : String
 		switch agentToLaunch {
 			case 'default':
-				fullyQualifiedAgent = basePackage + DEFAULT_CONTROLLER
+				fullyQualifiedAgent = basePackage + ".dummy.SuperSingleAgent"
+			case 'SuperSingleAgent': 
+				fullyQualifiedAgent = basePackage + ".dummy.SuperSingleAgent"
 			case 'BootMultiSWIAgents':
 				fullyQualifiedAgent = basePackage + ".dummy.BootMultiSWIAgents"
 			case 'SWISingleFullAgent':
 				fullyQualifiedAgent = basePackage + ".dummy.SWISingleFullAgent"
-			case 'SuperSingleAgent': {
-				fullyQualifiedAgent = basePackage + ".dummy.SuperSingleAgent"
-				}
 			default:
 				throw new IllegalArgumentException("Invalid agent to start: " + agentToLaunch)
 		}
@@ -73,5 +53,26 @@ class BootMAS {
 		assert SARLagent != null;
 		Boot.startJanus(SARLagent)
 	}
-	
+
+	static def getSelectionFromuser(message : String, options : String[]) : String {
+		System.out.println(message);
+	            for (var i = 0; i < options.size; i++) {
+			System.out.println(String.format("%d. %s", i + 1, options.get(i)))
+		}
+		val in : Scanner = new Scanner(System.in)
+		var confNum : Integer = null
+		while (confNum === null) {
+			try {
+				confNum = Integer.parseInt(in.next())
+				if (confNum < 1 || confNum > options.size) {
+					System.out.println("No option for that number, try again:")
+			                confNum = null
+			                }
+			} catch (e : Exception) {
+				System.out.println("Invalid number, try again:")
+			}
+		}
+		return options.get(confNum.intValue - 1)
+	}
+
 }
