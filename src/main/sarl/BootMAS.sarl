@@ -34,13 +34,13 @@ class BootMAS {
 		var fullyQualifiedAgent : String
 		switch agentToLaunch {
 			case 'default':
-				fullyQualifiedAgent = basePackage + ".dummy.SuperSingleAgent"
+				fullyQualifiedAgent = String.format("%s.%s", basePackage, "dummy.SuperSingleAgent")
 			case 'SuperSingleAgent': 
-				fullyQualifiedAgent = basePackage + ".dummy.SuperSingleAgent"
+				fullyQualifiedAgent = String.format("%s.%s", basePackage, "dummy.SuperSingleAgent")
 			case 'BootMultiSWIAgents':
-				fullyQualifiedAgent = basePackage + ".dummy.BootMultiSWIAgents"
+				fullyQualifiedAgent = String.format("%s.%s", basePackage, "dummy.BootMultiSWIAgents")
 			case 'SWISingleFullAgent':
-				fullyQualifiedAgent = basePackage + ".dummy.SWISingleFullAgent"
+				fullyQualifiedAgent = String.format("%s.%s", basePackage, "dummy.SWISingleFullAgent")
 			default:
 				throw new IllegalArgumentException("Invalid agent to start: " + agentToLaunch)
 		}
@@ -54,6 +54,9 @@ class BootMAS {
 		Boot.startJanus(SARLagent)
 	}
 
+	/**
+	 * Given a set of options, present them with a message and ask user which one; return the option string
+	 */
 	static def getSelectionFromuser(message : String, options : String[]) : String {
 		System.out.println(message);
 	            for (var i = 0; i < options.size; i++) {

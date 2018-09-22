@@ -18,8 +18,6 @@
 package au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy
 
 // MASSIM EIS imports
-import eis.EnvironmentInterfaceStandard
-import massim.eismassim.EnvironmentInterface
 import eis.exceptions.ActException
 import eis.iilang.Action
 import eis.iilang.Percept
@@ -34,13 +32,7 @@ import io.sarl.core.Logging
 import io.sarl.core.Schedules
 
 // General Java tools
-import java.util.*;
-import java.io.File
-import java.io.IOException
-import java.nio.file.Files
 import java.nio.file.Paths
-import javax.management.relation.RelationException
-import org.json.JSONObject
 
 // Agents in City SARL MIDDLEWARE
 // from https://bitbucket.org/ssardina-research/sarl-agtcity-mw
@@ -51,7 +43,6 @@ import au.edu.rmit.agtgrp.agtcity.sarl.mw.skills.S_MassimTalking17
 
 import au.edu.rmit.agtgrp.agtcity.sarl.mw.utils.ConfHandler
 import au.edu.rmit.agtgrp.agtcity.sarl.mw.aggregator.Util
-import au.edu.rmit.agtgrp.agtcity.sarl.mw.entities.PlayerState
 
 import eis.iilang.Identifier
 import eis.exceptions.PerceiveException
@@ -68,18 +59,13 @@ import au.edu.rmit.agtgrp.agtcity.sarl.events.E_SenseEnvironment
 // SARL PROLOG CAPACITY (and MOCHALOG)
 // https://bitbucket.org/ssardina-research/sarl-prolog-cap
 // https://github.com/ssardina/mochalog
-import io.sarl.extras.SWI_KB_Prolog
 import io.sarl.extras.KB_Prolog
 import au.edu.rmit.agtgrp.agtcity.sarl.beliefs.KB_AgtCity
 import au.edu.rmit.agtgrp.agtcity.sarl.beliefs.SWI_KB_AgtCity
 
 
-import io.mochalog.bridge.prolog.query.exception.NoSuchSolutionException
-import io.mochalog.bridge.prolog.query.MQuery
-import io.mochalog.bridge.prolog.SandboxedPrologContext
-import io.mochalog.bridge.prolog.PrologContext
-import java.text.SimpleDateFormat
 import au.edu.rmit.agtgrp.util.TimestampedDir
+import java.util.Collection
 
 /** 
  * This is a single SARL agent that uses the S_MassimTalking07 skill 
@@ -141,7 +127,7 @@ agent SWISingleFullAgent {
 				// Ask the user which subdirectory in conf/ we need to use to find the server config JSON file
 				eiConfigDir = ConfHandler.getConfDir()
 		
-		// Is there a paramter for the KB dumping directory?
+		// Is there a parameter for the KB dumping directory?
 		if (args.length >= 2) {
 			kb_dump_dir = args.get(1) as String
 		} else {
@@ -182,7 +168,7 @@ agent SWISingleFullAgent {
 		kb_load(kb_root_path + "/beliefs/percept-mgmt.pl")
 		kb_load(kb_root_path + "/beliefs/decision-making.pl") 
 		agent_says("I have loaded all my knowledge bases!")
-		assertFirst("agentName(@A)", mySARLname)	// assert my name in the KB (using SWI_KB_Prolog skill directly)
+		assertFirst("agentName(?)", mySARLname)	// assert my name in the KB (using SWI_KB_Prolog skill directly)
 		// kb_recordKBName(mySARLname)				// same but using the current KB domain capacity KB_AgtCity
 
 
@@ -221,7 +207,7 @@ agent SWISingleFullAgent {
 
 		// Store in the KB the names of the EI players we are controlling
 		MT_getPlayersNames.forEach [ playerName : String |
-			assertFirst("player(@A)", playerName)
+			assertFirst("player(?)", playerName)
 			]
 				
 		
@@ -245,7 +231,7 @@ agent SWISingleFullAgent {
 	 * We need to guard it to fire only if it is my event as there may be many other similar SARL agents doing the same!
 	 */
 	on E_SenseEnvironment [occurrence.fromMe] {
-		agent_shouts("Start sensing the environment")
+		agent_shouts("Start sensing the environment...")
 		var step = 0 
 		
 		// While the environment is running, wait for new percepts, read them all per agent
@@ -266,7 +252,7 @@ agent SWISingleFullAgent {
 					// MT_getPlayerState(playerName).update(percepts) // update the player java-object data
 					agent_says(MT_getPlayerState(playerName).reportState()) // report player state
 
-					// Record percepts in the KB
+					// Record percepts in the KB for this player that has perceived
 					kb_recordPercepts(playerName, MT_getPlayerState(playerName).step, percepts)
 				} catch (e : PerceiveException) {
 					agent_shouts("There was an error in perception for player {0} (message: {1}), maybe not yet connected? Will try later...",
@@ -279,7 +265,7 @@ agent SWISingleFullAgent {
 			// Instruct the SWI-KB to process last percept for each player (and store each knowledge separately)
 			MT_getPlayersNames.forEach([ playerName : String |
 				kb_processLastPercept(playerName)
-				agent_says("Percepts for agent {0} have been processed in the SWI KB", playerName)
+				agent_says("Percepts for player **{0}** have been processed into the SWI KB", playerName)
 			])
 	
 			// All percepts per agent read. Report some information and do something per agent
@@ -307,25 +293,22 @@ agent SWISingleFullAgent {
 //				solution.get("Agent").toString(), solution.get("Step").intValue)
 //		}
 
-		// 2. Report current status of each player
-		// This is using Mochalog directly: get the PrologContext engine, and operate on it via Mohalog API
-		// Would be best to factor this out into the domain capacity/skill
+		// 2. Report current status of each player from data in the KB
 		MT_getPlayersNames.forEach([ playerName : String |
-			try {
-				//	This is now directly using Mochalog, but getting the prolog engine and using it!
-				val p : PrologContext = get_prolog_engine() as PrologContext
-				val solution = p.askForSolution(MQuery.format("percepts_self(@S, Step, Percept)", playerName))
-				agent_says("Player {0} has percept info in its KB for step {1}", playerName, solution.get("Step").intValue)
-				
-				// In case you want to also see the percepts				
-//				agent_says(
-//					"Player {0} percepts at step {1}: {2}",
-//					playerName,
-//					solution.get("Step").toString(),
-//					solution.get("Percept").toString()
-//				)
-			} catch (e : NoSuchSolutionException) {
-				agent_says("I do not have self information for player {0}",	playerName)
+			//	This is now directly using Mochalog, but getting the prolog engine and using it!
+			val solution = askOnce("get_player_last_loc(?, Step, Lat, Long), 
+									get_player_last_charge(?, Step, Charge)", playerName, playerName)
+			if (solution !== null) {
+				agent_says(
+					"Player **{0}** location is ({1},{2}) and charge is {3} at step {4}", 
+					playerName,
+					solution.get("Lat").floatValue,
+					solution.get("Long").floatValue,
+					solution.get("Charge").floatValue,
+					solution.get("Step").intValue
+					)
+			} else {
+				agent_says("I do not have self information for player {0}", playerName)
 			}
 		])
 		
