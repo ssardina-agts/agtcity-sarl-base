@@ -1,8 +1,5 @@
 package au.edu.rmit.agtgrp.agtcity.sarl.utils
 
-import java.util.Collection
-import java.util.ArrayList
-
 class PlayersManager {
 	public var myName = "bigBoss"
 

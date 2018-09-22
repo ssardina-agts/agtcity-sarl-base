@@ -62,13 +62,15 @@ So, to **run the system** you need to follow these general steps:
 		
 
 2. Start the SARL Controller, either via ECLIPSE or through the CLI (again, see [general SARL instructions](https://bitbucket.org/snippets/ssardina/6eybMg#markdown-header-4-running-the-sarl-application)).
-	* System will generally need a JSON configuration file for the game server and one for the teams. 
+	* System will generally need a JSON configuration file for the game server. 
 	* By default, the JAR file built does not carry all dependencies as the compilation is too slow. Hence you need to execute via Maven execution plugin, which will run the default `BootMAS` class:
 	
-	
+			mvn exec:java 
 			mvn exec:java -Dexec.args=SuperSingleAgent -Dloglevel=4
 			mvn exec:java -Dexec.args=SWISingleFullAgent -Dloglevel=4
 			mvn exec:java -Dexec.args=BootMultiSWIAgents -Dloglevel=4
+			
+		If you run without arguments, it will list all available controllers and ask for one at console.
 		
 	* If you package the JAR with dependencies. then:
 
@@ -90,10 +92,12 @@ So, to **run the system** you need to follow these general steps:
 You can check the example template agents (see below) that are in package `au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy` to start your new development.
 You will find there the process how SARL systems can connect to the game server and manipulate a team in the game.
 
-If your solution will use Prolog as knolwedgebase, we suggest carefully understanding how the [SARL PROLOG CAP](https://bitbucket.org/ssardina-research/sarl-prolog-cap) framework, which provides the skill to
+If your solution will use Prolog as knowledgebase, we suggest carefully understanding how the [SARL PROLOG CAP](https://bitbucket.org/ssardina-research/sarl-prolog-cap) framework, which provides the skill to
 manipulate a Prolog knowledgebase, works. Some initial code for a domain knowledge base is already provided in this base system, including substantial Prolog code to process all percepts.
-It is also important to understand what [Mochalog](https://github.com/ssardina/mochalog) provides to build goal queries; please check its readme. 
-In particular, it is important to understand how to build queries using using @-placeholders `@A`, `@I`, and `@S` and the various query methods (prove, one solution, all solutions, iterators) provided.
+
+We recommend using the JPL-based skill for the **KB_Prolog** capacity. It is simpler, direct to JPL and more expressive (e.g., can send Java objects to Prolog). Read the documentation in the SARL PROLOG CAP to understand how to use it to build queries, in particular the use of placeholders `?` and the varios term types.
+
+If you use the Mochalog-based skill for the **KB_Prolog** capacity, then it is important to understand to read [Mochalog](https://github.com/ssardina/mochalog) to understand how to build queries using using @-placeholders `@A`, `@I`, and `@S` and the various query methods (prove, one solution, all solutions, iterators) provided.
 
 ## EXAMPLE AGENTS ##
 
@@ -114,7 +118,7 @@ The agent examples are:
 		* Via SARL booting class: `java -cp target/sarl-agtcity-base-1.3.0.7.2-jar-with-dependencies.jar io.janusproject.Boot au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.SuperSingleAgent`
 		* Then, select the location where `eismassimconfig.json` server configuration file is located.
 
-2. **SWISingleFullAgent**: This is one single SARL agent controlling _all players_ in the game and, importantly, using an SWI Prolog Knowledge Base via the [Mochalog Framework](https://github.com/ssardina/mochalog).
+2. **SWISingleFullAgent**: This is one single SARL agent controlling _all players_ in the game and, importantly, using an SWI Prolog Knowledge Base via the JPL-based skill.
 	* _Class_: `au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.SWISingleFullAgent`
 	* To help understand how the SWI Knowledge Base is updated, every percept cycle the agent prints out some results from queries and then dumps its entire KB into file `swiSingleFullAgent-<n>.pl`, where `<n>` is the step number. The agent contains a few example uses of how to assert in the KB and query it. It also contains simple logic to continously select a random destination and go there. For achieving this, both SARL (emitting and handling event **E_MoveRandomly**) and SWI Prolog (for choosing the destination) is used.
 	* To run this agent: `mvn exec:java -Dexec.args=SWISingleFullAgent -Dloglevel=4`, and then select the location where `eismassimconfig.json` server configuration file is located.

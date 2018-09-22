@@ -7,8 +7,6 @@ import java.nio.file.Paths
 import java.io.File
 
 class TimestampedDir {
-	val timestamp_format = "'%Y-%m-%d--%H-%M-%S'"
-	
 	static val formatter = new SimpleDateFormat("yyyy-MM-dd--HH-mm-ss")
 	static var runtime_timestamp = formatter.format(new Date()) // store runtime date time as a string
 	static var rootDir : String = "./"

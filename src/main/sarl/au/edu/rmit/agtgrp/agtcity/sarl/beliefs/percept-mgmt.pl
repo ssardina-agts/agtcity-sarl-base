@@ -155,6 +155,9 @@ get_last_step(Player, Step) :-
 get_player_last_loc(Player, Step, Lat, Long) :- 
 	player(Player),
 	once(get_player_loc(Player, Step, Lat, Long)).
+get_player_last_charge(Player, Step, Charge) :- 
+	player(Player),
+	once(get_player_charge(Player, Step, Charge)).
 	
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

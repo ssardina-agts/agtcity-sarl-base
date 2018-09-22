@@ -19,21 +19,19 @@ package au.edu.rmit.agtgrp.agtcity.sarl.beliefs
 
 import io.sarl.core.Logging
 
-import io.sarl.extras.SWI_KB_Prolog
-
+// Just in case you need to return pairs
 import org.apache.commons.lang3.tuple.Pair
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.Map
+import java.util.ArrayList
+import java.util.Collection
 
 import org.jpl7.Term
 
-import io.mochalog.bridge.prolog.query.MQuery
-import java.util.Collection
 import eis.iilang.Percept
-import java.util.HashSet
-import java.util.ArrayList
-import au.edu.rmit.agtgrp.util.TimestampedDir
+
+import io.sarl.extras.SWIJPL_KB_Prolog
 
 /** 
  * @author Sebastian Sardina (ssardina@gmail.com)
@@ -56,7 +54,7 @@ capacity KB_AgtCity {
 /**
  * Skill for KB_AgtCity using SWI Prolog
  */
-skill SWI_KB_AgtCity extends SWI_KB_Prolog implements KB_AgtCity {
+skill SWI_KB_AgtCity extends SWIJPL_KB_Prolog implements KB_AgtCity {
 	uses Logging
 
 	// Logging level for the skill
@@ -72,13 +70,19 @@ skill SWI_KB_AgtCity extends SWI_KB_Prolog implements KB_AgtCity {
 		kb_setLogLevel(logLevel)
 	}
 
+	// For compatibility for old version
+	@Deprecated
+	new (logLevel : int = 0, name : String) {
+		this(name, logLevel)
+	}
+
 	def kb_setLogLevel(logLevel : int) {
 		this.logLevel = logLevel 
 	}
 
 	
 	def kb_load(file : String) {
-		consult_file(file)
+		consult(file)
 	}
 
 	def kb_dump() {
@@ -87,11 +91,11 @@ skill SWI_KB_AgtCity extends SWI_KB_Prolog implements KB_AgtCity {
 	
 
 	def kb_recordKBName(name : String) {
-		assertFirst("agentName(@S)", name)
+		assertFirst("player_name(?)", name)
 	}
 
 	def kb_recordPercepts(playerName : String, stepNo : int, percepts : String) {
-		assertFirst("percepts(@A, @I, @A)", playerName, stepNo, percepts)
+		assertFirst("percepts(?, ?, ?)", playerName, stepNo, percepts)
 		
 	}
 
@@ -100,11 +104,11 @@ skill SWI_KB_AgtCity extends SWI_KB_Prolog implements KB_AgtCity {
 
 		percepts.forEach[percept : Percept|perceptsProlog.add(percept.toProlog())]
 		
-		assertFirst("percepts(@A, @I, @A)", playerName, stepNo, perceptsProlog.toString)
+		assertFirst("percepts(?, ?, ?)", playerName, stepNo, perceptsProlog.toString)
 	}
 
 	def kb_processLastPercept(playerName : String) {
-		prove("process_last_percepts(@A)", playerName)
+		prove("process_last_percepts(?)", playerName)
 	}
 
 	def kb_pickDestination(playerName : String) : String {
