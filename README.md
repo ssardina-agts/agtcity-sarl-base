@@ -71,6 +71,12 @@ So, to **run the system** you need to follow these general steps:
 			mvn exec:java -Dexec.args=BootMultiSWIAgents -Dloglevel=4
 			
 		If you run without arguments, it will list all available controllers and ask for one at console.
+	
+	* You can use grep inverse to get rid of all the printout of XML messages produced by the EI framework:
+	
+	       mvn exec:java | grep -v -e  \<.*\> -e WARNING -e '^ sent' -e '^ received' 
+	       
+	    This will filter out everything between < >, and any "sent" and "received" printout at start of line.
 		
 	* If you package the JAR with dependencies. then:
 
@@ -95,9 +101,9 @@ You will find there the process how SARL systems can connect to the game server 
 If your solution will use Prolog as knowledgebase, we suggest carefully understanding how the [SARL PROLOG CAP](https://bitbucket.org/ssardina-research/sarl-prolog-cap) framework, which provides the skill to
 manipulate a Prolog knowledgebase, works. Some initial code for a domain knowledge base is already provided in this base system, including substantial Prolog code to process all percepts.
 
-We recommend using the JPL-based skill for the **KB_Prolog** capacity. It is simpler, direct to JPL and more expressive (e.g., can send Java objects to Prolog). Read the documentation in the SARL PROLOG CAP to understand how to use it to build queries, in particular the use of placeholders `?` and the varios term types.
+We recommend using the JPL-based `SWIJPL_KB_Prolog`  skill for the `KB_Prolog` capacity. It is simpler, direct to JPL and more expressive (e.g., can send Java objects to Prolog). Read the documentation in the SARL PROLOG CAP to understand how to use it to build queries, in particular the use of placeholders `?` and the varios term types.
 
-If you use the Mochalog-based skill for the **KB_Prolog** capacity, then it is important to understand to read [Mochalog](https://github.com/ssardina/mochalog) to understand how to build queries using using @-placeholders `@A`, `@I`, and `@S` and the various query methods (prove, one solution, all solutions, iterators) provided.
+If you use the Mochalog-based `SWI_KB_Prolog` skill for the `KB_Prolog` capacity, then it is important to understand to read [Mochalog](https://github.com/ssardina/mochalog) to understand how to build queries using using @-placeholders `@A`, `@I`, and `@S` and the various query methods (prove, one solution, all solutions, iterators) provided.
 
 ## EXAMPLE AGENTS ##
 
