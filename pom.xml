@@ -16,7 +16,7 @@
 
     <groupId>org.bitbucket.ssardina-research</groupId>
     <artifactId>sarl-agtcity-base</artifactId>
-    <version>1.5.${env.SARL_VERSION}</version>
+    <version>1.6.${env.SARL_VERSION}</version>
 
 	<name>SARL Agents in City Base Controllers</name>
     <description>
@@ -105,35 +105,43 @@
         </dependency>
         
         <!--  SARL Agent City Middleware  -->
-		<dependency>
-		    <groupId>org.bitbucket.ssardina-research</groupId>
-		    <artifactId>sarl-agtcity-mw</artifactId>
-	    	<version>97112ea</version>
-			<!-- 
-	    	<version>1.3.${sarl.version}</version>
-	    	 -->
-		</dependency>
-	       
-        <!--  SARL-PROLOG CAPACITY -->
+	<dependency>
+		<!--  BITBUCKET VERSION - not working reliable
+	    <groupId>org.bitbucket.ssardina-research</groupId>
+	    -->
+	    <groupId>com.github.ssardina-research</groupId>
+	    <artifactId>sarl-agtcity-mw</artifactId>
+	    <version>9adec63</version>
+	</dependency>
+
+ 		 
+       	<!--  SARL-PROLOG CAPACITY -->
         <dependency>
-		    <groupId>com.github.ssardina-sarl</groupId>
-		    <artifactId>sarl-prolog-cap</artifactId>
-		    <version>2.1.0.7.2</version>
-		</dependency>
+		<!--  BITBUCKET VERSION - not working reliable
+	    <groupId>org.bitbucket.ssardina-research</groupId>
+	    -->
+	    <groupId>com.github.ssardina-research</groupId>
+		<!--  BITBUCKET VERSION - not working reliable
+	    <groupId>org.bitbucket.ssardina-research</groupId>
+	    -->
+	    <artifactId>sarl-prolog-cap</artifactId>
+	    <version>3b6c418</version>
+	</dependency>
 
         <!--  MOCHALOG interface for SWI-Prolog -->
+        <!--  This is not needed anymore in the base system as it uses the SWIJPL skill -->
         <dependency>
-            <groupId>com.github.ssardina</groupId>
+            <groupId>com.github.ssardina-research</groupId>
             <artifactId>mochalog</artifactId>
-            <version>0.5.0</version>
+            <version>d0dd4f5</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
-		<dependency>
-		    <groupId>org.apache.commons</groupId>
-		    <artifactId>commons-lang3</artifactId>
-		    <version>3.7</version>
-		</dependency>
+	<dependency>
+	    <groupId>org.apache.commons</groupId>
+	    <artifactId>commons-lang3</artifactId>
+	    <version>3.7</version>
+	</dependency>
 
     </dependencies>
 
@@ -176,12 +184,12 @@
           
           
           
-          			<!--  Aggregate project into a JAR package
+        	<!--  Aggregate project into a JAR package
 			https://maven.apache.org/plugins/maven-assembly-plugin/
-			
+		
 			Commented out because it compiles too slow....
 			-->
-		  	<!-- 
+		<!-- 
 		    <plugin>
 		    <artifactId>maven-assembly-plugin</artifactId>
 		    <version>3.1.0</version>
