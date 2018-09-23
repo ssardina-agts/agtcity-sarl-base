@@ -31,8 +31,10 @@ Some dummy controllers are provided as templates to build from.
 	* Uses the [eishub/EIS](https://github.com/eishub/eis) version `0.5` (sources also under `extras/`).
 * The [SARL-PROLOG-CAP](https://bitbucket.org/ssardina-research/sarl-prolog-cap) capacity+skill for [SWI Prolog](http://www.swi-prolog.org/) system:
 	* Capacity and skill to allow the use of SWI Prolog knowledge-bases in SARL agents.
-	* Relies on [Mochalog](https://github.com/ssardina/mochalog) and [JPL](https://jpl7.org/) to have Prolog access from Java.
-	* The right version (specified in the POM file) should be obtained automatically via [JitPack](https://jitpack.io/#org.bitbucket.ssardina-research/sarl-prolog-cap).
+	* Relies on [JPL](https://jpl7.org/) and [Mochalog](https://github.com/ssardina/mochalog) to have Prolog access from Java.
+	* The right version (specified in the POM file) should be obtained automatically via [JitPack](http://jitpack.io):
+		* From Bitbucket repo (less reliable): [JitPack](https://jitpack.io/#org.bitbucket.ssardina-research/sarl-prolog-cap).
+		* From Github clone (more reliable): [JitPack](https://jitpack.io/#ssardina-sarl/sarl-prolog-cap)
 	* **IMPORTANT**: Please refer to the instructions and examples in the [capacity+skill's page](https://bitbucket.org/ssardina-research/sarl-prolog-cap) to set-up and use it in your SARL application.
 * The [MASSIM Agents in City Game server](https://github.com/agentcontest/massim): to run the game.
 	* Server version `2017-0.7` that comes with massim package distribution `massim-2017-1.7` (check  release [here](https://github.com/agentcontest/massim/releases/tag/massim-2017-1.7)).
