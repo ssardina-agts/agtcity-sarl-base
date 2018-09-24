@@ -166,7 +166,7 @@ agent SWISingleFullAgent {
 			kb_load(kb_root_path + "/beliefs/percept-mgmt.pl")
 			kb_load(kb_root_path + "/beliefs/decision-making.pl")
 			agent_says("I have loaded all my knowledge bases!")
-//			assertFirst("agentName(?)", mySARLname) // assert my name in the KB (using SWI_KB_Prolog skill directly)
+			assertFirst("agentName(?)", mySARLname) // assert my name in the KB (using SWI_KB_Prolog skill directly)
 			// kb_recordKBName(mySARLname)				// same but using the current KB domain capacity KB_AgtCity
 
 			/* 
