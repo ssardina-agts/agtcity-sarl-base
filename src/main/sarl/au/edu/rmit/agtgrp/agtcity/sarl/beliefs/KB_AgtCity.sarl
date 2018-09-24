@@ -23,11 +23,9 @@ import io.sarl.core.Logging
 import org.apache.commons.lang3.tuple.Pair
 import org.apache.commons.lang3.tuple.MutablePair;
 
-import java.util.Map
 import java.util.ArrayList
 import java.util.Collection
 
-import org.jpl7.Term
 
 import eis.iilang.Percept
 
@@ -115,22 +113,20 @@ skill SWI_KB_AgtCity extends SWIJPL_KB_Prolog implements KB_AgtCity {
 		val solution = askOnce(String.format("choose_destination('%s', Destination)", playerName))
 //		solution = askOnce("choose_destination(@S, Destination)", playerName)	// Using Mochalog query builder formatter
 		
-		if (solution !== null) return solution.get("Destination").toString else return null
+		if (solution !== null) return solution.get("Destination").name else return null
 	}
 
-
-
-
+	// Function invoked when the skill is installed in the owner.
+	// You should put all the initialization statements in this block of code.
 	def install {
-		// Function invoked when the skill is installed in the owner.
-		// You should put all the initialization statements in this block of code.
-		info("KB_AgtCity skill installed")
+		super.install	// Do the install of the higher class first.
+		debug("Domain KB_AgtCity skill INSTALLED")
 	}
 
 	def uninstall {
 		// Function invoked when the skill is uninstalled from the owner.
 		// You should put all the resource release statements in this block of code.
-		info("KB_AgtCity skill uninstalled")
+		debug("Domain KB_AgtCity skill UNINSTALLED")
 	}
 
 }

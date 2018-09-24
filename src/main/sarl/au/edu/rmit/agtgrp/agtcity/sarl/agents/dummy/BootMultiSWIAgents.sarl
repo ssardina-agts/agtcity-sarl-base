@@ -93,7 +93,7 @@ agent BootMultiSWIAgents {
 
 				// No more to agents to wait, start sensing!
 				if (agentsToComplete.empty && noSpawn == noToSpawn) {
-					info("All {0} agents have been created, now dying... From BootMultiSWIAgents, bye bye....", noSpawn)
+					info("All {0} agents have now been created (BootMultiSWIAgents)", noSpawn)
 					killMe
 				}
 			} else {
