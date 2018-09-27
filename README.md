@@ -22,7 +22,7 @@ Some dummy controllers are provided as templates to build from.
 * Maven project management and comprehension tool (to meet dependencies, compile, package, run).
 * SARL (SRE Janus) execution engine:
 	* Version defined via environment variable `SARL_VERSION` (e.g., `export SARL_VERSION=0.7.2`).
-	* Obtained via Maven automatically from <http://mvnrepository.com/artifact/io.sarl.Maven>
+	* Obtained via Maven automatically from <http://mvnrepository.com/artifact/io.sarl.maven>
 * The [SARL Agents in City SARL Middleware](https://bitbucket.org/ssardina-research/sarl-agtcity-mw). 
 	* Should be obtained automatically via Maven + Jitpack.
 * The [EISMASSim](https://github.com/agentcontest/massim)  a Java library using the Environment Interface Standard (EIS) to communicate with the MASSim server. 
