@@ -1,6 +1,7 @@
 # SARL Agent Controller for MAC Agents in the City 2017 - BASE #
 
-This project/package provides _basic_ SARL controllers for the [2017 MAC Agents in City Contest](https://multiagentcontest.org/). It can be used as an initial set-up to build more advanced controllers.
+This project/package provides _basic_ SARL controllers for the [MAC Agents in City Contest](https://multiagentcontest.org/). At this moment it only supports the [2017 edition](https://github.com/agentcontest/massim/tree/massim-2017-1.7).
+It can be used as an initial set-up to build more advanced controllers.
 
 
 The project relies on:
