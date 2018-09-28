@@ -16,7 +16,7 @@
 
     <groupId>org.bitbucket.ssardina-research</groupId>
     <artifactId>sarl-agtcity-base</artifactId>
-    <version>1.6.${env.SARL_VERSION}</version>
+    <version>1.7.${env.SARL_VERSION}</version>
 
 	<name>SARL Agents in City Base Controllers</name>
     <description>
@@ -128,7 +128,7 @@
 	    <!-- 
 	    <version>3b6c418</version>
 	     -->
-	     <version>e64ada8</version>
+	     <version>c4ed0b1</version>
 	    
 	</dependency>
 
@@ -137,7 +137,7 @@
         <dependency>
             <groupId>com.github.ssardina-research</groupId>
             <artifactId>mochalog</artifactId>
-            <version>d0dd4f5</version>
+            <version>5aed56a</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
