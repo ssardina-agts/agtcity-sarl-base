@@ -31,7 +31,6 @@ percept_simStart_type(map(_)).		% problem with arguments in capital treated as v
 percept_simStart_type(seedCapital(_)).
 percept_simStart_type(steps(_)).
 percept_simStart_type(team(_)).		% problem with arguments in capital treated as vars
-percept_simStart_type(role(_, _, _, _, _)).
 percept_simStart_type(item(_, _, _, _)).
 percept_simStart_type(proximity(_)).
 percept_simStart_type(cellSize(_)).
@@ -48,6 +47,7 @@ percept_simEnd_type(ranking(_)).
 percept_simEnd_type(score(_)).
 
 percept_self_type(name(_)). 
+percept_self_type(role(_, _, _, _, _)).
 percept_self_type(actionID(_)).
 percept_self_type(timestamp(_)).
 percept_self_type(deadline(_)).
@@ -128,15 +128,19 @@ get_player_data(Player, Name, Step, Lat, Long, Charge, Load, Money, Facility) :-
 	member(money(Money), Percepts),
 	(member(facility(Facility), Percepts) - true ; Facility = none).
 get_player_name(Player, Name) :-
-	get_last_step(Player, Step),  
-	percepts(Player, Step, Percepts), 
+	player(Player),  
+	once(percepts(Player, _, Percepts)),
 	member(name(Name), Percepts).
+get_player_role(Player, Role, Speed, Load, Charge, Tools) :- % role(motorcycle, 4, 300, 350, [tool1, tool5])
+	player(Player), 
+	once(percepts(Player, _, Percepts)), 
+	member(role(Role, Speed, Load, Charge, Tools), Percepts).
 get_player_loc(Player, Step, Lat, Long) :- 
-	percepts(Player, Step, Percepts),
+	percepts(Player, Step, Percepts), !,
 	member(lat(Lat), Percepts),
 	member(lon(Long), Percepts).
 get_player_charge(Player, Step, Charge) :- 
-	percepts(Player, Step, Percepts),
+	percepts(Player, Step, Percepts), !,
 	member(charge(Charge), Percepts).
 
 
@@ -199,6 +203,8 @@ process_percepts(Player, Percepts) :-
 	process_simEnd_percepts(Percepts).		% produces percepts_simEnd/1 and one per data
 
 
+%% This is done once, because then id/1 will be in the database
+%% 	All the players/agents receive the same sim-star data, except their roles (which we treat as self percept) 
 process_simStart_percepts(Percepts) :-	% simstart percepts
 	\+ id(_), !, 			% not processed before (this is just 1 time message)
 	member(simStart, Percepts),
