@@ -14,7 +14,10 @@ The project relies on:
 
 Some dummy controllers are provided as templates to build from.
 
-**IMPORTANT:** A comprehensive set of instructions how to run SARL systems can be found [here](https://bitbucket.org/snippets/ssardina/6eybMg/sarl-application-general-information-setup)
+**IMPORTANT:** For some support documentation/guides see:
+
+* A comprehensive set of instructions how to run SARL systems can be found [here](https://bitbucket.org/snippets/ssardina/6eybMg/sarl-application-general-information-setup).
+* A FAQ list on using SARL+SWI via Maven and ECLIPSE IDE can be found [here](https://bitbucket.org/snippets/ssardina/9er67X).
 
 
 ## PREREQUISITES
