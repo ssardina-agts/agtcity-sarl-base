@@ -11,9 +11,11 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
     <modelVersion>4.0.0</modelVersion>
 
+    <!-- ##################################################################
+		PROJECT INFO 
+     ####################################################################### -->
     <groupId>org.bitbucket.ssardina-research</groupId>
     <artifactId>sarl-agtcity-base</artifactId>
     <version>1.7.${env.SARL_VERSION}</version>
@@ -42,9 +44,9 @@
 	    </developer>
   	</developers>
 
-
-
-    <!-- SARL-MASSIM properties -->
+    <!-- ##################################################################
+		SARL-MASSIM PROPERTIES 
+     ####################################################################### -->
     <properties>
         <!-- SARL framework version and configuration -->
         <sarl.version>${env.SARL_VERSION}</sarl.version>
@@ -69,6 +71,9 @@
         </pluginRepository>
     </pluginRepositories>
     
+    <!-- ##################################################################
+		REPOSITORIES 
+     ####################################################################### -->
     <repositories>
         <!-- JANUS Project kernel (contains SARL language core) -->
         <repository>
@@ -88,7 +93,9 @@
         </repository>
     </repositories>
 
-    <!-- Project dependencies -->
+    <!-- ##################################################################
+		DEPENDENCIES 
+     ####################################################################### -->
     <dependencies>
         <!-- JANUS Project kernel (contains SARL language core) -->
         <dependency>
@@ -105,32 +112,31 @@
         </dependency>
         
         <!--  SARL Agent City Middleware  -->
-	<dependency>
-		<!--  BITBUCKET VERSION - not working reliable
-	    <groupId>org.bitbucket.ssardina-research</groupId>
-	    -->
-	    <groupId>com.github.ssardina-research</groupId>
-	    <artifactId>sarl-agtcity-mw</artifactId>
-	    <version>242326f</version>
-	</dependency>
+		<dependency>
+			<!--  BITBUCKET VERSION - not working reliable
+		    <groupId>org.bitbucket.ssardina-research</groupId>
+		    -->
+		    <groupId>com.github.ssardina-research</groupId>
+		    <artifactId>sarl-agtcity-mw</artifactId>
+		    <version>242326f</version>
+		</dependency>
 
  		 
        	<!--  SARL-PROLOG CAPACITY -->
         <dependency>
-		<!--  BITBUCKET VERSION - not working reliable
-	    <groupId>org.bitbucket.ssardina-research</groupId>
-	    -->
-	    <groupId>com.github.ssardina-research</groupId>
-		<!--  BITBUCKET VERSION - not working reliable
-	    <groupId>org.bitbucket.ssardina-research</groupId>
-	    -->
-	    <artifactId>sarl-prolog-cap</artifactId>
-	    <!-- 
-	    <version>3b6c418</version>
-	     -->
-	     <version>c4ed0b1</version>
-	    
-	</dependency>
+			<!--  BITBUCKET VERSION - not working reliable
+		    <groupId>org.bitbucket.ssardina-research</groupId>
+		    -->
+		    <groupId>com.github.ssardina-research</groupId>
+			<!--  BITBUCKET VERSION - not working reliable
+		    <groupId>org.bitbucket.ssardina-research</groupId>
+		    -->
+		    <artifactId>sarl-prolog-cap</artifactId>
+		    <!-- 
+		    <version>3b6c418</version>
+		     -->
+		     <version>c4ed0b1</version>
+		</dependency>
 
         <!--  MOCHALOG interface for SWI-Prolog -->
         <!--  This is not needed anymore in the base system as it uses the SWIJPL skill -->
@@ -141,18 +147,25 @@
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
-	<dependency>
-	    <groupId>org.apache.commons</groupId>
-	    <artifactId>commons-lang3</artifactId>
-	    <version>3.7</version>
-	</dependency>
-
+		<dependency>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-lang3</artifactId>
+		    <version>3.7</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>20.0</version>
+		</dependency>
     </dependencies>
 
 
 
 
-    <!-- Build pipeline plugins -->
+    <!-- ##################################################################
+		BUILD PIPELINE PLUGINS 
+     ####################################################################### -->
     <build>
 
         <plugins>
