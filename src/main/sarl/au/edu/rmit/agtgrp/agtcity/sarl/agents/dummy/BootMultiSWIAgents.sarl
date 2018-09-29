@@ -29,9 +29,9 @@ import java.util.Set
 import java.util.UUID
 
 import au.edu.rmit.agtgrp.agtcity.sarl.utils.PlayersManager
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
+//import java.io.File
+//import java.text.SimpleDateFormat
+//import java.util.Date
 import au.edu.rmit.agtgrp.util.TimestampedDir
 
 /** 
@@ -40,12 +40,12 @@ import au.edu.rmit.agtgrp.util.TimestampedDir
 
  * @author Sebastian Sardina (ssardina@gmail.com) * 
  */
+@SuppressWarnings("potential_field_synchronization_problem")
 agent BootMultiSWIAgents {
     uses Lifecycle
     uses Logging
 
 	val eiConfigFile = #["conf/SingleAgent/", "eismassimconfig.json"]
-	val lock1 : Object = new Object()
 	
 	var teamManagers : Collection<PlayersManager> = new ArrayList<PlayersManager>()
 	var agentsToComplete : Set<UUID> = new HashSet<UUID>() // set of all SARL agents in the system

@@ -20,8 +20,8 @@ package au.edu.rmit.agtgrp.agtcity.sarl.beliefs
 import io.sarl.core.Logging
 
 // Just in case you need to return pairs
-import org.apache.commons.lang3.tuple.Pair
-import org.apache.commons.lang3.tuple.MutablePair;
+//import org.apache.commons.lang3.tuple.Pair
+//import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.ArrayList
 import java.util.Collection
@@ -52,6 +52,7 @@ capacity KB_AgtCity {
 /**
  * Skill for KB_AgtCity using SWI Prolog
  */
+@SuppressWarnings("potential_field_synchronization_problem")
 skill SWI_KB_AgtCity extends SWIJPL_KB_Prolog implements KB_AgtCity {
 	uses Logging
 

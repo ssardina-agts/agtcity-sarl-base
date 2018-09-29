@@ -77,6 +77,7 @@ import java.util.Collection
  * 
  * @author Sebastian Sardina (ssardina@gmail.com)
  */
+@SuppressWarnings("potential_field_synchronization_problem")
 agent SWISingleFullAgent {
 	uses Logging, Lifecycle, DefaultContextInteractions, Schedules
 	uses C_Reporting, C_MassimTalking
@@ -224,7 +225,6 @@ agent SWISingleFullAgent {
 	 */
 	on E_SenseEnvironment [occurrence.fromMe] {
 		agent_shouts("Start sensing the environment...")
-		var step = 0
 
 		// While the environment is running, wait for new percepts, read them all per agent
 		while (MT_getStatus() == EnvironmentState.RUNNING) {

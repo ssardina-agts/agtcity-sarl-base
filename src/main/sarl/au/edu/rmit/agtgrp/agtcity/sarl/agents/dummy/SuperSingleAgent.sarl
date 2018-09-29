@@ -34,13 +34,11 @@ import io.sarl.core.Schedules
 import java.nio.file.Paths
 import java.util.Collection
 import java.util.Random
-import java.util.Set
 
 import eis.exceptions.PerceiveException
 import eis.exceptions.ActException
 import eis.iilang.Identifier
-import eis.iilang.PrologVisitor
-import eis.iilang.IILVisitor
+
 
 // Import project content
 import au.edu.rmit.agtgrp.agtcity.sarl.events.E_ReportInfo
@@ -64,6 +62,7 @@ import au.edu.rmit.agtgrp.agtcity.sarl.mw.aggregator.PlayerStateBuilder
  * This is a monolithic SARL agent that uses the S_MassimTalking17 skill 
  * to manage ALL the players in the  game simulation.
  */
+@SuppressWarnings("potential_field_synchronization_problem")
 agent SuperSingleAgent {
 	uses Logging, Lifecycle, DefaultContextInteractions, Schedules
 	uses C_Reporting, C_MassimTalking
@@ -146,7 +145,6 @@ agent SuperSingleAgent {
 	 */
 	on E_SenseEnvironment {
 		agent_shouts("Start sensing the environment")
-		var step = 0
 
 		// Initializes three static data buffers for ENTITIES (agents), TEAM, and SIM-START
 		// Util is provided by the MW as part of the aggregator package
@@ -168,7 +166,8 @@ agent SuperSingleAgent {
 					// Process the percepts by updating the PlayerState of the player in question
 					// The skill S_MassimTalking17 maintains a PlayerState object per player
 					// But this is already done automatically when the player senses! So not needed to do it again
-					MT_getPlayerState(playerName).update(percepts) // update the agent data
+					val playerState : PlayerState = MT_getPlayerState(playerName)
+					playerState.update(percepts) // update the agent data
 					agent_says(MT_getPlayerState(playerName).reportState()) // report player state
 
 					// Populate general data (entity, team, simstart) static buffers
