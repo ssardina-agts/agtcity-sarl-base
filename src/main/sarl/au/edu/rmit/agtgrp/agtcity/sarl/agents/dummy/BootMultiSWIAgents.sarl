@@ -53,6 +53,10 @@ agent BootMultiSWIAgents {
 	var noSpawn : int	// agents already spawn
 	
      on Initialize {
+     	logLevel = 4
+     	debug("Agent BootMultiSWIAgents is starting to initialize...")
+     	
+     	
 		teamManagers.add(
 			new PlayersManager("team1Manager", eiConfigFile.get(0), eiConfigFile.get(1), 
 				#["connectionA1", "connectionA2", "connectionA3"]))
@@ -64,13 +68,16 @@ agent BootMultiSWIAgents {
 		// Set the directory where the KB will be dumped: kb_dump_BootMultiSWI/<timestamp>
 		// all agents will dump in the same directory
 		TimestampedDir.setRoot("kb_dump_BootMultiSWI")
-		if (!TimestampedDir.exists) TimestampedDir.create
+		if(!TimestampedDir.exists) TimestampedDir.create
+		debug("Dumping directory setup...")
 
-		
+		debug("Starting to spawn the manager agents")
 		noToSpawn = teamManagers.size
 		noSpawn = 0
 		teamManagers.forEach([ teamManager : PlayersManager |
+			debug("About to spawn team manager **{0}**", teamManager.myName)
 			val UUID = spawn(SWISingleFullAgent, teamManager, TimestampedDir.getDir())
+			debug("\t SARL agent for team manager **{0}** spawn...", teamManager.myName)
 			synchronized (agentsToComplete) {
 				agentsToComplete.add(UUID)
 			}

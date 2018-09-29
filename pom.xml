@@ -140,11 +140,6 @@
 
         <!--  MOCHALOG interface for SWI-Prolog -->
         <!--  This is not needed anymore in the base system as it uses the SWIJPL skill -->
-        <dependency>
-            <groupId>com.github.ssardina-research</groupId>
-            <artifactId>mochalog</artifactId>
-            <version>5aed56a</version>
-        </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
 		<dependency>
