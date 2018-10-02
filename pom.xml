@@ -14,6 +14,9 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <!-- ##################################################################
+		PROJECT INFO 
+     ####################################################################### -->
     <groupId>org.bitbucket.ssardina-research</groupId>
     <artifactId>sarl-agtcity-base</artifactId>
     <version>1.7.${env.SARL_VERSION}</version>
@@ -44,7 +47,9 @@
 
 
 
-    <!-- SARL-MASSIM properties -->
+    <!-- ##################################################################
+		SARL-MASSIM PROPERTIES 
+     ####################################################################### -->
     <properties>
         <!-- SARL framework version and configuration -->
         <sarl.version>${env.SARL_VERSION}</sarl.version>
@@ -57,7 +62,9 @@
         
     </properties>
 
-    <!-- Repository definitions -->
+    <!-- ##################################################################
+		REPOSITORIES 
+     ####################################################################### -->
     <pluginRepositories>
         <pluginRepository>
             <id>maven.sarl.io</id>
@@ -88,7 +95,9 @@
         </repository>
     </repositories>
 
-    <!-- Project dependencies -->
+    <!-- ##################################################################
+		DEPENDENCIES 
+     ####################################################################### -->
     <dependencies>
         <!-- JANUS Project kernel (contains SARL language core) -->
         <dependency>
@@ -151,8 +160,9 @@
 
 
 
-
-    <!-- Build pipeline plugins -->
+    <!-- ##################################################################
+		BUILD PIPELINE PLUGINS 
+     ####################################################################### -->
     <build>
 
         <plugins>
