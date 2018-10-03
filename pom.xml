@@ -19,7 +19,7 @@
      ####################################################################### -->
     <groupId>org.bitbucket.ssardina-research</groupId>
     <artifactId>sarl-agtcity-base</artifactId>
-    <version>1.7.${env.SARL_VERSION}</version>
+    <version>3.0.${env.SARL_VERSION}</version>
 
 	<name>SARL Agents in City Base Controllers</name>
     <description>
@@ -136,7 +136,7 @@
 	    <!-- 
 	    <version>3b6c418</version>
 	     -->
-	     <version>c4ed0b1</version>
+	     <version>a34a4e9</version>
 	    
 	</dependency>
 
@@ -148,6 +148,12 @@
 	    <version>3.7</version>
 	</dependency>
 
+	<!--  #TODO: NEEDED FOR SARL 0.8.2 BUT WHY? SHOULD NOT BE NEEDED RIGHT? -->
+	<dependency>
+		<groupId>com.google.guava</groupId>
+		<artifactId>guava</artifactId>
+		<version>20.0</version>
+	</dependency>
     </dependencies>
 
 

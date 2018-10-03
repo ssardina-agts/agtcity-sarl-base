@@ -25,7 +25,7 @@ Some dummy controllers are provided as templates to build from.
 * Java Runtime Environment (JRE) and Java Compiler (javac) v1.8 (Sun version recommended)
 * Maven project management and comprehension tool (to meet dependencies, compile, package, run).
 * SARL (SRE Janus) execution engine:
-	* Version defined via environment variable `SARL_VERSION` (e.g., `export SARL_VERSION=0.7.2`).
+	* Version defined via environment variable `SARL_VERSION` (e.g., `export SARL_VERSION=0.8.2`).
 	* Obtained via Maven automatically from <http://mvnrepository.com/artifact/io.sarl.maven>
 * The [SARL Agents in City SARL Middleware](https://bitbucket.org/ssardina-research/sarl-agtcity-mw). 
 	* Should be obtained automatically via Maven + Jitpack.
@@ -34,8 +34,8 @@ Some dummy controllers are provided as templates to build from.
 	* Comes with the game server. Using version `3.4` that comes with server `massim-2017-1.7` (Sept 2017). Check [here](https://github.com/agentcontest/massim/releases/tag/massim-2017-1.7)
 	* Uses the [eishub/EIS](https://github.com/eishub/eis) version `0.5` (sources also under `extras/`).
 * The [SARL-PROLOG-CAP](https://bitbucket.org/ssardina-research/sarl-prolog-cap) capacity+skill for [SWI Prolog](http://www.swi-prolog.org/) system:
-	* Capacity and skill to allow the use of SWI Prolog knowledge-bases in SARL agents.
-	* Relies on [JPL](https://jpl7.org/) and [Mochalog](https://github.com/ssardina/mochalog) to have Prolog access from Java.
+	* Capacity and skill to allow the use of Prolog knowledge-bases in SARL agents.
+	* Relies on [JPL](https://jpl7.org/) for the SWIJPL skill implementation to have [SWI Prolog](http://www.swi-prolog.org/) access in agents.
 	* The right version (specified in the POM file) should be obtained automatically via [JitPack](http://jitpack.io):
 		* From Bitbucket repo (less reliable): [JitPack](https://jitpack.io/#org.bitbucket.ssardina-research/sarl-prolog-cap).
 		* From Github clone (more reliable): [JitPack](https://jitpack.io/#ssardina-sarl/sarl-prolog-cap)
