@@ -198,7 +198,7 @@ process_last_percepts(Player) :-
 % Transform list of percepts into different local predicates
 process_percepts(Player, Percepts) :-		
 	process_simStart_percepts(Percepts),		% produces percepts_simStart/1 and one per data
-	process_self_percepts(Player, Percepts),		% produces percepts_self/3
+	process_self_percepts(Player, Percepts),	% produces percepts_self/3
 	process_nonself_percepts(Percepts),		% produces percepts_nonself/2
 	process_simEnd_percepts(Percepts).		% produces percepts_simEnd/1 and one per data
 
