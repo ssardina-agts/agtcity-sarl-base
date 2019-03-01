@@ -1,15 +1,15 @@
 # SARL Agent Controller for MAC Agents in the City 2017 - BASE #
 
-This project/package provides _basic_ SARL controllers for the [MAC Agents in City Contest](https://multiagentcontest.org/). At this moment it only supports the [2017 edition](https://github.com/agentcontest/massim/tree/massim-2017-1.7).
+This project/package provides _basic_ SARL controllers for the [MAC Agents in City Contest](https://multiagentcontest.org/). 
+At this moment it only supports the [2017 edition](https://github.com/agentcontest/massim/tree/massim-2017-1.7).
 It can be used as an initial set-up to build more advanced controllers.
 
 
 The project relies on:
 
 1. The [SARL Agents in City Middleware](https://bitbucket.org/ssardina-research/sarl-agtcity-mw) which provides SARL capacity and skill for teams to connect and play in the game simulator.
-2. The [EISMASSim](https://github.com/eishub/massim) environment interface.
-	* A Java library using the [Environment Interface Standard (EIS)](https://github.com/eishub/eis) to communicate with the MASSim server that can be used with platforms which support the EIS.
-	* Provides a more high-level access to the game sever than low-level JSON messages.
+2. The [EISMASSim](https://github.com/agentcontest/massim/blob/massim-2017-1.7/docs/eismassim.md) environment interface for the 2017 game version.
+	* A Java library based on the [Environment Interface Standard (EIS)](https://github.com/eishub/eis) to communicate with the MASSim server. Provides a more high-level access to the game sever than low-level JSON messages.
 3. The [SARL-PROLOG-CAP](https://bitbucket.org/ssardina-research/sarl-prolog-cap) project that provides a capacity and a skill for SARL agents to use [SWI Prolog](http://www.swi-prolog.org/) for implementing the knowledge base of the agents. 
 
 Some dummy controllers are provided as templates to build from.
