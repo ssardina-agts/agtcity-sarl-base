@@ -18,6 +18,9 @@ class BootMAS {
 		Boot.verboseLevel = 7 //ALL
 		val basePackage = "au.edu.rmit.agtgrp.agtcity.sarl.agents"
 		val AGENTS_AVAILABLE : String[] = #["default", "SuperSingleAgent", "SWISingleFullAgent", "BootMultiSWIAgents"]
+		val DEFAULT = "SuperSingleAgent"
+		
+		System.out.println(String.format("Default Controller is: %s", DEFAULT))
 
 		// Boot a specific one and that' s it
 		// Boot.startJanus(typeof(DummyMultiCarController))
