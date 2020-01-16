@@ -57,6 +57,11 @@
 
         <!-- JANUS project version -->
         <janus.version>2.${sarl.version}</janus.version>
+
+		<!--  Maven boot class for mvn exec:java -->
+		<boot.class>BootMAS</boot.class>
+		<!-- <mainClass>io.janusproject.Boot</mainClass>  -->
+
         
     </properties>
 
@@ -169,10 +174,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <configuration>
 	                <addClasspath>true</addClasspath>
-	                <!-- 
-                    <mainClass>io.janusproject.Boot</mainClass>
-	                 -->
-	                <mainClass>BootMAS</mainClass>
+	                <mainClass>${boot.class}</mainClass>
                 </configuration>
             </plugin>
           
