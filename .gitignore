@@ -34,3 +34,4 @@ src/main/generated-sources/*myClauses-*
 myClauses*
 generated-sources
 kb*.pl
+pom.xml.orig
