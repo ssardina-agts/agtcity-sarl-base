@@ -19,7 +19,7 @@
      ####################################################################### -->
     <groupId>com.github.ssardina-agts</groupId>
     <artifactId>agtcity-sarl-base</artifactId>
-    <version>3.1.${env.SARL_VERSION}</version>
+    <version>4.0.${env.SARL_VERSION}</version>
 
 	<name>SARL Agents in City Base Controllers</name>
     <description>
