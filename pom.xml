@@ -18,7 +18,7 @@
 		PROJECT INFO 
      ####################################################################### -->
     <groupId>com.github.ssardina-agts</groupId>
-    <artifactId>agtcity-sarl-base17</artifactId>
+    <artifactId>agtcity-sarl-base</artifactId>
     <version>3.1.${env.SARL_VERSION}</version>
 
 	<name>SARL Agents in City Base Controllers</name>
@@ -27,7 +27,7 @@
 	    It includes the connectivity to the game simulator via the SARL Agents in City Middleware and 
 	    the SWI-Prolog Capacity/Skill.
     </description>
-  	<url>https://github.com/ssardina-agts/agtcity-sarl-base17</url>
+  	<url>https://github.com/ssardina-agts/agtcity-sarl-base</url>
 
     <licenses>
 	    <license>
@@ -41,7 +41,7 @@
 	      <name>Sebastian Sardina</name>
 	      <email>ssardina@gmail.com</email>
 	      <organization>ssardina-research</organization>
-	      <organizationUrl>https://github.com/ssardina-agts/agtcity-sarl-base17/</organizationUrl>
+	      <organizationUrl>https://github.com/ssardina-agts/agtcity-sarl-base/</organizationUrl>
 	    </developer>
   	</developers>
 
