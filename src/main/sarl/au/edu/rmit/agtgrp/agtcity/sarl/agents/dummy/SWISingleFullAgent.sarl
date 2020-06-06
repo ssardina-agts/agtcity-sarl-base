@@ -38,10 +38,10 @@ import java.nio.file.Paths
 import au.edu.rmit.agtgrp.agtcity.sarl.mw.capacities.C_Reporting
 import au.edu.rmit.agtgrp.agtcity.sarl.mw.capacities.C_MassimTalking
 import au.edu.rmit.agtgrp.agtcity.sarl.mw.skills.S_ConsoleReporting
-import au.edu.rmit.agtgrp.agtcity.sarl.mw.skills.S_MassimTalking17
+import au.edu.rmit.agtgrp.agtcity.sarl.mw.skills.S_MassimTalking
 
 import au.edu.rmit.agtgrp.agtcity.sarl.mw.utils.ConfHandler
-import au.edu.rmit.agtgrp.agtcity.sarl.mw.aggregator.Util
+import au.edu.rmit.agtgrp.agtcity.sarl.mw.util.Util
 
 import eis.iilang.Identifier
 import eis.exceptions.PerceiveException
@@ -203,8 +203,8 @@ agent SWISingleFullAgent {
 			}
 
 			// Store in the KB the names of the EI players we are controlling
-			MT_getPlayersNames.forEach [ playerName : String |
-				assertFirst("player(?)", playerName)
+			MT_getEntityNames.forEach [ entity : String |
+				assertFirst("player(?)", entity)
 			]
 
 			agent_shouts("I am now alive! Will start working now (sending and acting!)...")
@@ -228,45 +228,45 @@ agent SWISingleFullAgent {
 
 		// While the environment is running, wait for new percepts, read them all per agent
 		while (MT_getStatus() == EnvironmentState.RUNNING) {
-			agent_says("Waiting for new percepts (blocking) for players **{0}**", MT_getPlayersNames())
-			MT_getPlayersNames.forEach([ playerName : String |
+			agent_says("Waiting for new percepts (blocking) for players **{0}**", MT_getEntityNames())
+			MT_getEntityNames.forEach([ entity : String |
 				var percepts : Collection<Percept>
 				try {
-					percepts = MT_sensePlayerPercepts(playerName) // This is blocking!
+					percepts = MT_senseEntityPercepts(entity) // This is blocking!
 					val userName = Util.getAgentName(percepts)
-					agent_says("Player **{0}** (game username {2}) received {1} percepts.", playerName,
+					agent_says("Player **{0}** (game user-name {2}) received {1} percepts.", entity,
 						Util.getNoOfPercepts(percepts), userName)
 
 					// Process the percepts by updating the PlayerState of the player in question
 					// The skill S_MassimTalking17 maintains a PlayerState object per player
 					// But this is already done automatically when the player senses! So not needed to do it again
 					// ATTENTION: The update is done already automatically by MT when sensing the player!
-					// MT_getPlayerState(playerName).update(percepts) // update the player java-object data
-					agent_says(MT_getPlayerState(playerName).reportState()) // report player state
+					// MT_getEntityState(entity).update(percepts) // update the player java-object data
+					agent_says(MT_getEntityState(entity).reportState()) // report player state
 					// Record percepts in the KB for this player that has perceived
-					kb_recordPercepts(playerName, MT_getPlayerState(playerName).step, percepts)
+					kb_recordPercepts(entity, MT_getEntityState(entity).step, percepts)
 				} catch (e : PerceiveException) {
 					agent_shouts(
 						"There was an EI **PerceiveException** perception error for player {0} (message: {1}), maybe not yet connected? Will try later...",
-						playerName, e.message)
+						entity, e.message)
 				} catch (e : StackOverflowError) {
 					agent_shouts("There was a **StackOverflowError** perception error for player {0} (message: {1})",
-						playerName, e.message)
+						entity, e.message)
 				}
 			])
 			// AT THIS POINT all percepts from all players have been processed
 			// Instruct the SWI-KB to process last percept for each player (and store each knowledge separately)
-			MT_getPlayersNames.forEach([ playerName : String |
-				kb_processLastPercept(playerName)
-				agent_says("Percepts for player **{0}** have been processed into the SWI KB", playerName)
+			MT_getEntityNames.forEach([ entity : String |
+				kb_processLastPercept(entity)
+				agent_says("Percepts for player **{0}** have been processed into the SWI KB", entity)
 			])
 
 			// All percepts per agent read. Report some information and do something per agent
 			emit(new E_ReportInfo())
 
 			// 5. Very finally, do some some movement per agent
-			MT_getPlayersNames.forEach([ name : String |
-				emit(new E_MoveRandomly => [playerName = name]) // see compact way of assignment data in event
+			MT_getEntityNames.forEach([ name : String |
+				emit(new E_MoveRandomly => [entity = name]) // see compact way of assignment data in event
 			])
 
 		}
@@ -285,21 +285,21 @@ agent SWISingleFullAgent {
 		// solution.get("Agent").toString(), solution.get("Step").intValue)
 		// }
 		// 2. Report current status of each player from data in the KB
-		MT_getPlayersNames.forEach([ playerName : String |
+		MT_getEntityNames.forEach([ entity : String |
 			//	This is now directly using Mochalog, but getting the prolog engine and using it!
 			val solution = askOnce("get_player_last_loc(?, Step, Lat, Long), 
-									get_player_last_charge(?, Step, Charge)", playerName, playerName)
+									get_player_last_charge(?, Step, Charge)", entity, entity)
 			if (solution !== null) {
 				agent_says(
 					"Player **{0}** location is ({1},{2}) and charge is {3} at step {4}",
-					playerName,
+					entity,
 					solution.get("Lat").floatValue,
 					solution.get("Long").floatValue,
 					solution.get("Charge").floatValue,
 					solution.get("Step").intValue
 				)
 			} else {
-				agent_says("I do not have self information for player {0}", playerName)
+				agent_says("I do not have self information for player {0}", entity)
 			}
 		])
 
@@ -308,8 +308,8 @@ agent SWISingleFullAgent {
 		dump_kb() 	// Using Prolog-CAP directly
 	}
 
-	on E_MoveRandomly [occurrence.fromMe] {
-		agent_shouts("I am instructed to move RANDOMLY player **{0}**", occurrence.playerName)
+	on E_MoveRandomly [fromMe] {
+		agent_shouts("I am instructed to move RANDOMLY player **{0}**", occurrence.entity)
 	}
 
 	/* 
@@ -317,25 +317,25 @@ agent SWISingleFullAgent {
 	 * 
 	 * This two behaviors make the player move towards any random facility
 	 */
-	on E_MoveRandomly [occurrence.fromMe && (MT_getPlayerState(occurrence.playerName).routeLength > 0)] {
+	on E_MoveRandomly [fromMe && (MT_getEntityState(occurrence.entity).routeLength > 0)] {
 		// we are still traveling, just continue following the path...
-		val playerName = occurrence.playerName
+		val entity = occurrence.entity
 
-		agent_says("Seems player **{0}** is already am moving: {1} steps to go!", playerName,
-			MT_getPlayerState(playerName).routeLength)
+		agent_says("Seems player **{0}** is already am moving: {1} steps to go!", entity,
+			MT_getEntityState(entity).routeLength)
 
-		performAction(playerName, new Action("continue"))
+		performAction(entity, new Action("continue"))
 	}
 
-	on E_MoveRandomly [occurrence.fromMe && !(MT_getPlayerState(occurrence.playerName).routeLength > 0)] {
-		val playerName = occurrence.playerName
+	on E_MoveRandomly [fromMe && !(MT_getEntityState(occurrence.entity).routeLength > 0)] {
+		val entity = occurrence.entity
 
 		// Do some reasoning to pick up the next destination!
-		var destination = kb_pickDestination(playerName)
+		var destination = kb_pickDestination(entity)
 
 		if (destination !== null) {
-			performAction(playerName, new Action("goto", new Identifier(destination)))
-			agent_says("I will send player **{1}** to navigating towards destination {0}", destination, playerName)
+			performAction(entity, new Action("goto", new Identifier(destination)))
+			agent_says("I will send player **{1}** to navigating towards destination {0}", destination, entity)
 		} else {
 			agent_says("Sorry, but no good destination was found to navigate to...")
 		}
@@ -345,13 +345,13 @@ agent SWISingleFullAgent {
 	 * A basic method for sending actions the the EIS server
 	 * If sending fails, the exception is caught and logged. 
 	 */
-	def performAction(playerName : String, action : Action) {
+	def performAction(entity : String, action : Action) {
 		try {
 			// perform the action by agentName in the EIS
-			MT_executeAction(playerName, action)
+			MT_executeAction(entity, action)
 		} catch (e : ActException) {
 			if (action !== null)
-				warning("Could not perform action {0} for player **{1}**", action, playerName)
+				warning("Could not perform action {0} for player **{1}**", action, entity)
 		}
 	}
 
