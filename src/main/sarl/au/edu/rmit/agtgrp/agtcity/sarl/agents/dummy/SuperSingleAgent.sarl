@@ -229,6 +229,7 @@ agent SingleRandomAgent {
 					agent_shouts("I am finished sensing the environment - Step {0} for player {1}", MT_getStepNo(),
 						entityName)
 
+					agent_shouts("Entity {1} will ACT next for step {0}!!!", last_step, entityName)
 					emit(new E_MoveRandomly => [entity = entityName]) 	// see compact way of assignment data in event
 
 					
@@ -248,32 +249,32 @@ agent SingleRandomAgent {
 		} 	// end of game & sensing finished
 	} // end of on E_SenseEnvironment
 
-	/* 
-	 * Handled the case when an entity has completed a perception
-	 */
-	on E_MoveRandomly {
+
+
+	on E_MoveRandomly [reportState]  {
+		reportState(occurrence.entity)
+		agent_says(state.report());
+	}
+
+	// We are still traveling, just continue following the path...
+	on E_MoveRandomly [MT_getEntityState(entity).routeLength > 0] {
+		val entityName = occurrence.entity
+
+		agent_says("Seems player **{0}** is already travelling: {1} steps to go!", entityName,
+			MT_getEntityState(entityName).routeLength)
+
+		if (!MT_executeAction(entityName, new Action("continue")))
+			warning("Could not perform continue for entity **{1}**", entityName)
+	}
+
+
+	// We are NOT traveling: buy or go somewhere or wait 
+	on E_MoveRandomly [MT_getEntityState(entity).routeLength == 0] {
 		val entityName = occurrence.entity
 		val entity = MT_getEntityState(entityName)
 		val shops = state.getShops() // shops we know about
-		agent_shouts("Entity {1} will report and act for step {0}!!!", last_step, entityName)
 
-		if (reportState) {
-			reportState(entityName)
-			agent_says(state.report());
-		}
-
-		/** 
-		 * If it is traveling, continue
-		 * If it is in a shop facility, buy something
-		 * If we know of a shop, start going there
-		 * Otherwise, do nothing (wait for a shop to be known)
-		 */
-		if (entity.routeLength > 0) { // entity is traveling on route
-			agent_says("Seems player **{0}** is already traveling: {1} steps to go!", entityName, entity.routeLength)
-			if (!MT_executeAction(entityName, new Action("continue")))
-				agent_shouts("Was not able to successfully send action goto({0}) for entity {1}", "continue",
-					entityName)
-		} else if (entity.facility !== null && shops.containsKey(entity.facility) && entity.lastAction.type != "buy") { // we are at a shop, by some item?
+		if (entity.facility !== null && shops.containsKey(entity.facility) && entity.lastAction.type != "buy") { // we are at a shop, by some item?
 			val stock = shops.get(entity.facility).stocks
 			val item = stock.get(rand.nextInt(stock.size() - 1))
 			val quantity = "1"
@@ -282,9 +283,7 @@ agent SingleRandomAgent {
 			if (!MT_executeAction(entityName, new Action("buy", new Identifier(item.name), new Identifier(quantity))))
 				agent_shouts("Was not able to successfully send action buy({0}) for entity {1}", item.name, entityName)
 		} else if (shops.size() > 0) { // We know some shop
-		// Pick some random facility and go!
-		// val destination = facilities.get(rand.nextInt(facilities.length - 1))
-		// Pick a random shop and go
+			// Pick some random facility and go!
 			val destination = shops.values().get(rand.nextInt(shops.size() - 1))
 
 			agent_says("I will send player **{1}** to location {0}", destination.name, entityName)
@@ -295,46 +294,6 @@ agent SingleRandomAgent {
 			agent_shouts("I just don't know any facility to go yet, sorry...!")
 		}
 	}
-
-//	/** 
-//	 * NAVIGATE TO RAMDOM FACILITY
-//	 * 
-//	 * These two behaviors make the player move towards any random facility
-//	 */
-//	on E_MoveRandomly [{
-//		var entity = occurrence.entity;
-//		val l = MT_getEntityState(entity).routeLength;
-//		(l > 0)
-//	}] {
-//		// we are still traveling, just continue following the path...
-//		val entityName = occurrence.entity
-//
-//		agent_says("Seems player **{0}** is already travelling: {1} steps to go!", entityName,
-//			MT_getEntityState(entityName).routeLength)
-//
-//		if (!MT_executeAction(entityName, new Action("continue")))
-//			warning("Could not perform continue for entity **{1}**", entityName)
-//	}
-//
-//	on E_MoveRandomly [!(MT_getEntityState(occurrence.entity).routeLength > 0)] {
-//		// We are not following any route, just go somewhere!
-//		val entityName = occurrence.entity
-//		val facilities = state.getFacilitiesNames()
-//		val shops = state.getShops() // shops we know about
-//
-//		if (facilities === null || state.getFacilitiesNames().length == 0) {
-//			agent_shouts("I just don't know any facility to go, sorry...!")
-//		} else {
-//			// Pick some random facility and go!
-//			val destination = shops.values().get(rand.nextInt(shops.size() - 1))
-//			
-//			agent_says("=========> I will send player **{1}** to navigating towards destination {0}", destination,
-//				entityName)
-//
-//			if (!MT_executeAction(entityName, new Action("goto", new Identifier(destination.name))))
-//				warning("Could not perform goto({0}) for entity **{1}**", destination.name, entityName)
-//		}
-//	}
 
 
 

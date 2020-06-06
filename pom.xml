@@ -116,7 +116,7 @@
 		<dependency>
 		    <groupId>com.github.ssardina-agts</groupId>
 		    <artifactId>agtcity-sarl-mw</artifactId>
-		    <version>ba1049b</version>
+		    <version>951f865</version>
 		</dependency>
 
  		 
