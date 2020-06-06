@@ -110,12 +110,7 @@
             <version>${janus.version}</version>
         </dependency>
 
-        <!--  EIS-MASSIM Environment Interface Standard -->
-        <dependency>
-            <groupId>com.github.agentcontest.massim</groupId>
-            <artifactId>eismassim</artifactId>
-            <version>massim-2017-1.7</version>
-        </dependency>
+      
         
         <!--  SARL Agent City Middleware  -->
 		<dependency>

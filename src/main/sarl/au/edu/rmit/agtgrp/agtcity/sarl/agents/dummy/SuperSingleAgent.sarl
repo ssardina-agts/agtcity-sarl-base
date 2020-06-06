@@ -251,8 +251,8 @@ agent SingleRandomAgent {
 	/* 
 	 * Handled the case when an entity has completed a perception
 	 */
-	on E_EntitySensed {
-		val entityName = occurrence.entityName
+	on E_MoveRandomly {
+		val entityName = occurrence.entity
 		val entity = MT_getEntityState(entityName)
 		val shops = state.getShops() // shops we know about
 		agent_shouts("Entity {1} will report and act for step {0}!!!", last_step, entityName)
@@ -296,47 +296,47 @@ agent SingleRandomAgent {
 		}
 	}
 
-	/** 
-	 * NAVIGATE TO RAMDOM FACILITY
-	 * 
-	 * These two behaviors make the player move towards any random facility
-	 */
-	on E_MoveRandomly [(MT_getEntityState(occurrence.playerName).routeLength > 0)] {
-		// we are still traveling, just continue following the path...
-		val playerName = occurrence.playerName
+//	/** 
+//	 * NAVIGATE TO RAMDOM FACILITY
+//	 * 
+//	 * These two behaviors make the player move towards any random facility
+//	 */
+//	on E_MoveRandomly [{
+//		var entity = occurrence.entity;
+//		val l = MT_getEntityState(entity).routeLength;
+//		(l > 0)
+//	}] {
+//		// we are still traveling, just continue following the path...
+//		val entityName = occurrence.entity
+//
+//		agent_says("Seems player **{0}** is already travelling: {1} steps to go!", entityName,
+//			MT_getEntityState(entityName).routeLength)
+//
+//		if (!MT_executeAction(entityName, new Action("continue")))
+//			warning("Could not perform continue for entity **{1}**", entityName)
+//	}
+//
+//	on E_MoveRandomly [!(MT_getEntityState(occurrence.entity).routeLength > 0)] {
+//		// We are not following any route, just go somewhere!
+//		val entityName = occurrence.entity
+//		val facilities = state.getFacilitiesNames()
+//		val shops = state.getShops() // shops we know about
+//
+//		if (facilities === null || state.getFacilitiesNames().length == 0) {
+//			agent_shouts("I just don't know any facility to go, sorry...!")
+//		} else {
+//			// Pick some random facility and go!
+//			val destination = shops.values().get(rand.nextInt(shops.size() - 1))
+//			
+//			agent_says("=========> I will send player **{1}** to navigating towards destination {0}", destination,
+//				entityName)
+//
+//			if (!MT_executeAction(entityName, new Action("goto", new Identifier(destination.name))))
+//				warning("Could not perform goto({0}) for entity **{1}**", destination.name, entityName)
+//		}
+//	}
 
-		agent_says("Seems player **{0}** is already travelling: {1} steps to go!", playerName,
-			MT_getEntityState(playerName).routeLength)
 
-		performAction(playerName, new Action("continue"))
-	}
-
-	on E_MoveRandomly [!(MT_getEntityState(occurrence.playerName).routeLength > 0)] {
-		// We are not following any route, just go somewhere!
-		val playerName = occurrence.playerName
-		val facilities = state.getFacilitiesNames()
-
-		if (facilities === null || state.getFacilitiesNames().length == 0) {
-			agent_shouts("I just don't know any facility to go, sorry...!")
-		} else {
-			// Pick some random facility and go!
-			val destination = facilities.get(rand.nextInt(facilities.length - 1))
-			performAction(playerName, new Action("goto", new Identifier(destination)))
-			agent_says("=========> I will send player **{1}** to navigating towards destination {0}", destination,
-				playerName)
-		}
-	}
-
-	/** 
-	 * A basic method for sending actions the the EIS server
-	 * If sending fails, the exception is caught and logged. 
-	 */
-	def performAction(playerName : String, action : Action) {
-		agent_says("Performing action **{1}** for player **{0}**", playerName, action.toProlog())
-		
-		if (!MT_executeAction(playerName, action)) 
-				warning("Could not perform action {0} for player **{1}**", action, playerName)
-	}
 
 	/** 
 	 * The current state of an entity.
