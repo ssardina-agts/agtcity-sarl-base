@@ -53,7 +53,12 @@ class BootMAS {
 		var SARLagent : Class<? extends Agent>
 		SARLagent = type.asSubclass(Agent)
 		assert SARLagent !== null;
-		Boot.startJanus(SARLagent)
+
+		if (args.length == 2) { // second CLI argument states which config dir has to be used to find "eismassimconfig.json"
+			Boot.startJanus(SARLagent, args.get(1)) 	// pass it to agent if there was one
+		} else {
+			Boot.startJanus(SARLagent)
+		}
 	}
 
 	/**
