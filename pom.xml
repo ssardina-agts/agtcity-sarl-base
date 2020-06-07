@@ -19,7 +19,7 @@
      ####################################################################### -->
     <groupId>com.github.ssardina-agts</groupId>
     <artifactId>agtcity-sarl-base</artifactId>
-    <version>4.5.${env.SARL_VERSION}</version>
+    <version>4.5.${sarl.varsion}</version>
 
 	<name>SARL Agents in City Base Controllers</name>
     <description>
@@ -185,7 +185,7 @@
         <dependency>
 		    <groupId>com.github.ssardina-agts</groupId>
 		    <artifactId>sarl-prolog-cap</artifactId>
-    		<version>3.6.0.8.6</version>
+    		<version>1cd236c</version>
 		</dependency>
 
        
