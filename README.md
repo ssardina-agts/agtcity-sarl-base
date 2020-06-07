@@ -1,4 +1,4 @@
-# SARL Agent Controller for MAC Agents in the City 2017 - BASE #
+# SARL Controller for Agents in the City 2018+ - BASE 
 
 This project/package provides _basic_ SARL controllers for the [MAC Agents in City Contest](https://multiagentcontest.org/).
 
