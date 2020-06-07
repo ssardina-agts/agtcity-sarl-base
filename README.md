@@ -91,15 +91,11 @@ So, to **run the system** you need to follow these general steps:
 
 ### Developing SARL agents
 
-You can check the example template agents (see below) that are in package `au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy` to start your new development.
-You will find there the process how SARL systems can connect to the game server and manipulate a team in the game.
+Package `au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy` contains some simple examples that coul dbe used to start your new development. In particular, it has all the connectivity/communication with the game server already resolved, as well as a simple sensing cycle.
 
-If your solution will use Prolog as knowledgebase, we suggest carefully understanding how the [SARL PROLOG CAP](https://github.com/ssardina-agts/sarl-prolog-cap) framework, which provides the skill to
-manipulate a Prolog knowledgebase, works. Some initial code for a domain knowledge base is already provided in this base system, including substantial Prolog code to process all percepts.
+As the system becomes very complex, it is covenient to rely on Prolog knowledgebases (via JPL-based skill `SWIJPL_KB_Prolog`) rather than storing all information in plan Java data-structures. We suggest to carefully underestand the [SARL PROLOG CAP](https://github.com/ssardina-agts/sarl-prolog-cap) framework, which provides the skill to manipulate a Prolog knowledgebase. Some initial code for a domain knowledge base is already provided in this base system, including substantial Prolog code to process all percepts.
 
-We recommend using the JPL-based `SWIJPL_KB_Prolog`  skill for the `KB_Prolog` capacity. It is simpler, direct to JPL and more expressive (e.g., can send Java objects to Prolog). Read the documentation in the SARL PROLOG CAP to understand how to use it to build queries, in particular the use of placeholders `?` and the varios term types.
-
-## EXAMPLE AGENTS ##
+## EXAMPLE AGENTS 
 
 These are all "thin" agent controllers for the players in the game, but they should provide a solid base for developing more sophisticated agent systems.
 
