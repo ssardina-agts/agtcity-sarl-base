@@ -1,48 +1,37 @@
 # SARL Agent Controller for MAC Agents in the City 2017 - BASE #
 
-This project/package provides _basic_ SARL controllers for the [MAC Agents in City Contest](https://multiagentcontest.org/). 
-At this moment it only supports the [2017 edition](https://github.com/agentcontest/massim/tree/massim-2017-1.7).
+This project/package provides _basic_ SARL controllers for the [MAC Agents in City Contest](https://multiagentcontest.org/).
+
+This version supports the [RMIT 2018+ edition](https://github.com/ssardina-agts/agtcity-server) of the Agents in City Game, which is basically the official 2018 edition with items brought back to shops.
+
 It can be used as an initial set-up to build more advanced controllers.
-
-
-The project relies on:
-
-1. The [SARL Agents in City Middleware](https://bitbucket.org/ssardina-research/sarl-agtcity-mw) which provides SARL capacity and skill for teams to connect and play in the game simulator.
-2. The [EISMASSim](https://github.com/agentcontest/massim/blob/massim-2017-1.7/docs/eismassim.md) environment interface for the 2017 game version.
-	* A Java library based on the [Environment Interface Standard (EIS)](https://github.com/eishub/eis) to communicate with the MASSim server. Provides a more high-level access to the game sever than low-level JSON messages.
-3. The [SARL-PROLOG-CAP](https://bitbucket.org/ssardina-research/sarl-prolog-cap) project that provides a capacity and a skill for SARL agents to use [SWI Prolog](http://www.swi-prolog.org/) for implementing the knowledge base of the agents. 
-
-Some dummy controllers are provided as templates to build from.
-
-**IMPORTANT:** For some support documentation/guides see:
-
-* A comprehensive set of instructions how to run SARL systems can be found [here](https://bitbucket.org/snippets/ssardina/6eybMg/sarl-application-general-information-setup).
-* A FAQ list on using SARL+SWI via Maven and ECLIPSE IDE can be found [here](https://bitbucket.org/snippets/ssardina/9er67X).
 
 
 ## PREREQUISITES
 
-* Java Runtime Environment (JRE) and Java Compiler (javac) v1.8 (Sun version recommended)
+The project relies on:
+
+* Java Runtime Environment (JRE) and Java Compiler (javac) v1.8+.
 * Maven project management and comprehension tool (to meet dependencies, compile, package, run).
-* SARL (SRE Janus) execution engine:
-	* Version defined via environment variable `SARL_VERSION` (e.g., `export SARL_VERSION=0.8.3`).
-	* Obtained via Maven automatically from <http://mvnrepository.com/artifact/io.sarl.maven>
-* The [SARL Agents in City SARL Middleware](https://bitbucket.org/ssardina-research/sarl-agtcity-mw). 
-	* Should be obtained automatically via Maven + Jitpack.
-* The [EISMASSim](https://github.com/agentcontest/massim)  a Java library using the Environment Interface Standard (EIS) to communicate with the MASSim server. 
-	* The JAR sources are provided under `extras/` so they can be used to attach sources in ECLIPSE.
-	* Comes with the game server. Using version `3.4` that comes with server `massim-2017-1.7` (Sept 2017). Check [here](https://github.com/agentcontest/massim/releases/tag/massim-2017-1.7)
-	* Uses the [eishub/EIS](https://github.com/eishub/eis) version `0.5` (sources also under `extras/`).
-* The [SARL-PROLOG-CAP](https://bitbucket.org/ssardina-research/sarl-prolog-cap) capacity+skill for [SWI Prolog](http://www.swi-prolog.org/) system:
-	* Capacity (and skill) to allow SARL agents to have Prolog knowledge-bases.
-	* Relies on [JPL](https://jpl7.org/) for the  implementation to have [SWI Prolog](http://www.swi-prolog.org/) access in agents.
-	* The right version (specified in the POM file) should be obtained automatically via [JitPack](http://jitpack.io):
-		* From Bitbucket repo (less reliable): [JitPack](https://jitpack.io/#org.bitbucket.ssardina-research/sarl-prolog-cap).
-		* From Github clone (more reliable): [JitPack](https://jitpack.io/#ssardina-sarl/sarl-prolog-cap)
-	* **IMPORTANT**: Please refer to the instructions and examples in the [capacity+skill's page](https://bitbucket.org/ssardina-research/sarl-prolog-cap) to set-up and use it in your SARL application.
-* The [MASSIM Agents in City Game server](https://github.com/agentcontest/massim): to run the game.
-	* Server version `2017-0.7` that comes with massim package distribution `massim-2017-1.7` (check  release [here](https://github.com/agentcontest/massim/releases/tag/massim-2017-1.7)).
-	* You can also get the pre-pack binary from [download](https://bitbucket.org/ssardina-research/sarl-agtcity-base/downloads/) section. You can also clone the version and run `mvn clean package` to build the massim package, including server, completely.
+* The [SARL Agents in City Middleware](https://github.com/ssardina-agts/agtcity-sarl-mw) which provides SARL capacity and skill for teams to connect and play in the game simulator.
+    * Itself, the MW builds on the [EISMASSim](https://github.com/ssardina-agts/agtcity-server/tree/master/eismassim) environment interface connectivity that comes with the [MASSim Agents in City Server (RMIT 2018+ edition)](https://github.com/ssardina-agts/agtcity-server). This is a Java API that provides high-level access to the game sever to avoid dealing with low-level XML or JSON messages. The doc of the protocol and messages can be found [here](https://github.com/ssardina-agts/agtcity-server/blob/master/docs/eismassim.md).
+* The [SARL-PROLOG-CAP](https://github.com/ssardina-agts/sarl-prolog-cap) project that provides a capacity and a skill for SARL agents to use [SWI-Prolog](http://www.swi-prolog.org/) for implementing the knowledge base of the agents. This dependency is obtained automativally via Maven and JitPack [here](https://jitpack.io/#ssardina-sarl/sarl-prolog-cap).
+    * This in turn relies on [JPL](https://jpl7.org/), to bridge Prolog and Java.
+    * **IMPORTANT**: Please refer to the instructions and examples in the [capacity+skill's page](https://github.com/ssardina-agts/sarl-prolog-cap) to set-up and use it in your SARL application.
+
+
+### SWIPL Configuration
+
+One can use the SWIPL + JPL that comes with a distribution or a locally compiled and installed one.
+
+The current version (May 2020) is 8.2.+, which is stable and brings JPL 7.6.0 with a lot of fixes and improvements form the 7.6.x version that comes with default distros. The latest stable version can be obtained via this [PPA](https://www.swi-prolog.org/build/PPA.html). In principle, nothing else is needed if we are to use this version.
+
+To tell the system to use a a locally compiled and installed version of SWIPL with JPL package (for example in `/usr/local/swipl-git/lib/swipl/`):
+
+	export SWI_HOME_DIR=/usr/local/swipl-git/lib/swipl/
+	export LD_LIBRARY_PATH=$SWI_HOME_DIR/lib/x86_64-linux/:$LD_LIBRRY_PATH
+
+Observe while either framework brings also the `jpl.jar` Java API implementation, the SARL-PROLOG-CAPACITY will gather and use the JAR file from the [JPL official repository](https://github.com/SWI-Prolog/packages-jpl).
 
 
 ## INSTALL, RUN and DEVELOP
@@ -70,11 +59,11 @@ So, to **run the system** you need to follow these general steps:
 2. Start the SARL Controller, either via ECLIPSE or through the CLI (again, see [general SARL instructions](https://bitbucket.org/snippets/ssardina/6eybMg#markdown-header-4-running-the-sarl-application)).
 	* System will generally need a JSON configuration file for the game server. 
 	* By default, the JAR file built does not carry all dependencies as the compilation is too slow. Hence you need to execute via Maven execution plugin, which will run the default `BootMAS` class:
-	
+	mvn exec:java -Dexec.args="SWISingleFullAgent conf/SingleAgent" -Dloglevel=4
 			mvn exec:java 
-			mvn exec:java -Dexec.args=SuperSingleAgent -Dloglevel=4
-			mvn exec:java -Dexec.args=SWISingleFullAgent -Dloglevel=4
-			mvn exec:java -Dexec.args=BootMultiSWIAgents -Dloglevel=4
+			mvn exec:java -Dexec.args="SWISingleFullAgent conf/SingleAgent" -Dloglevel=4
+			mvn exec:java -Dexec.args="SWISingleFullAgent conf/SingleAgent" -Dloglevel=4
+			mvn exec:java -Dexec.args=BootMultiSWIAgents conf/MultiAgents/" -Dloglevel=4
 			
 		If you run without arguments, it will list all available controllers and ask for one at console.
 	
