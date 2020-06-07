@@ -60,13 +60,13 @@ So, to **run the system** you need to follow these general steps:
 	* System will generally need a JSON configuration file for the game server. 
 	* By default, the JAR file built does not carry all dependencies as the compilation is too slow. Hence you need to execute via Maven execution plugin, which will run the default `BootMAS` class:
 	
-		mvn exec:java -Dexec.args="SWISingleFullAgent conf/SingleAgent" -Dloglevel=4
 			mvn exec:java 
-			mvn exec:java -Dexec.args="SWISingleFullAgent conf/SingleAgent" -Dloglevel=4
+			mvn exec:java -Dexec.args="SingleFullAgent conf/SingleAgent" -Dloglevel=4
 			mvn exec:java -Dexec.args="SWISingleFullAgent conf/SingleAgent" -Dloglevel=4
 			mvn exec:java -Dexec.args=BootMultiSWIAgents conf/MultiAgents/" -Dloglevel=4
-			
-		If you run without arguments, it will list all available controllers and ask for one at console.
+	
+	
+	If you run without arguments, it will list all available controllers and ask for one at console.
 	
 	* You can use grep inverse to get rid of all the printout of XML messages produced by the EI framework:
 	
