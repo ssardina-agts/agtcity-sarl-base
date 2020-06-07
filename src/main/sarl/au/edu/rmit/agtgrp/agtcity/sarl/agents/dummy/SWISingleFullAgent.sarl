@@ -1,6 +1,6 @@
 /** 
  * SARL-MASSIM - Interface between the SARL agent-oriented language 
- * and the MASSIM 2017-2020 server
+ * and the MASSIM RMIT 2018+ server
  * 
  * Copyright (C) 2017-2020 The SARL-MASSIM Authors.
  * 
@@ -93,7 +93,6 @@ agent SWISingleFullAgent {
 	var last_step : int = -1
 	var facilities : Set<String>
 	var rand : Random
-	var state : State = new State() // used to track the current state as per percepts received
 	
 	
 	/* 
@@ -119,9 +118,7 @@ agent SWISingleFullAgent {
 
 		rand = new Random()
 
-		// Create an information aggregator (all percept info will be integrated here by the MW)
-		state = new State()
-
+	
 		// Give reporting skill via console
 		setSkill(new S_ConsoleReporting(myName), C_Reporting)
 		setLogLevel(agentLogLevel) // set debug level
@@ -252,26 +249,18 @@ agent SWISingleFullAgent {
 					// System.out.println(String.join(",", plist))
 					agent_says("I have just sensed player {0} at step {1}", entityName, MT_getStepNo())
 
-					// First step has Sim-Start percepts
-					// https://github.com/ssardina-agts/agtcity-server/blob/master/docs/eismassim.md#sim-start-percepts
-					if(MT_getStepNo() == 0) state.recordSimStartData(percepts)
-
-
 					// Updating the PlayerState of the player where percepts come from
 					// ATTENTION: This step is already done by the MT once data is sensed, so it is technically not necessary
 					// The skill S_MassimTalking already maintains and updates upon sensing a PlayerState object per connected player
 					// That state can be accessed via MT_getEntityState(playerName)
 					// MT_updatePlayerState(playerName, percepts) // update the agent data
-					state.updateAggregatedGameState(percepts)
 					agent_shouts("State updated with percepts from entity {0}", entityName)
 
 					kb_recordPercepts(entityName, MT_getStepNo(), percepts)
 					kb_processLastPercept(entityName)
 				
 
-					facilities = state.getFacilitiesNames()
-					agent_shouts("Set of facilities known: {0}", facilities)
-
+	
 					// update the last step if the percept just processed has a higher step number
 					last_step = MT_getStepNo()
 					agent_shouts("I am finished sensing the environment - Step {0} for player {1}", MT_getStepNo(),
@@ -364,33 +353,7 @@ agent SWISingleFullAgent {
 
 
 
-	/** 
-	 * The current state of an entity.
-	 * This is printed every step for each entity this SARL agent controls.
-	 * 
-	 * @param entity to report for
-	 */
-	def reportState(entity : String) {
-		val reportText = String.format(
-			"\n========================== REPORT FOR ENTITY %s ==========================\n" +
-				"REPORT OF ENTITY: %s\n" + "Playing in map **%s** for **%d** simulation steps\n" +
-				"Team money: %d (seed capital was: %d)\n" + "Team name: %s\n" + "Entities known: %s\n" +
-				"========================== REPORT FOR ENTITY %s ==========================",
-			entity,
-			MT_reportEntityState(entity),
-			state.mapName,
-			state.simulationLength,
-			state.money,
-			state.seedCapital,
-			state.team,
-			state.entities.keySet(),
-			entity
-		)
-
-		agent_says(reportText)
-
-	}
-
+	
 }
 // /////////////////////////////////////////////////
 // END OF FILE
