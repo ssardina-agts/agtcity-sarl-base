@@ -36,7 +36,7 @@ Observe while either framework brings also the `jpl.jar` Java API implementation
 
 ## INSTALL, RUN and DEVELOP
 
-You can run the SARL controller, either from ECLIPSE or from CLI (via Java or Maven), please refer to [this instructions](https://bitbucket.org/snippets/ssardina/6eybMg#markdown-header-4-running-the-sarl-application).
+You can run the SARL controller, either from ECLIPSE or from CLI (via Java or Maven), please refer to [this instructions](https://gist.github.com/ssardina/43d6e6f469921e5f692b37304f952d43#4-running-a-sarl-application).
 
 You can use the source JAR files for modules [EIS](https://github.com/eishub/eis) and [massim](https://github.com/eishub/massim) provided in `extras/` to attah sources in ECLIPSE (their sources are not available via Maven).
 
@@ -56,7 +56,7 @@ So, to **run the system** you need to follow these general steps:
 		* Rename team names. Instead of team `A`, use team `teamA`.	
 		
 
-2. Start the SARL Controller, either via ECLIPSE or through the CLI (again, see [general SARL instructions](https://bitbucket.org/snippets/ssardina/6eybMg#markdown-header-4-running-the-sarl-application)).
+2. Start the SARL Controller, either via ECLIPSE or through the CLI (again, see [general SARL instructions](https://gist.github.com/ssardina/43d6e6f469921e5f692b37304f952d43#4-running-a-sarl-application)).
 	* System will generally need a JSON configuration file for the game server. 
 	* By default, the JAR file built does not carry all dependencies as the compilation is too slow. Hence you need to execute via Maven execution plugin, which will run the default `BootMAS` class:
 	mvn exec:java -Dexec.args="SWISingleFullAgent conf/SingleAgent" -Dloglevel=4
@@ -93,12 +93,10 @@ So, to **run the system** you need to follow these general steps:
 You can check the example template agents (see below) that are in package `au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy` to start your new development.
 You will find there the process how SARL systems can connect to the game server and manipulate a team in the game.
 
-If your solution will use Prolog as knowledgebase, we suggest carefully understanding how the [SARL PROLOG CAP](https://bitbucket.org/ssardina-research/sarl-prolog-cap) framework, which provides the skill to
+If your solution will use Prolog as knowledgebase, we suggest carefully understanding how the [SARL PROLOG CAP](https://github.com/ssardina-agts/sarl-prolog-cap) framework, which provides the skill to
 manipulate a Prolog knowledgebase, works. Some initial code for a domain knowledge base is already provided in this base system, including substantial Prolog code to process all percepts.
 
 We recommend using the JPL-based `SWIJPL_KB_Prolog`  skill for the `KB_Prolog` capacity. It is simpler, direct to JPL and more expressive (e.g., can send Java objects to Prolog). Read the documentation in the SARL PROLOG CAP to understand how to use it to build queries, in particular the use of placeholders `?` and the varios term types.
-
-If you use the Mochalog-based `SWI_KB_Prolog` skill for the `KB_Prolog` capacity, then it is important to understand to read [Mochalog](https://github.com/ssardina/mochalog) to understand how to build queries using using @-placeholders `@A`, `@I`, and `@S` and the various query methods (prove, one solution, all solutions, iterators) provided.
 
 ## EXAMPLE AGENTS ##
 
@@ -133,25 +131,11 @@ The agent examples are:
 	* Then, select the location where `eismassimconfig.json` server configuration file is located.
 
 
-## LINKS 
-
-For general links check [here](https://bitbucket.org/snippets/ssardina/6eybMg#markdown-header-1-software-prerequisites-and-links).
-
-* The Multi Agent Agents in City 2017 contest:
-	* Multi-Agent Contest Home Page: https://multiagentcontest.org/
-	* Main git repository: https://github.com/agentcontest/massim
-	* Documentation: https://github.com/agentcontest/massim/tree/master/docs
-	* Scenario description: https://github.com/agentcontest/massim/blob/master/docs/scenario.md
-	* EISMASSim Documentation (the interface provided to communicate with game server): https://github.com/agentcontest/massim/blob/master/docs/eismassim.md
-		* Web page of the Environment Interface Standard (EIS): https://github.com/eishub/
-
-
-
 
 ## PROJECT CONTRIBUTORS ##
 
 * Sebastian Sardina (Project leader and contact - ssardina@gmail.com)
-* Matthew McNally (first version of SWI-based agent via Mochalog)
+* Matthew McNally (first version of SWI-based agent via the old Mochalog interface)
 
 
 ## LICENSE ##
