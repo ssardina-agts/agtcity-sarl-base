@@ -153,11 +153,12 @@ agent SWISingleFullAgent {
 			}
 			kb_dump_dir = TimestampedDir.getDir()
 		}
-		debug("\n***************************************************\n" + "Configuration settings:\n" + 
+		debug("\n***************************************************\n" + 
+				"Configuration settings:\n" + 
 				"\t My SARL agent name: {0}\n" +
 				"\t EI registration file: {1}\n" + 
-				"***************************************************" +
-				"\t Directory to dump KB: {2}", 
+				"\t Directory to dump KB: {2}\n" + 
+				"***************************************************", 
 			myName,
 			eiRegistrationFile,
 			Paths.get(kb_dump_dir))
@@ -347,24 +348,14 @@ agent SWISingleFullAgent {
 	// We are NOT traveling: buy or go somewhere or wait 
 	on E_MoveRandomly [MT_getEntityState(entity).routeLength == 0] {
 		val entityName = occurrence.entity
-		val entity = MT_getEntityState(entityName)
-		val shops = state.getShops() // shops we know about
 
-		if (entity.facility !== null && shops.containsKey(entity.facility) && entity.lastAction.type != "buy") { // we are at a shop, by some item?
-			val stock = shops.get(entity.facility).stocks
-			val item = stock.get(rand.nextInt(stock.size() - 1))
-			val quantity = "1"
-
-			agent_says("I will ask player **{1}** to to buy {0}", item.name, entityName)
-			if (!MT_executeAction(entityName, new Action("buy", new Identifier(item.name), new Identifier(quantity))))
-				agent_shouts("Was not able to successfully send action buy({0}) for entity {1}", item.name, entityName)
-		} else if (shops.size() > 0) { // We know some shop
-			// Pick some random facility and go!
-			val destination = shops.values().get(rand.nextInt(shops.size() - 1))
-
-			agent_says("I will send player **{1}** to location {0}", destination.name, entityName)
-			if (!MT_executeAction(entityName, new Action("goto", new Identifier(destination.name))))
-				agent_shouts("Was not able to successfully send action goto({0}) for entity {1}", destination.name,
+		// Pick some random facility and go!
+		val destination = kb_pickDestination(entityName)
+		
+		if (destination !== null) {
+			agent_says("I will send player **{1}** to location {0}", destination, entityName)
+			if (!MT_executeAction(entityName, new Action("goto", new Identifier(destination))))
+				agent_shouts("Was not able to successfully send action goto({0}) for entity {1}", destination,
 					entityName)
 		} else {
 			agent_shouts("I just don't know any facility to go yet, sorry...!")
