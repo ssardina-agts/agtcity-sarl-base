@@ -1,0 +1,406 @@
+/** 
+ * SARL-MASSIM - Interface between the SARL agent-oriented language 
+ * and the MASSIM 2017-2020 server
+ * 
+ * Copyright (C) 2017-2020 The SARL-MASSIM Authors.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy
+
+// MASSIM EIS imports
+import au.edu.rmit.agtgrp.agtcity.sarl.mw.capacities.C_MassimTalking
+import au.edu.rmit.agtgrp.agtcity.sarl.mw.capacities.C_Reporting
+import au.edu.rmit.agtgrp.agtcity.sarl.mw.skills.S_ConsoleReporting
+import au.edu.rmit.agtgrp.agtcity.sarl.mw.skills.S_MassimTalking
+import au.edu.rmit.agtgrp.agtcity.sarl.mw.utils.ConfHandler
+import eis.exceptions.PerceiveException
+import eis.iilang.Action
+import eis.iilang.EnvironmentState
+import eis.iilang.Identifier
+import eis.iilang.Percept
+import io.sarl.core.DefaultContextInteractions
+import io.sarl.core.Initialize
+import io.sarl.core.Lifecycle
+import io.sarl.core.Logging
+import io.sarl.core.Schedules
+import java.nio.file.Paths
+import java.util.Collection
+import java.util.Random
+import java.util.Set
+import au.edu.rmit.agtgrp.agtcity.sarl.mw.util.State
+import au.edu.rmit.agtgrp.agtcity.sarl.events.E_MoveRandomly
+import au.edu.rmit.agtgrp.util.TimestampedDir
+import au.edu.rmit.agtgrp.agtcity.sarl.beliefs.SWI_KB_AgtCity
+import au.edu.rmit.agtgrp.agtcity.sarl.beliefs.KB_AgtCity
+import io.sarl.extras.KB_Prolog
+
+event E_SenseEnvironment
+
+event E_EntitySensed {
+	var stepNo : int
+	var entityName : String
+	var percepts : Collection<Percept>
+
+	new(stepNo : int, entityName : String, percepts : Collection<Percept>) {
+		this.stepNo = stepNo
+		this.entityName = entityName
+		this.percepts = percepts
+	}
+
+}
+
+/** 
+ * This is a monolithic SARL agent to manage ALL the entity agents in the  game simulation.
+ */
+@SuppressWarnings("potential_field_synchronization_problem")
+agent SWISingleFullAgent {
+	uses Logging, Lifecycle, DefaultContextInteractions
+	uses Schedules
+	uses C_Reporting, C_MassimTalking
+	uses KB_AgtCity, KB_Prolog // We can use KB_Prolog directly!
+	
+
+	val myName = "swiSingleFullAgent"
+
+	val agentLogLevel = 4 // debug = 4 this is for the high-level agent, not for SARL
+	val reportEILog = false // true if XML messages from server need to be printed out
+	val reportState = true // Report current state of entity and state tracking
+	
+
+	// Server information: registration configuration file and entities that this agent will control
+	val eiRegistrationFileName = "eismassimconfig.json" // the name of the registration file
+	//	val myEntityConnections = #["entityA1", "entityA2", "entityA3", "entityA4", "entityA5"]
+	val myConnectedEntities = #["entityA1"] // simpler testing, just 2 players
+
+	// Folders where Prolog KB are located by default and where to dump the KBs
+	var kb_root_path = "src/main/sarl/au/edu/rmit/agtgrp/agtcity/sarl"
+	var kb_dump_dir : String // directory where KB database is to be dumped
+	
+
+	// Data kept by this single SARL agent: just the step number
+	var last_step : int = -1
+	var facilities : Set<String>
+	var rand : Random
+	var state : State = new State() // used to track the current state as per percepts received
+	
+	
+	/* 
+	 * SARL agent is initialized 
+	 * 
+	 * The SARL agent may control one more more game entities (trucks, motorcycles, drones, etc).
+	 * 
+	 * To do so, the agent will install a S_MassimTalking skill, which allows the agent to talk to the game server.
+	 * 
+	 * The skill uses the Environment Interface (EI) for MASSIM which provides a high-level connection to the game server.
+	 * The skill needs an EI registration file "eismassimconfig.json" containing all the server info and
+	 * all entity connections available (including username/password to authenticate) 
+	 * We can tell the skill to control an sense among those available connections
+	 * 
+	 * Different EI registration files can be kept in different folders under conf/
+	 * 
+	 * If a directory is given in CLI argument, then  EI registration file eismassimconfig.json is search there.
+	 * Otherwise, possible options as per folders under conf/ are scanned and given to user for selection	 * 
+	 */
+	on Initialize { // Should only be initializing with the EIS as a parameter.
+		var args = newArrayList(occurrence.parameters) // may receive config directory at creation
+		var eiConfigDir : String
+
+		rand = new Random()
+
+		// Create an information aggregator (all percept info will be integrated here by the MW)
+		state = new State()
+
+		// Give reporting skill via console
+		setSkill(new S_ConsoleReporting(myName), C_Reporting)
+		setLogLevel(agentLogLevel) // set debug level
+
+		info("This is an INFO TEST message (level 3)....")
+		warning("This is a WARNING TEST message (level 2)....")
+		error("This is an ERROR TEST message (level 1)....")
+
+		/* 
+		 * FIRST, collect the directory where the server and player configuration files to be used are
+		 */
+		agent_says("PHASE 1: INSTALL MASSIM-TALKING SKILL WITH CONFIG FILE: {0}", eiRegistrationFileName)
+		if (args.length != 0) {
+			eiConfigDir = args.get(0) as String 	// use the config dir given as CLI argument
+		} else {
+			// Ask the user which folder in conf/ is to be used to use the EI config file
+			eiConfigDir = ConfHandler.getConfDir()
+		}
+		val eiRegistrationFile = Paths.get(eiConfigDir, eiRegistrationFileName)
+
+		// Set the KB dumping directory: variable kb_dump_dir
+		// If there is a parameter for that, use it. Otherwise, use kb_dump_SWISingle/<timestamp>
+			if (args.length >= 2) {
+			kb_dump_dir = args.get(1) as String
+		} else {
+			TimestampedDir.setRoot("kb_dump_SWISingle")
+				if (!TimestampedDir.exists) {
+				TimestampedDir.create
+			}
+			kb_dump_dir = TimestampedDir.getDir()
+		}
+		debug("\n***************************************************\n" + "Configuration settings:\n" + 
+				"\t My SARL agent name: {0}\n" +
+				"\t EI registration file: {1}\n" + 
+				"***************************************************" +
+				"\t Directory to dump KB: {2}", 
+			myName,
+			eiRegistrationFile,
+			Paths.get(kb_dump_dir))
+		
+			
+		try {
+
+			/* 
+			 * SECOND, install skill to talk to the server using EI registration file 
+			 * (no actual connection to entities yet, just recording of registration file to be used)
+			 */
+		agent_says("PHASE 2: INSTALL MASSIM-TALKING SKILL WITH EI REGISTRATION FILE {0}", eiRegistrationFile)
+		setSkill(new S_MassimTalking(eiRegistrationFile, reportEILog), C_MassimTalking)
+
+		/* 
+		 * THIRD, we configure the skill by providing which specific entities this agent will control
+		 * The agents to control have to be among those listed in the registration file
+		 * No actual connection (or server authentication) happens at this step
+		 */
+		agent_says("PHASE 3: REGISTERING ENTITIES TO CONTROL: ", myConnectedEntities.toString)
+		if (myConnectedEntities !== null)
+			myConnectedEntities.forEach [ entityName : String | // entityA1, entityA2, .../entityAn
+				MT_registerEntityByName(entityName) // register entities to control (no authentication yet)
+				agent_says("I have registered entity **{0}** for control and perception.", entityName)
+			]
+
+		/* 
+		 * FOURTH, we establish the connection to the game server via the EI 
+		 * 
+		 * All entities registered for control are authenticated and connected to the server
+		 */
+		agent_says("PHASE 4: INITIALIZING CONNECTIONS {1} USING EI CONFIG FILE {0}", eiRegistrationFileName);
+		if (MT_initialize()) {
+			agent_says("The EI is now initialized, entities are being authenticated...")
+		} else {
+			agent_shouts("Something wrong when initializing the EI, I am finished...")
+			killMe
+		}
+
+		/* 
+		 * FIFTH, Set up a new Prolog belief base - load agent knowledge bases.
+		 */
+		val beliefSpace = String.format(this.myName)
+		setSkill(new SWI_KB_AgtCity(beliefSpace, 0, kb_dump_dir))
+		agent_says("My KB SWI module is: {0}", get_prolog_engine as String) // This will give the SWI module where this agent has its KB!
+		kb_load(kb_root_path + "/beliefs/tools.pl")
+		kb_load(kb_root_path + "/beliefs/percept-mgmt.pl")
+		kb_load(kb_root_path + "/beliefs/decision-making.pl")
+		agent_says("I have loaded all my knowledge bases!")
+		assertFirst("agentName(?)", this.myName) // assert my name in the KB (using SWI_KB_Prolog skill directly)
+			// kb_recordKBName(mySARLname)				// same but using the current KB domain capacity KB_AgtCity
+
+		// Store in the KB the names of the EI players we are controlling
+			MT_getEntityNames.forEach [ entity : String | assertFirst("player(?)", entity) ]
+
+		/* 
+		 * FINALLY, all entities registered and connected for control and sensing.
+		 * 
+		 * So, send an event to start sending and controlling 
+		 */
+		agent_says("PHASE FINAL: Emit E_SenseEnvironment() to start sensing and acting")
+			
+		in(2000)[emit(new E_SenseEnvironment())] 	// wait 2 seconds to allow everyone to auhenticate to server
+	} catch (e : Exception) {
+		error("Sorry but I was not able to initialize the skill to talk to server! Message: {0}", e.message)
+		e.printStackTrace()
+		killMe
+	}
+}
+
+	/* 
+	 * Handle the process of sensing the environment
+	 */
+	on E_SenseEnvironment {
+		agent_shouts("Start sensing the environment for the following entities I control: {0}", MT_getEntityNames)
+
+		// While the environment is running, wait for new percepts (read percepts for each player registered/connected)
+		while (MT_getStatus() == EnvironmentState.RUNNING && !MT_getEntityNames().empty) {
+
+			MT_getEntityNames().forEach([ entityName : String |
+
+				// All percepts for the player: (role/entity of agent --> collection of single percepts)
+				// In this game, players usually are of one role/entity, so we will store that single set of percepts
+				// in variable percepts (the first value of allPercepts)
+				try {
+					debug("About to sense percepts for step {0} in player {0}", last_step + 1, entityName)
+					var percepts : Collection<Percept>
+					percepts = MT_senseEntityPercepts(entityName) // This is BLOCKING!!
+					// TODO: Change this to debug log
+					// var plist = percepts.stream().map([p | return p.name]).collect(Collectors.toList)
+					// System.out.println(String.join(",", plist))
+					agent_says("I have just sensed player {0} at step {1}", entityName, MT_getStepNo())
+
+					// First step has Sim-Start percepts
+					// https://github.com/ssardina-agts/agtcity-server/blob/master/docs/eismassim.md#sim-start-percepts
+					if(MT_getStepNo() == 0) state.recordSimStartData(percepts)
+
+
+					// Updating the PlayerState of the player where percepts come from
+					// ATTENTION: This step is already done by the MT once data is sensed, so it is technically not necessary
+					// The skill S_MassimTalking already maintains and updates upon sensing a PlayerState object per connected player
+					// That state can be accessed via MT_getEntityState(playerName)
+					// MT_updatePlayerState(playerName, percepts) // update the agent data
+					state.updateAggregatedGameState(percepts)
+					agent_shouts("State updated with percepts from entity {0}", entityName)
+
+					kb_recordPercepts(entityName, MT_getStepNo(), percepts)
+					kb_processLastPercept(entityName)
+				
+
+					facilities = state.getFacilitiesNames()
+					agent_shouts("Set of facilities known: {0}", facilities)
+
+					// update the last step if the percept just processed has a higher step number
+					last_step = MT_getStepNo()
+					agent_shouts("I am finished sensing the environment - Step {0} for player {1}", MT_getStepNo(),
+						entityName)
+
+					agent_shouts("Entity {1} will ACT next for step {0}!!!", last_step, entityName)
+					emit(new E_MoveRandomly => [entity = entityName]) 	// see compact way of assignment data in event
+
+					
+
+				} catch (e : PerceiveException) {
+					agent_shouts("There was an error in perception ({0}), maybe not yet connected? Will try later...",
+						e.message)
+				} catch (e : Exception) {
+					error("Something bad has happened during perception for player **{0}**: {1}", entityName,
+						e.toString)
+					throw e
+				}
+			]) // FINISH sensing cycle for all entities - We have sensed every entity now
+			agent_shouts(
+				"Finished sensing the environment for all the player connections. Next report and act for step {0}!!!",
+				last_step)
+		} 	// end of game & sensing finished
+	} // end of on E_SenseEnvironment
+
+
+
+	on E_MoveRandomly [reportState] {
+
+		// 1. Report all the percepts/3 information available in the KB
+		// val query = new Query("percepts(Agent, Step, Percepts)")	// no need to format query
+		// for (solution : askForAllSolutions(query))
+		// {
+		// agent_says("There is percept information in KB for player {0} on step {1}",
+		// solution.get("Agent").toString(), solution.get("Step").intValue)
+		// }
+		// 2. Report current status of each player from data in the KB
+		MT_getEntityNames.forEach([ entity : String |
+			val solution = askOnce("get_player_last_loc(?, Step, Lat, Long), 
+									get_player_last_charge(?, Step, Charge)", entity, entity)
+			if (solution !== null) {
+				agent_says(
+					"Player **{0}** location is ({1},{2}) and charge is {3} at step {4}",
+					entity,
+					solution.get("Lat").floatValue,
+					solution.get("Long").floatValue,
+					solution.get("Charge").floatValue,
+					solution.get("Step").intValue
+				)
+			} else {
+				agent_says("I do not have self information for player {0}", entity)
+			}
+		])
+
+		// 3. Finally, save current KB to file (for the step)
+		agent_says("I will dump all that I know so far....")
+		dump_kb() // Using Prolog-CAP directly
+//		reportState(occurrence.entity)
+//		agent_says(state.report());
+	}
+
+	// We are still traveling, just continue following the path...
+	on E_MoveRandomly [MT_getEntityState(entity).routeLength > 0] {
+		val entityName = occurrence.entity
+
+		agent_says("Seems player **{0}** is already travelling: {1} steps to go!", entityName,
+			MT_getEntityState(entityName).routeLength)
+
+		if (!MT_executeAction(entityName, new Action("continue")))
+			warning("Could not perform continue for entity **{1}**", entityName)
+	}
+
+
+	// We are NOT traveling: buy or go somewhere or wait 
+	on E_MoveRandomly [MT_getEntityState(entity).routeLength == 0] {
+		val entityName = occurrence.entity
+		val entity = MT_getEntityState(entityName)
+		val shops = state.getShops() // shops we know about
+
+		if (entity.facility !== null && shops.containsKey(entity.facility) && entity.lastAction.type != "buy") { // we are at a shop, by some item?
+			val stock = shops.get(entity.facility).stocks
+			val item = stock.get(rand.nextInt(stock.size() - 1))
+			val quantity = "1"
+
+			agent_says("I will ask player **{1}** to to buy {0}", item.name, entityName)
+			if (!MT_executeAction(entityName, new Action("buy", new Identifier(item.name), new Identifier(quantity))))
+				agent_shouts("Was not able to successfully send action buy({0}) for entity {1}", item.name, entityName)
+		} else if (shops.size() > 0) { // We know some shop
+			// Pick some random facility and go!
+			val destination = shops.values().get(rand.nextInt(shops.size() - 1))
+
+			agent_says("I will send player **{1}** to location {0}", destination.name, entityName)
+			if (!MT_executeAction(entityName, new Action("goto", new Identifier(destination.name))))
+				agent_shouts("Was not able to successfully send action goto({0}) for entity {1}", destination.name,
+					entityName)
+		} else {
+			agent_shouts("I just don't know any facility to go yet, sorry...!")
+		}
+	}
+
+
+
+	/** 
+	 * The current state of an entity.
+	 * This is printed every step for each entity this SARL agent controls.
+	 * 
+	 * @param entity to report for
+	 */
+	def reportState(entity : String) {
+		val reportText = String.format(
+			"\n========================== REPORT FOR ENTITY %s ==========================\n" +
+				"REPORT OF ENTITY: %s\n" + "Playing in map **%s** for **%d** simulation steps\n" +
+				"Team money: %d (seed capital was: %d)\n" + "Team name: %s\n" + "Entities known: %s\n" +
+				"========================== REPORT FOR ENTITY %s ==========================",
+			entity,
+			MT_reportEntityState(entity),
+			state.mapName,
+			state.simulationLength,
+			state.money,
+			state.seedCapital,
+			state.team,
+			state.entities.keySet(),
+			entity
+		)
+
+		agent_says(reportText)
+
+	}
+
+}
+// /////////////////////////////////////////////////
+// END OF FILE
+// /////////////////////////////////////////////////

@@ -1,5 +1,5 @@
 {
-  "scenario": "city2017",
+  "scenario": "city2018",
   "host": "localhost",
   "port": 12300,
   "scheduling": true,
@@ -8,8 +8,8 @@
   "notifications": false,
   "queued": false,
   "entities": [
-    {"name": "connectionA4", "username": "agentA4", "password": "1", "iilang": false, "xml": true},
-    {"name": "connectionA5", "username": "agentA5", "password": "1", "iilang": false, "xml": true},
-    {"name": "connectionA6", "username": "agentA6", "password": "1", "iilang": false, "xml": true}
+    {"name": "entityA4", "username": "agentA4", "password": "1", "iilang": false, "xml": true},
+    {"name": "entityA5", "username": "agentA5", "password": "1", "iilang": false, "xml": true},
+    {"name": "entityA6", "username": "agentA6", "password": "1", "iilang": false, "xml": true}
   ]
 }

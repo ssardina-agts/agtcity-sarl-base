@@ -48,12 +48,11 @@ capacity KB_AgtCity {
 }
 
 
-
 /**
  * Skill for KB_AgtCity using SWI Prolog
  */
 @SuppressWarnings("potential_field_synchronization_problem")
-skill SWI_KB_AgtCity extends SWIJPL_KB_Prolog implements KB_AgtCity {
+skill SWI_KB_AgtCity implements KB_AgtCity extends SWIJPL_KB_Prolog {
 	uses Logging
 
 	// Logging level for the skill
