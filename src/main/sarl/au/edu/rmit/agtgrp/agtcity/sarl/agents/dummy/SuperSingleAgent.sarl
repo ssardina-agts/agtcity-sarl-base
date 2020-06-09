@@ -124,7 +124,7 @@ agent SingleRandomAgent {
 		 */
 		agent_says("PHASE 1: INSTALL MASSIM-TALKING SKILL WITH CONFIG FILE: {0}", eiRegistrationFileName)
 		if (args.length != 0) {
-			eiConfigDir = args.get(0) as String 	// use the config dir given as CLI argument
+			eiConfigDir = args.get(0).toString()	// use the config dir given as CLI argument
 		} else {
 			// Ask the user which folder in conf/ is to be used to use the EI config file
 			eiConfigDir = ConfHandler.getConfDir()

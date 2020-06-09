@@ -20,11 +20,16 @@
 package au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy
 
 // MASSIM EIS imports
+
+import au.edu.rmit.agtgrp.agtcity.sarl.beliefs.KB_AgtCity
+import au.edu.rmit.agtgrp.agtcity.sarl.beliefs.SWI_KB_AgtCity
+import au.edu.rmit.agtgrp.agtcity.sarl.events.E_MoveRandomly
 import au.edu.rmit.agtgrp.agtcity.sarl.mw.capacities.C_MassimTalking
 import au.edu.rmit.agtgrp.agtcity.sarl.mw.capacities.C_Reporting
 import au.edu.rmit.agtgrp.agtcity.sarl.mw.skills.S_ConsoleReporting
 import au.edu.rmit.agtgrp.agtcity.sarl.mw.skills.S_MassimTalking
 import au.edu.rmit.agtgrp.agtcity.sarl.mw.utils.ConfHandler
+import au.edu.rmit.agtgrp.util.TimestampedDir
 import eis.exceptions.PerceiveException
 import eis.iilang.Action
 import eis.iilang.EnvironmentState
@@ -35,16 +40,10 @@ import io.sarl.core.Initialize
 import io.sarl.core.Lifecycle
 import io.sarl.core.Logging
 import io.sarl.core.Schedules
+import io.sarl.extras.KB_Prolog
 import java.nio.file.Paths
 import java.util.Collection
 import java.util.Random
-import java.util.Set
-import au.edu.rmit.agtgrp.agtcity.sarl.mw.util.State
-import au.edu.rmit.agtgrp.agtcity.sarl.events.E_MoveRandomly
-import au.edu.rmit.agtgrp.util.TimestampedDir
-import au.edu.rmit.agtgrp.agtcity.sarl.beliefs.SWI_KB_AgtCity
-import au.edu.rmit.agtgrp.agtcity.sarl.beliefs.KB_AgtCity
-import io.sarl.extras.KB_Prolog
 
 event E_SenseEnvironment
 
@@ -91,8 +90,8 @@ agent SWISingleFullAgent {
 
 	// Data kept by this single SARL agent: just the step number
 	var last_step : int = -1
-	var facilities : Set<String>
-	var rand : Random
+	
+	
 	
 	
 	/* 
@@ -116,7 +115,7 @@ agent SWISingleFullAgent {
 		var args = newArrayList(occurrence.parameters) // may receive config directory at creation
 		var eiConfigDir : String
 
-		rand = new Random()
+		new Random()
 
 	
 		// Give reporting skill via console
@@ -132,7 +131,7 @@ agent SWISingleFullAgent {
 		 */
 		agent_says("PHASE 1: INSTALL MASSIM-TALKING SKILL WITH CONFIG FILE: {0}", eiRegistrationFileName)
 		if (args.length != 0) {
-			eiConfigDir = args.get(0) as String 	// use the config dir given as CLI argument
+			eiConfigDir = args.get(0).toString() 	// use the config dir given as CLI argument
 		} else {
 			// Ask the user which folder in conf/ is to be used to use the EI config file
 			eiConfigDir = ConfHandler.getConfDir()
@@ -142,7 +141,7 @@ agent SWISingleFullAgent {
 		// Set the KB dumping directory: variable kb_dump_dir
 		// If there is a parameter for that, use it. Otherwise, use kb_dump_SWISingle/<timestamp>
 			if (args.length >= 2) {
-			kb_dump_dir = args.get(1) as String
+			kb_dump_dir = args.get(1).toString()
 		} else {
 			TimestampedDir.setRoot("kb_dump_SWISingle")
 				if (!TimestampedDir.exists) {
@@ -200,7 +199,7 @@ agent SWISingleFullAgent {
 		 */
 		val beliefSpace = String.format(this.myName)
 		setSkill(new SWI_KB_AgtCity(beliefSpace, 0, kb_dump_dir))
-		agent_says("My KB SWI module is: {0}", get_prolog_engine as String) // This will give the SWI module where this agent has its KB!
+		agent_says("My KB SWI module is: {0}", get_prolog_engine.toString()) // This will give the SWI module where this agent has its KB!
 		kb_load(kb_root_path + "/beliefs/tools.pl")
 		kb_load(kb_root_path + "/beliefs/percept-mgmt.pl")
 		kb_load(kb_root_path + "/beliefs/decision-making.pl")

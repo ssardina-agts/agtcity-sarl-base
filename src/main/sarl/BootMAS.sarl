@@ -10,7 +10,8 @@ import java.util.Scanner
  * @author Sebastian Sardina (ssardina@gmail.com)
  * 
  */
-@SuppressWarnings("potential_field_synchronization_problem")
+@SuppressWarnings("all")
+//@SuppressWarnings("potential_field_synchronization_problem")
 class BootMAS {
 	// Code adapted from example how to boot from name string: 	http://tinyurl.com/ycolmey5
 	def static main(args : String[]) : void {

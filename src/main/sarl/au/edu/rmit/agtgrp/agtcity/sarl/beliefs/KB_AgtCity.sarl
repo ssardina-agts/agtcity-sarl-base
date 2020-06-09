@@ -17,19 +17,11 @@
  */
 package au.edu.rmit.agtgrp.agtcity.sarl.beliefs
 
+import eis.iilang.Percept
 import io.sarl.core.Logging
-
-// Just in case you need to return pairs
-//import org.apache.commons.lang3.tuple.Pair
-//import org.apache.commons.lang3.tuple.MutablePair;
-
+import io.sarl.extras.SWIJPL_KB_Prolog
 import java.util.ArrayList
 import java.util.Collection
-
-
-import eis.iilang.Percept
-
-import io.sarl.extras.SWIJPL_KB_Prolog
 
 /** 
  * @author Sebastian Sardina (ssardina@gmail.com)
@@ -55,9 +47,6 @@ capacity KB_AgtCity {
 skill SWI_KB_AgtCity implements KB_AgtCity extends SWIJPL_KB_Prolog {
 	uses Logging
 
-	// Logging level for the skill
-	var logLevel : int
-	
 	new (name : String, logLevel : int = 0, kb_dump_dir : String) {
 		super(name, kb_dump_dir) // Call the super's constructor
 		kb_setLogLevel(logLevel)
@@ -75,7 +64,7 @@ skill SWI_KB_AgtCity implements KB_AgtCity extends SWIJPL_KB_Prolog {
 	}
 
 	def kb_setLogLevel(logLevel : int) {
-		this.logLevel = logLevel 
+		 
 	}
 
 	
