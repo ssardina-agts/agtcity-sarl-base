@@ -14,12 +14,10 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- ##################################################################
-		PROJECT INFO 
-     ####################################################################### -->
+  	<!-- ############################## PROJECT INFO ############################## -->
     <groupId>com.github.ssardina-agts</groupId>
     <artifactId>agtcity-sarl-base</artifactId>
-    <version>4.5.${sarl.varsion}</version>
+    <version>4.5.${sarl.version}</version>
 
 	<name>SARL Agents in City Base Controllers</name>
     <description>
@@ -45,9 +43,7 @@
 	    </developer>
   	</developers>
 
-    <!-- ##################################################################
-		SARL-MASSIM PROPERTIES 
-     ####################################################################### -->
+   	<!-- ############################## PROPERTIES ############################## -->
     <properties>
         <!-- SARL framework version and configuration -->
         <sarl.version>0.10.0</sarl.version>
@@ -77,9 +73,7 @@
         </pluginRepository>
     </pluginRepositories>
     
-    <!-- ##################################################################
-		REPOSITORIES 
-     ####################################################################### -->
+   	<!-- ############################## REPOSITORIES ############################## -->
     <repositories>
         <!-- JANUS Project kernel (contains SARL language core) -->
         <repository>
@@ -99,9 +93,7 @@
         </repository>
     </repositories>
 
-    <!-- ##################################################################
-		DEPENDENCIES 
-     ####################################################################### -->
+   	<!-- ############################## DEPENDENCIES ############################## -->
     <dependencies>
         <!-- JANUS Project kernel (contains SARL language core) -->
         <dependency>
@@ -185,7 +177,7 @@
         <dependency>
 		    <groupId>com.github.ssardina-agts</groupId>
 		    <artifactId>sarl-prolog-cap</artifactId>
-    		<version>1cd236c</version>
+    		<version>26b6f19</version>
 		</dependency>
 
        
@@ -201,10 +193,8 @@
 
 
 
-    <!-- ##################################################################
-		BUILD PIPELINE PLUGINS 
-     ####################################################################### -->
-    <build>
+  	<!-- ############################## BUILD PIPELINE PLUGINS ############################## -->
+	<build>
 
         <plugins>
             <plugin>
