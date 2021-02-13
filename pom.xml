@@ -38,7 +38,7 @@
     	<developer>
 	      <name>Sebastian Sardina</name>
 	      <email>ssardina@gmail.com</email>
-	      <organization>ssardina-research</organization>
+	      <organization>ssardina-agts</organization>
 	      <organizationUrl>https://github.com/ssardina-agts/agtcity-sarl-base/</organizationUrl>
 	    </developer>
   	</developers>
@@ -46,19 +46,14 @@
    	<!-- ############################## PROPERTIES ############################## -->
     <properties>
         <!-- SARL framework version and configuration -->
-        <sarl.version>0.10.0</sarl.version>
+        <sarl.version>0.11.0</sarl.version>
+        <janus.version>3.${sarl.version}</janus.version>
 
         <compiler.level>1.8</compiler.level>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <!-- JANUS project version -->
-        <janus.version>2.${sarl.version}</janus.version>
-
 		<!--  Maven boot class for mvn exec:java -->
 		<boot.class>BootMAS</boot.class>
-		<!-- <mainClass>io.janusproject.Boot</mainClass>  -->
-
-        
     </properties>
 
     <!-- Repository definitions -->
@@ -100,9 +95,43 @@
             <groupId>io.janusproject</groupId>
             <artifactId>io.janusproject.kernel</artifactId>
             <version>${janus.version}</version>
-            
-            
 			<exclusions>
+              <exclusion>
+                <groupId>org.eclipse.platform</groupId>
+                <artifactId>org.eclipse.osgi</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>org.eclipse.platform</groupId>
+                <artifactId>org.eclipse.equinox.common</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>org.eclipse.platform</groupId>
+                <artifactId>org.eclipse.core.jobs</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>org.eclipse.platform</groupId>
+                <artifactId>org.eclipse.equinox.registry</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>org.eclipse.platform</groupId>
+                <artifactId>org.eclipse.equinox.preferences</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>org.eclipse.platform</groupId>
+                <artifactId>org.eclipse.equinox.preferences</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>org.eclipse.platform</groupId>
+                <artifactId>org.eclipse.core.contenttype</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>org.eclipse.platform</groupId>
+                <artifactId>org.eclipse.equinox.app</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>org.eclipse.platform</groupId>
+                <artifactId>org.eclipse.osgi</artifactId>
+              </exclusion>
               <exclusion>
                 <groupId>org.eclipse.platform</groupId>
                 <artifactId>org.eclipse.equinox.common</artifactId>
@@ -160,16 +189,13 @@
                 <artifactId>org.eclipse.jdt.core</artifactId>
               </exclusion>
             </exclusions>
-            
         </dependency>
 
-      
-        
         <!--  SARL Agent City Middleware  -->
 		<dependency>
 		    <groupId>com.github.ssardina-agts</groupId>
 		    <artifactId>agtcity-sarl-mw</artifactId>
-		    <version>951f865</version>
+		    <version>18554abe006c9a5f4751faf071245d8822b541d7</version>
 		</dependency>
 
  		 
@@ -177,7 +203,7 @@
         <dependency>
 		    <groupId>com.github.ssardina-agts</groupId>
 		    <artifactId>sarl-prolog-cap</artifactId>
-    		<version>26b6f19</version>
+    		<version>eb11c14a911f7443795d2addf3f4a48e6ca6aa7d</version>
 		</dependency>
 
        
@@ -193,8 +219,21 @@
 
 
 
-  	<!-- ############################## BUILD PIPELINE PLUGINS ############################## -->
-	<build>
+	<!-- ##################################################################
+		BUILD PIPELINE PLUGINS 
+     ####################################################################### -->
+   	<build>
+   	    
+         <resources>
+               <resource>
+                    <directory>src/main/sarl</directory>
+                    <filtering>false</filtering>
+                </resource>
+                <resource>
+                    <directory>src/main/java</directory>
+                    <filtering>false</filtering>
+                </resource>
+          </resources>
 
         <plugins>
             <plugin>
@@ -218,6 +257,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
+                <version>3.0.0</version>
                 <configuration>
 	                <addClasspath>true</addClasspath>
 	                <mainClass>${boot.class}</mainClass>
@@ -226,37 +266,34 @@
           
           
           
-        	<!--  Aggregate project into a JAR package
+   			<!--  Aggregate project into a FULL JAR package
 			https://maven.apache.org/plugins/maven-assembly-plugin/
-		
-			Commented out because it compiles too slow....
 			-->
-		<!-- 
 		    <plugin>
-		    <artifactId>maven-assembly-plugin</artifactId>
-		    <version>3.1.0</version>
-		    <configuration>
-		        <archive>
-		            <manifest>
-		                <addClasspath>true</addClasspath>
-		                <mainClass>BootMAS</mainClass>
-		            </manifest>
-		        </archive>
-		        <descriptorRefs>
-		            <descriptorRef>jar-with-dependencies</descriptorRef>
-		        </descriptorRefs>
-		    </configuration>
-		    <executions>
-		        <execution>
-		            <id>make-my-jar-with-dependencies</id>
-		            <phase>package</phase>
-		            <goals>
-		                <goal>single</goal>
-		            </goals>
-		        </execution>
-		    </executions>
+			    <artifactId>maven-assembly-plugin</artifactId>
+			    <version>3.3.0</version>
+			    <configuration>
+			        <archive>
+			            <manifest>
+			                <addClasspath>true</addClasspath>
+			                <mainClass>BootMAS</mainClass>
+			            </manifest>
+			        </archive>
+			        <descriptorRefs>
+			            <descriptorRef>jar-with-dependencies</descriptorRef>
+			        </descriptorRefs>
+			    </configuration>
+			    <executions>
+			        <execution>
+			            <id>make-my-jar-with-dependencies</id>
+			            <phase>package</phase>
+			            <goals>
+			                <goal>single</goal>
+			            </goals>
+			        </execution>
+			    </executions>
 		    </plugin>
-           -->
+   
             
         </plugins>
 

@@ -1,7 +1,4 @@
-/** 
- * Class to boot up an agent controller
- */
-import io.janusproject.Boot
+import io.sarl.bootstrap.SRE
 
 import io.sarl.lang.core.Agent
 import java.util.Scanner
@@ -15,8 +12,9 @@ import java.util.Scanner
 class BootMAS {
 	// Code adapted from example how to boot from name string: 	http://tinyurl.com/ycolmey5
 	def static main(args : String[]) : void {
-		Boot.offline = true
-		Boot.verboseLevel = 7 //ALL
+		var sre = SRE::bootstrap
+		sre.verboseLevel = 7
+
 		val basePackage = "au.edu.rmit.agtgrp.agtcity.sarl.agents"
 		val AGENTS_AVAILABLE : String[] = #["default", "SuperSingleAgent", "SWISingleFullAgent", "BootMultiSWIAgents"]
 		val DEFAULT = "SuperSingleAgent"
@@ -56,9 +54,9 @@ class BootMAS {
 		assert SARLagent !== null;
 
 		if (args.length == 2) { // second CLI argument states which config dir has to be used to find "eismassimconfig.json"
-			Boot.startJanus(SARLagent, args.get(1)) 	// pass it to agent if there was one
+			sre.startAgent(SARLagent, args.get(1)) 	// pass it to agent if there was one
 		} else {
-			Boot.startJanus(SARLagent)
+			sre.startAgent(SARLagent)
 		}
 	}
 

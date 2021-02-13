@@ -22,6 +22,8 @@ import io.sarl.core.Lifecycle
 import io.sarl.core.Logging
 import io.sarl.core.Destroy
 import io.sarl.core.AgentSpawned
+import io.sarl.core.DefaultContextInteractions
+
 import java.util.Collection
 import java.util.ArrayList
 import java.util.HashSet
@@ -44,6 +46,7 @@ import au.edu.rmit.agtgrp.util.TimestampedDir
 agent BootMultiSWIAgents {
     uses Lifecycle
     uses Logging
+    uses DefaultContextInteractions
 
 	val eiConfigFile = #["conf/SingleAgent/", "eismassimconfig.json"]
 	
@@ -76,16 +79,18 @@ agent BootMultiSWIAgents {
 		noSpawn = 0
 		teamManagers.forEach([ teamManager : PlayersManager |
 			debug("About to spawn team manager **{0}**", teamManager.myName)
-			val UUID = spawn(SWISingleFullAgent, teamManager, TimestampedDir.getDir())
+			
+			val agent_UUID = UUID::randomUUID;
+			spawnInContextWithID(SWISingleFullAgent, agent_UUID, defaultContext, teamManager, TimestampedDir.getDir())
 			debug("\t SARL agent for team manager **{0}** spawn...", teamManager.myName)
 			synchronized (agentsToComplete) {
-				agentsToComplete.add(UUID)
+				agentsToComplete.add(agent_UUID)
 			}
 		])
 	}
 
-	on AgentSpawned [!(occurrence.agentIdentifiers.get(0) == this.ID)]  {
-		val agent_UUID = occurrence.agentIdentifiers.get(0)
+	on AgentSpawned [!(occurrence.agentID == this.ID)] {
+		val agent_UUID = occurrence.agentID
 		val agent_type = occurrence.agentType
 
 		// This code gives validation error at compile, it should not!
