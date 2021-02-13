@@ -1,4 +1,4 @@
-# SARL Controller for Agents in the City 2018+ - BASE 
+# SARL Controller for Agents in the City 2018+ - BASE
 
 This project/package provides _basic_ SARL controllers for the [MAC Agents in City Contest](https://multiagentcontest.org/).
 
@@ -6,33 +6,37 @@ This version supports the [RMIT 2018+ edition](https://github.com/ssardina-agts/
 
 It can be used as an initial set-up to build more advanced controllers.
 
-
 ## PREREQUISITES
 
 The project relies on:
 
-* Java Runtime Environment (JRE) and Java Compiler (javac) v1.8+.
-* Maven project management and comprehension tool (to meet dependencies, compile, package, run).
-* The [SARL Agents in City Middleware](https://github.com/ssardina-agts/agtcity-sarl-mw) which provides SARL capacity and skill for teams to connect and play in the game simulator.
-    * Itself, the MW builds on the [EISMASSim](https://github.com/ssardina-agts/agtcity-server/tree/master/eismassim) environment interface connectivity that comes with the [MASSim Agents in City Server (RMIT 2018+ edition)](https://github.com/ssardina-agts/agtcity-server). This is a Java API that provides high-level access to the game sever to avoid dealing with low-level XML or JSON messages. The doc of the protocol and messages can be found [here](https://github.com/ssardina-agts/agtcity-server/blob/master/docs/eismassim.md).
-* The [SARL-PROLOG-CAP](https://github.com/ssardina-agts/sarl-prolog-cap) project that provides a capacity and a skill for SARL agents to use [SWI-Prolog](http://www.swi-prolog.org/) for implementing the knowledge base of the agents. This dependency is obtained automativally via Maven and JitPack [here](https://jitpack.io/#ssardina-sarl/sarl-prolog-cap).
-    * This in turn relies on [JPL](https://jpl7.org/), to bridge Prolog and Java.
-    * **IMPORTANT**: Please refer to the instructions and examples in the [capacity+skill's page](https://github.com/ssardina-agts/sarl-prolog-cap) to set-up and use it in your SARL application.
 
+- Java Runtime Environment (JRE) and Java Compiler (javac) v1.8+. 
+    - Tested with SUN Java 1.8 and OpenJDK 11.
+- Maven project management and comprehension tool (to meet dependencies, compile, package, run).
+- The [RMIT 2018+ game server edition](https://github.com/ssardina-agts/agtcity-server) (not the official 2018 server). This updated edition that brings back _items_ to _shop_ as in the 2017 version.
+  
+The following  dependencies are resolved via Maven and JitPack automatically:
 
-### SWIPL Configuration
+- [SARL modules and execution engine](http://mvnrepository.com/artifact/io.sarl.maven).
+- The [SARL Agents in City Middleware](https://github.com/ssardina-agts/agtcity-sarl-mw) which provides SARL capacity and skill for teams to connect and play in the game simulator.
+    - Itself, the MW builds on the [EISMASSim](https://github.com/ssardina-agts/agtcity-server/tree/master/eismassim) environment interface connectivity that comes with the [MASSim Agents in City Server (RMIT 2018+ edition)](https://github.com/ssardina-agts/agtcity-server). This is a Java API that provides high-level access to the game sever to avoid dealing with low-level XML or JSON messages. The doc of the protocol and messages can be found [here](https://github.com/ssardina-agts/agtcity-server/blob/master/docs/eismassim.md).
+* The [SARL-PROLOG-CAP](https://github.com/ssardina-agts/sarl-prolog-cap) project that provides a capacity and a skill for SARL agents to use [SWI-Prolog](http://www.swi-prolog.org/) and [JPL](https://jpl7.org/) for implementing the knowledge base of the agents.
 
-One can use the SWIPL + JPL that comes with a distribution or a locally compiled and installed one.
+### SWI-Prolog Configuration
+
+One can use the SWI-Prolog + JPL that comes with a distribution or a locally compiled and installed one.
 
 The current version (May 2020) is 8.2.+, which is stable and brings JPL 7.6.0 with a lot of fixes and improvements form the 7.6.x version that comes with default distros. The latest stable version can be obtained via this [PPA](https://www.swi-prolog.org/build/PPA.html). In principle, nothing else is needed if we are to use this version.
 
-To tell the system to use a a locally compiled and installed version of SWIPL with JPL package (for example in `/usr/local/swipl-git/lib/swipl/`):
+To tell the system to use a a locally compiled and installed version of SWI-Prolog with JPL package (for example in `/usr/local/swipl-git/lib/swipl/`):
 
-	export SWI_HOME_DIR=/usr/local/swipl-git/lib/swipl/
-	export LD_LIBRARY_PATH=$SWI_HOME_DIR/lib/x86_64-linux/:$LD_LIBRRY_PATH
+```bash
+export SWI_HOME_DIR=/usr/local/swipl-git/lib/swipl/
+export LD_LIBRARY_PATH=$SWI_HOME_DIR/lib/x86_64-linux/:$LD_LIBRRY_PATH
+```
 
 Observe while either framework brings also the `jpl.jar` Java API implementation, the SARL-PROLOG-CAPACITY will gather and use the JAR file from the [JPL official repository](https://github.com/SWI-Prolog/packages-jpl).
-
 
 ## INSTALL, RUN and DEVELOP
 
