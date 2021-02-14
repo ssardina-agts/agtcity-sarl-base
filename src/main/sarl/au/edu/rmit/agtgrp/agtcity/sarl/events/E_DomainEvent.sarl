@@ -23,7 +23,7 @@ package au.edu.rmit.agtgrp.agtcity.sarl.events
  */
 event E_DomainEvent
 event E_MoveRandomly extends E_DomainEvent {
-	var entity : String
+	var entityName : String
 	
 //	new(entity : String) {
 //		this.entity = entity

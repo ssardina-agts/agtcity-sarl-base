@@ -118,7 +118,13 @@ This is a similar system as `SWISuperSingleAgent` but uses Prolog  Knowledge Bas
 
 To help understand the Prolog KB, the SARL agent prints out, at every sensing cycle, some results from queries and then dumps its entire KB into a file with the step number as part of the file name.
 
-The agent contains a few example uses of how to assert in the KB and query it. It also contains simple logic to continuously select a random destination and go there. 
+The agent contains a few example uses of how to assert in the KB and query it. It also contains simple logic to continuously select a random destination and go there.
+
+This agent can be run directly as follows:
+
+```java
+$ mvn -o exec:java -Dexec.args="SWISuperSingleAgent conf/SingleAgent"
+```
 
 ### **`Multi Agent System`**
 

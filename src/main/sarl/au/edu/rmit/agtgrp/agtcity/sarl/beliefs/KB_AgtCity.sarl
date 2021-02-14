@@ -31,14 +31,13 @@ capacity KB_AgtCity {
 	def kb_load(file : String)
 	def kb_dump()
 	def kb_recordKBName(name : String)
-	def kb_recordPercepts(playerName : String, stepNo : int, percepts : String)
-	def kb_recordPercepts(playerName : String, stepNo : int, percepts : Collection<Percept>)
-	def kb_processLastPercept(playerName : String)
-	def kb_pickDestination(playerName : String) : String
+	def kb_recordPercepts(entityName : String, stepNo : int, percepts : String)
+	def kb_recordPercepts(entityName : String, stepNo : int, percepts : Collection<Percept>)
+	def kb_processLastPercept(entityName : String)
+	def kb_pickDestination(entityName : String) : String
 
 	def kb_setLogLevel(logLevel : int)
 }
-
 
 /**
  * Skill for KB_AgtCity using SWI Prolog
@@ -78,29 +77,29 @@ skill SWI_KB_AgtCity implements KB_AgtCity extends SWIJPL_KB_Prolog {
 	
 
 	def kb_recordKBName(name : String) {
-		assertFirst("player_name(?)", name)
+		assertFirst("entity_name(?)", name)
 	}
 
-	def kb_recordPercepts(playerName : String, stepNo : int, percepts : String) {
-		assertFirst("percepts(?, ?, ?)", playerName, stepNo, percepts)
+	def kb_recordPercepts(entityName : String, stepNo : int, percepts : String) {
+		assertFirst("percepts(?, ?, ?)", entityName, stepNo, percepts)
 		
 	}
 
-	def kb_recordPercepts(playerName : String, stepNo : int, percepts : Collection<Percept>) {
+	def kb_recordPercepts(entityName : String, stepNo : int, percepts : Collection<Percept>) {
 		val perceptsProlog : Collection<String> = new ArrayList<String>
 
 		percepts.forEach[percept : Percept|perceptsProlog.add(percept.toProlog())]
 		
-		assertFirst("percepts(?, ?, ?)", playerName, stepNo, perceptsProlog.toString)
+		assertFirst("percepts(?, ?, ?)", entityName, stepNo, perceptsProlog.toString)
 	}
 
-	def kb_processLastPercept(playerName : String) {
-		prove("process_last_percepts(?)", playerName)
+	def kb_processLastPercept(entityName : String) {
+		prove("process_last_percepts(?)", entityName)
 	}
 
-	def kb_pickDestination(playerName : String) : String {
-		val solution = askOnce(String.format("choose_destination('%s', Destination)", playerName))
-//		solution = askOnce("choose_destination(@S, Destination)", playerName)	// Using Mochalog query builder formatter
+	def kb_pickDestination(entityName : String) : String {
+		val solution = askOnce(String.format("choose_destination('%s', Destination)", entityName))
+//		solution = askOnce("choose_destination(@S, Destination)", entityName)	// Using Mochalog query builder formatter
 		
 		if (solution !== null) return solution.get("Destination").name else return null
 	}

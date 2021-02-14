@@ -1,14 +1,13 @@
 package au.edu.rmit.agtgrp.agtcity.sarl.utils
 
-class PlayersManager {
+class EntitiesManager {
 	public var myName = "bigBoss"
 
 	public var dirConfigFiles = "conf/SingleAgent/"
 	public var eisMassimConfig = "eismassimconfig.json"
-	public var playersMassimConfig = "agentsconfig.json"
+	public var entitysMassimConfig = "agentsconfig.json"
 
-	public var myConnections : String[] = #["connectionA1", "connectionA2", "connectionA3", "connectionA4",
-	"connectionA5", "connectionA6"]	
+	public var myConnections : String[] = #["entityA1", "entityA2", "entityA3", "entityA4", "entityA5", "entityA6"]	
 	new (myName : String, dirConfigFiles : String, eisMassimConfig : String, myConnections: String[]) {
 			
 		this.myName = myName

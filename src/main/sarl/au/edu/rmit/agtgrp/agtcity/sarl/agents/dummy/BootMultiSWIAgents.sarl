@@ -30,7 +30,7 @@ import java.util.HashSet
 import java.util.Set
 import java.util.UUID
 
-import au.edu.rmit.agtgrp.agtcity.sarl.utils.PlayersManager
+import au.edu.rmit.agtgrp.agtcity.sarl.utils.EntitiesManager
 //import java.io.File
 //import java.text.SimpleDateFormat
 //import java.util.Date
@@ -38,7 +38,7 @@ import au.edu.rmit.agtgrp.util.TimestampedDir
 
 /** 
  * This agent will spawn several single SWISingleFullAgents, each of the managing some subset
- * of the players in the simulation
+ * of the entitys in the simulation
 
  * @author Sebastian Sardina (ssardina@gmail.com) * 
  */
@@ -50,7 +50,7 @@ agent BootMultiSWIAgents {
 
 	val eiConfigFile = #["conf/SingleAgent/", "eismassimconfig.json"]
 	
-	var teamManagers : Collection<PlayersManager> = new ArrayList<PlayersManager>()
+	var teamManagers : Collection<EntitiesManager> = new ArrayList<EntitiesManager>()
 	var agentsToComplete : Set<UUID> = new HashSet<UUID>() // set of all SARL agents in the system
 	var noToSpawn : int	// total agents to spawn
 	var noSpawn : int	// agents already spawn
@@ -61,10 +61,10 @@ agent BootMultiSWIAgents {
      	
      	
 		teamManagers.add(
-			new PlayersManager("team1Manager", eiConfigFile.get(0), eiConfigFile.get(1), 
+			new EntitiesManager("team1Manager", eiConfigFile.get(0), eiConfigFile.get(1), 
 				#["connectionA1", "connectionA2", "connectionA3"]))
 		teamManagers.
-			add(new PlayersManager("team2Manager", eiConfigFile.get(0), eiConfigFile.get(1),
+			add(new EntitiesManager("team2Manager", eiConfigFile.get(0), eiConfigFile.get(1),
 			#["connectionA4", "connectionA5", "connectionA6"]))
 
 
@@ -77,11 +77,11 @@ agent BootMultiSWIAgents {
 		debug("Starting to spawn the manager agents")
 		noToSpawn = teamManagers.size
 		noSpawn = 0
-		teamManagers.forEach([ teamManager : PlayersManager |
+		teamManagers.forEach([ teamManager : EntitiesManager |
 			debug("About to spawn team manager **{0}**", teamManager.myName)
 			
 			val agent_UUID = UUID::randomUUID;
-			spawnInContextWithID(SWISingleFullAgent, agent_UUID, defaultContext, teamManager, TimestampedDir.getDir())
+			spawnInContextWithID(SWISuperSingleAgent, agent_UUID, defaultContext, teamManager, TimestampedDir.getDir())
 			debug("\t SARL agent for team manager **{0}** spawn...", teamManager.myName)
 			synchronized (agentsToComplete) {
 				agentsToComplete.add(agent_UUID)
