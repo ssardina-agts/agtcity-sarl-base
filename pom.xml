@@ -195,7 +195,7 @@
 		<dependency>
 		    <groupId>com.github.ssardina-agts</groupId>
 		    <artifactId>agtcity-sarl-mw</artifactId>
-		    <version>18554abe006c9a5f4751faf071245d8822b541d7</version>
+		    <version>909154a</version>
 		</dependency>
 
  		 
