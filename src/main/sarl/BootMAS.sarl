@@ -15,48 +15,39 @@ class BootMAS {
 		var sre = SRE::bootstrap
 		sre.verboseLevel = 7
 
+		// Configuration of booting utility
 		val basePackage = "au.edu.rmit.agtgrp.agtcity.sarl.agents"
-		val AGENTS_AVAILABLE : String[] = #["default", "SuperSingleAgent", "SWISingleFullAgent", "BootMultiSWIAgents"]
+		val AGENTS_AVAILABLE : String[] = #["default", "SuperSingleAgent", "SWISuperSingleAgent",
+			"BootMultiSWIAgents"]
 		val DEFAULT = "SuperSingleAgent"
 		
 		System.out.println(String.format("Default Controller is: %s", DEFAULT))
 
-		// Boot a specific one and that' s it
-		// Boot.startJanus(typeof(DummyMultiCarController))
-		var agentToLaunch : String
-		if (args.length == 0) { // if not agent given in CLI argument, list the available ones and ask user for one
-			agentToLaunch = getSelectionFromuser("Choose the controller to run: ", AGENTS_AVAILABLE)
-		}
-		else {
-			agentToLaunch = args.get(0) // get the agent name from CLI first argument
-		}
 
-		System.out.println(String.format("Running controller: \"%s\"", agentToLaunch))
+		// If agent has not been passed in CLI, ask the user for the agent to boot from available ones
+		var agentToLaunch : String = DEFAULT
+		if (args.length == 0) 
+			agentToLaunch = getSelectionFromuser("Choose the controller to run: ", AGENTS_AVAILABLE)
+		else 
+			agentToLaunch = args.get(0) // get the agent name from CLI first argument
+
+		// Calculate full qualified class for agent selected
 		var fullyQualifiedAgent : String
-		switch agentToLaunch {
-			case 'default':
-				fullyQualifiedAgent = String.format("%s.%s", basePackage, "dummy.SuperSingleAgent")
-			case 'SuperSingleAgent': 
-				fullyQualifiedAgent = String.format("%s.%s", basePackage, "dummy.SuperSingleAgent")
-			case 'BootMultiSWIAgents':
-				fullyQualifiedAgent = String.format("%s.%s", basePackage, "dummy.BootMultiSWIAgents")
-			case 'SWISingleFullAgent':
-				fullyQualifiedAgent = String.format("%s.%s", basePackage, "dummy.SWISingleFullAgent")
-			default:
-				throw new IllegalArgumentException("Invalid agent to start: " + agentToLaunch)
-		}
+		if(agentToLaunch == "default") agentToLaunch = DEFAULT
+		fullyQualifiedAgent = String.format("%s.dummy.%s", basePackage, agentToLaunch)
 		
-		// now get agent class for fullQualifiedAgent and boot it
-		System.out.println(String.format("Loading SARL controller agent %s (%s)", fullyQualifiedAgent, agentToLaunch))
+		// Next, get agent class for fullQualifiedAgent
+		System.out.println(String.format("Loading SARL controller agent: %s", fullyQualifiedAgent))
 		val type = Class.forName(fullyQualifiedAgent)
 		var SARLagent : Class<? extends Agent>
 		SARLagent = type.asSubclass(Agent)
 		assert SARLagent !== null;
 
+		// Finally, boot class SARLagent
 		if (args.length == 2) { // second CLI argument states which config dir has to be used to find "eismassimconfig.json"
 			sre.startAgent(SARLagent, args.get(1)) 	// pass it to agent if there was one
 		} else {
-			sre.startAgent(SARLagent)
+			sre.startAgent(SARLagent) // agent will ask for server connection file
 		}
 	}
 

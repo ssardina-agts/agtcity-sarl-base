@@ -6,6 +6,9 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.io.File
 
+/**
+ * An utility to manage folders with a timestamp in their name (e.g., to create set of logs or dumps)
+ */
 class TimestampedDir {
 	static val formatter = new SimpleDateFormat("yyyy-MM-dd--HH-mm-ss")
 	static var runtime_timestamp = formatter.format(new Date()) // store runtime date time as a string
@@ -27,21 +30,27 @@ class TimestampedDir {
 	}
 
 	/* 
-	 * Set the root of the current log dir 
+	 * Sets the root of the timestamped dir
+	 * 
+	 * @param rootDir the root folder
 	 */
-	static def setRoot(rootDir : String) : String {
+	static def setRoot(rootDir : String) : void {
 		timestampedLogDir = String.format("%s/%s", rootDir, runtime_timestamp)
 	}
 
 	/* 
-	 * Get current log dir as a String
+	 * Get the full nameof the timestamp folder
+	 * 
+	 * @return the full name of the timestamp folder
 	 */
 	static def getDir() : String {
 		return timestampedLogDir
 	}
 
 	/* 
-	 * Get current log dir as a Path
+	 * Get current timestamp dir as a Path
+	 * 
+	 * @return the Path of the timestamp dir
 	 */
 	static def getPath() : Path {
 		return Paths.get(timestampedLogDir)
@@ -59,14 +68,16 @@ class TimestampedDir {
 	}
 
 	/**
-	 * Does the current log dir exist?
+	 * Check if timestamp dir exists already
+	 * 
+	 * @return true if the timestamp dir exists
 	 */
 	static def exists() : boolean {
 		return new File(timestampedLogDir).exists()
 	}
 	
 	/**
-	 * Create the log dir if it does not exist
+	 * Create the timestamp dir if it does not exist
 	 */
 	static def create() {
 		if (!exists()) new File(timestampedLogDir).mkdirs
