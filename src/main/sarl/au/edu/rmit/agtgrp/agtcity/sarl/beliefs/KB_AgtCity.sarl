@@ -1,6 +1,6 @@
 /** 
  * SARL-AGTCITY-BASE - Team controller for Agents in City Game
- * Copyright (C) 2018 Sebastian Sardina.
+ * Copyright (C) 2018-2021 Sebastian Sardina.
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,8 @@ capacity KB_AgtCity {
 	def kb_processLastPercept(entityName : String)
 	def kb_pickDestination(entityName : String) : String
 
+	@Pure
+	def kb_lengthRoute(entityName : String) : int
 	def kb_setLogLevel(logLevel : int)
 }
 
@@ -102,6 +104,13 @@ skill SWI_KB_AgtCity implements KB_AgtCity extends SWIJPL_KB_Prolog {
 //		solution = askOnce("choose_destination(@S, Destination)", entityName)	// Using Mochalog query builder formatter
 		
 		if (solution !== null) return solution.get("Destination").name else return null
+	}
+
+	@Pure
+	def kb_lengthRoute(entityName : String) : int {
+		val solution = askOnce(String.format("get_entity_routeLength('%s', N)", entityName))
+		// solution = askOnce("choose_destination(@S, Destination)", entityName)	// Using Mochalog query builder formatter
+		if (solution !== null) return solution.get("N").intValue else return -1
 	}
 
 	// Function invoked when the skill is installed in the owner.

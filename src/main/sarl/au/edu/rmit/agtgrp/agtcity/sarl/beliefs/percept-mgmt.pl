@@ -139,6 +139,11 @@ get_entity_loc(Entity, Step, Lat, Long) :-
 get_entity_charge(Entity, Step, Charge) :-
 	percepts(Entity, Step, Percepts), !,
 	member(charge(Charge), Percepts).
+get_entity_routeLength(Entity, Step, Length) :-
+	percepts(Entity, Step, Percepts), !,
+	member(routeLength(Length), Percepts).
+get_entity_routeLength(Entity, Length) :-       % return last route length
+    get_entity_routeLength(Entity, _, Length), !.
 
 
 
