@@ -2,6 +2,8 @@ import io.sarl.bootstrap.SRE
 
 import io.sarl.lang.core.Agent
 import java.util.Scanner
+import au.edu.rmit.agtgrp.agtcity.sarl.utils.BootingConf
+import java.util.ArrayList
 
 /** 
  * @author Sebastian Sardina (ssardina@gmail.com)
@@ -43,12 +45,23 @@ class BootMAS {
 		SARLagent = type.asSubclass(Agent)
 		assert SARLagent !== null;
 
-		// Finally, boot class SARLagent
-		if (args.length == 2) { // second CLI argument states which config dir has to be used to find "eismassimconfig.json"
-			sre.startAgent(SARLagent, args.get(1)) 	// pass it to agent if there was one
-		} else {
-			sre.startAgent(SARLagent) // agent will ask for server connection file
+		// Object to pass booting info
+		var bootingConf = new BootingConf()
+
+		// Arguments (optional) have been passed in CLI
+		// First arg should be the directory where to grab the server connection configuration file "eismassimconfig.json"
+		// The remaining arguments are the entities to control
+		if (args.length >= 2) { // second CLI argument states which config dir has to be used to find 
+			bootingConf.eiConfigurationDir = args.get(1);
+			if (args.length >= 3) { 	// entities to connect have been given too
+				var entitiesToConnect = new ArrayList<String>
+		       	for (var i = 2; i < args.length; i++) 	// process entities to be controlled
+					entitiesToConnect.add(args.get(i))
+				bootingConf.connections = entitiesToConnect
+			}
 		}
+		// Finally boot the agent and pass booting object as argument
+		sre.startAgent(SARLagent, bootingConf)
 	}
 
 	/**
