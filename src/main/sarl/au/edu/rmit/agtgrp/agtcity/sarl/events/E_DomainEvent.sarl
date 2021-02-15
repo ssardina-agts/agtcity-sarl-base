@@ -17,10 +17,9 @@
  */
 package au.edu.rmit.agtgrp.agtcity.sarl.events
 
-event E_DomainEvent
-event E_MoveRandomly extends E_DomainEvent {
+event E_MoveRandomly {
 	var entityName : String
 }
-event E_SenseEnvironment extends E_DomainEvent 
+event E_SenseEnvironment 
 
 
