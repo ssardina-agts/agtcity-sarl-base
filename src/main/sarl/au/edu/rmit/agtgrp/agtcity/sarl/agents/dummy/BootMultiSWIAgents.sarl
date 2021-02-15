@@ -1,6 +1,6 @@
 /** 
  * SARL-AGTCITY-BASE - Team controller for Agents in City Game
- * Copyright (C) 2017 The SARL-AGTCITY-BASE Authors.
+ * Copyright (C) 2017-2021 The SARL-AGTCITY-BASE Authors.
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
  */
 package au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy
 
+
 import io.sarl.core.Initialize
 import io.sarl.core.Lifecycle
 import io.sarl.core.Logging
@@ -30,66 +31,93 @@ import java.util.HashSet
 import java.util.Set
 import java.util.UUID
 
-import au.edu.rmit.agtgrp.agtcity.sarl.utils.EntitiesManager
-//import java.io.File
-//import java.text.SimpleDateFormat
-//import java.util.Date
-import au.edu.rmit.agtgrp.util.TimestampedDir
+import au.edu.rmit.agtgrp.agtcity.sarl.mw.utils.ConfHandler
+import au.edu.rmit.agtgrp.util.KBDumpingDir
+import au.edu.rmit.agtgrp.agtcity.sarl.utils.BootingConf
 
 /** 
  * This agent will spawn several single SWISingleFullAgents, each of the managing some subset
- * of the entitys in the simulation
+ * of the entities in the simulation
 
- * @author Sebastian Sardina (ssardina@gmail.com) * 
+ * @author Sebastian Sardina (ssardina@gmail.com)  
  */
 @SuppressWarnings("potential_field_synchronization_problem")
 agent BootMultiSWIAgents {
     uses Lifecycle
     uses Logging
     uses DefaultContextInteractions
+    
+    val myName = this.class.simpleName
 
-	val eiConfigFile = #["conf/SingleAgent/", "eismassimconfig.json"]
+	// We allow SARL systems to have a directory to store configuration files or data
+	// In this case it is very simple as that directory will just have the EI configuration file eismassimconfig.json
+	// but more complex SARL systems can make use of various files to use at boot time
+	// The EI configuration file contains info to connect entities to server: server info (port/host + options) & entities credentials
+	var eiConfigurationDir : String // the configuration folder to be used (given by argument or asked to the user)
+	var eiConfigurationFileName = "eismassimconfig.json" // fixed (should be inside the configuration dir)
+	val eiConfigurationDirs = "conf" // the folder containing many configuration folders
 	
-	var teamManagers : Collection<EntitiesManager> = new ArrayList<EntitiesManager>()
+
+	// Variables used to keep track the various SARL agents spawns
+	var bootingConfigs : Collection<BootingConf> = new ArrayList<BootingConf>
 	var agentsToComplete : Set<UUID> = new HashSet<UUID>() // set of all SARL agents in the system
 	var noToSpawn : int	// total agents to spawn
 	var noSpawn : int	// agents already spawn
 	
-     on Initialize {
-     	logLevel = 4
-     	debug("Agent BootMultiSWIAgents is starting to initialize...")
-     	
-     	
-		teamManagers.add(
-			new EntitiesManager("team1Manager", eiConfigFile.get(0), eiConfigFile.get(1), 
-				#["connectionA1", "connectionA2", "connectionA3"]))
-		teamManagers.
-			add(new EntitiesManager("team2Manager", eiConfigFile.get(0), eiConfigFile.get(1),
-			#["connectionA4", "connectionA5", "connectionA6"]))
+	on Initialize {
+		var args = newArrayList(occurrence.parameters) // may receive parameters when booted
 
+		setLoggingName(myName)
+		info("Multi-agent Booting agent starting. My ID is {0}", this.ID)
 
-		// Set the directory where the KB will be dumped: kb_dump_BootMultiSWI/<timestamp>
-		// all agents will dump in the same directory
-		TimestampedDir.setRoot("kb_dump_BootMultiSWI")
-		if(!TimestampedDir.exists) TimestampedDir.create
-		debug("Dumping directory setup...")
+		// A configuration object has been provided
+		if (args.length >= 1) { // a configuration booting object has been provided, use it!
+			val bootingOptions = args.get(0) as BootingConf
 
-		debug("Starting to spawn the manager agents")
-		noToSpawn = teamManagers.size
+			if (bootingOptions.eiConfigurationDir !== null)
+				eiConfigurationDir = bootingOptions.eiConfigurationDir
+			if (bootingOptions.eiConfigurationFileName !== null)
+				eiConfigurationFileName = bootingOptions.eiConfigurationFileName
+		}
+		if (eiConfigurationDir === null) // ask the user which EI configuration dir to use
+			eiConfigurationDir = ConfHandler.getConfDir(eiConfigurationDirs) // ask user which folder in conf/ to use
+
+		// Set the directory where the KBs will be dumped for all team managers
+		KBDumpingDir.setRoot("kb_dump_BootMultiSWI")
+		if(!KBDumpingDir.exists) KBDumpingDir.create
+		debug("KB dumping folder configured at {0}", KBDumpingDir.dir)
+		
+	 	// Build different teams, each will control a set of entities
+		var bootConf1 = new BootingConf("team1Manager")
+		bootConf1.eiConfigurationDir = eiConfigurationDir
+		bootConf1.eiConfigurationFileName = eiConfigurationFileName
+		bootConf1.connections = #["entityA1", "entityA3"]
+		bootConf1.logDir = KBDumpingDir.path
+		bootingConfigs.add(bootConf1)
+
+		var bootConf2 = new BootingConf("team2Manager")
+		bootConf2.eiConfigurationDir = eiConfigurationDir
+		bootConf2.eiConfigurationFileName = eiConfigurationFileName
+		bootConf2.connections = #["entityA2", "entityA4"]
+		bootConf2.logDir = KBDumpingDir.path
+		bootingConfigs.add(bootConf2)
+	
+		info("Starting to spawn the individual manager agents")
+		noToSpawn = bootingConfigs.size
 		noSpawn = 0
-		teamManagers.forEach([ teamManager : EntitiesManager |
+		bootingConfigs.forEach([ teamManager : BootingConf |
 			debug("About to spawn team manager **{0}**", teamManager.myName)
 			
 			val agent_UUID = UUID::randomUUID;
-			spawnInContextWithID(SWISuperSingleAgent, agent_UUID, defaultContext, teamManager, TimestampedDir.getDir())
-			debug("\t SARL agent for team manager **{0}** spawn...", teamManager.myName)
+			spawnInContextWithID(SWISuperSingleAgent, agent_UUID, defaultContext, teamManager)
+			info("\t SARL agent for team manager **{0}** spawn...", teamManager.myName)
 			synchronized (agentsToComplete) {
 				agentsToComplete.add(agent_UUID)
 			}
 		])
 	}
 
-	on AgentSpawned [!(occurrence.agentID == this.ID)] {
+	on AgentSpawned [!occurrence.fromMe] {
 		val agent_UUID = occurrence.agentID
 		val agent_type = occurrence.agentType
 

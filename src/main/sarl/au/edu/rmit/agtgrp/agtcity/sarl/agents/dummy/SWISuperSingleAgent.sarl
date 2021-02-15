@@ -2,7 +2,7 @@
  * SARL-MASSIM - Interface between the SARL agent-oriented language 
  * and the MASSIM RMIT 2018+ server
  * 
- * Copyright (C) 2017-2020 The SARL-MASSIM Authors.
+ * Copyright (C) 2017-2021 Sebastian Sardina - ssardina@gmail.com
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,6 @@
  */
 package au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy
 
-// MASSIM EIS imports
-
 import au.edu.rmit.agtgrp.agtcity.sarl.beliefs.KB_AgtCity
 import au.edu.rmit.agtgrp.agtcity.sarl.beliefs.SWI_KB_AgtCity
 import au.edu.rmit.agtgrp.agtcity.sarl.events.E_MoveRandomly
@@ -29,21 +27,27 @@ import au.edu.rmit.agtgrp.agtcity.sarl.mw.capacities.C_Reporting
 import au.edu.rmit.agtgrp.agtcity.sarl.mw.skills.S_ConsoleReporting
 import au.edu.rmit.agtgrp.agtcity.sarl.mw.skills.S_MassimTalking
 import au.edu.rmit.agtgrp.agtcity.sarl.mw.utils.ConfHandler
-import au.edu.rmit.agtgrp.util.TimestampedDir
+import au.edu.rmit.agtgrp.util.KBDumpingDir
+import au.edu.rmit.agtgrp.agtcity.sarl.utils.BootingConf
+
 import eis.exceptions.PerceiveException
 import eis.iilang.Action
 import eis.iilang.EnvironmentState
 import eis.iilang.Identifier
 import eis.iilang.Percept
+
 import io.sarl.core.DefaultContextInteractions
 import io.sarl.core.Initialize
 import io.sarl.core.Lifecycle
 import io.sarl.core.Logging
 import io.sarl.core.Schedules
+
 import io.sarl.extras.KB_Prolog
+
 import java.nio.file.Paths
 import java.util.Collection
 import java.util.Random
+import java.nio.file.Path
 
 event E_SenseEnvironment
 
@@ -71,17 +75,21 @@ agent SWISuperSingleAgent {
 	uses KB_AgtCity, KB_Prolog // We can use KB_Prolog directly!
 	
 
-	val myName = "swiSingleFullAgent"
-
+	var myName = this.class.simpleName
 	val agentLogLevel = 4 // debug = 4 this is for the high-level agent, not for SARL
 	val reportEILog = false // true if XML messages from server need to be printed out
 	val reportState = true // Report current state of entity and state tracking
 
-	// Server configuration file: server info (port/host + options) & entities credentials
-	val eiRegistrationFileName = "eismassimconfig.json" 
+	// We allow SARL systems to have a directory to store configuration files or data
+	// In this case it is very simple as that directory will just have the EI configuration file eismassimconfig.json
+	// but more complex SARL systems can make use of various files to use at boot time
+	// The EI configuration file contains info to connect entities to server: server info (port/host + options) & entities credentials
+	var eiConfigurationDir : String // the configuration folder to be used (given by argument or asked to the user)
+	var eiConfigurationFileName = "eismassimconfig.json" // fixed (should be inside the configuration dir)
+	val eiConfigurationDirs = "conf" // the folder containing many configuration folders
 
 	// Entities to register in the server and control
-	val myConnectedEntities = #["entityA1", "entityA4"] 
+	var myConnectedEntities = #["entityA1", "entityA4"] 
 
 
 	// Data kept by this single SARL agent: just the step number
@@ -92,11 +100,8 @@ agent SWISuperSingleAgent {
 
 	// Folders where Prolog KB are located by default and where to dump the KBs
 	var kb_root_path = Paths.get("src/main/sarl/au/edu/rmit/agtgrp/agtcity/sarl/beliefs")
-	var kb_dump_dir : String // directory where KB database is to be dumped
-	
-	
-	
-	
+	var kb_dump_dir : Path  // directory where KB database is to be dumped
+
 	/* 
 	 * SARL agent is initialized 
 	 * 
@@ -105,65 +110,75 @@ agent SWISuperSingleAgent {
 	 * To do so, the agent will install a S_MassimTalking skill, which allows the agent to talk to the game server.
 	 * 
 	 * The skill uses the Environment Interface (EI) for MASSIM which provides a high-level connection to the game server.
-	 * The skill needs an EI registration file "eismassimconfig.json" containing all the server info and
+	 * The skill uses an EI server connection configuration file "eismassimconfig.json" containing all the server info and
 	 * all entity connections available (including username/password to authenticate) 
-	 * We can tell the skill to control an sense among those available connections
+	 * We can tell the skill to control an sense among those available entities defined in the file.
 	 * 
 	 * Different EI registration files can be kept in different folders under conf/
 	 * 
-	 * If a directory is given in CLI argument, then  EI registration file eismassimconfig.json is search there.
-	 * Otherwise, possible options as per folders under conf/ are scanned and given to user for selection	 * 
+	 * Agent may receive zero or one argument (via CLI argument).
+	 * The argument states the directory where the EI config file "eismassimconfig.json" to be used is located.
+	 * If no argument is given, possible sub-folders under conf/ are scanned and given to user for selection	  
 	 */
 	on Initialize { // Should only be initializing with the EIS as a parameter.
-		var args = newArrayList(occurrence.parameters) // may receive config directory at creation
-		var eiConfigDir : String
-
-		setLogLevel(agentLogLevel) // set debug level for Logging built-in capacity
-		info("This is an INFO TEST message (level 3)....")
-		warning("This is a WARNING TEST message (level 2)....")
-		error("This is an ERROR TEST message (level 1)....")
-		setSkill(new S_ConsoleReporting(myName), C_Reporting) // Give reporting skill via console to agent
+		var args = newArrayList(occurrence.parameters) // may receive a booting configuration object
 
 		/** 
 		 * 1. FIRST, collect the directory where the server configuration file eiRegistrationFile is located
 		 * If none is given as CLI argument, search inside conf/ folder and make user select one
 		 */
-		agent_says("PHASE 1: INSTALL MASSIM-TALKING SKILL WITH CONFIG FILE: {0}", eiRegistrationFileName)
-		if (args.length != 0) 
-			eiConfigDir = args.get(0).toString() 	// use the config dir given as CLI argument
-		else
-			eiConfigDir = ConfHandler.getConfDir()	// ask user
-		val eiRegistrationFile = Paths.get(eiConfigDir, eiRegistrationFileName)
+		if (args.length >= 1) { // a configuration booting object has been provided, use it!
+			val bootingOptions = args.get(0) as BootingConf
+
+			if (bootingOptions.myName !== null)
+				myName = bootingOptions.myName
+			if (bootingOptions.eiConfigurationDir !== null)
+				eiConfigurationDir = bootingOptions.eiConfigurationDir
+			if (bootingOptions.eiConfigurationFileName !== null)
+				eiConfigurationFileName = bootingOptions.eiConfigurationFileName
+			if (bootingOptions.connections !== null)
+				myConnectedEntities = bootingOptions.connections
+			if (bootingOptions.logDir !== null)
+				kb_dump_dir = bootingOptions.logDir
+		}
+		if (eiConfigurationDir === null) // ask the user which EI configuration dir to use
+			eiConfigurationDir = ConfHandler.getConfDir(eiConfigurationDirs) // ask user which folder in conf/ to use
+		val eiConfigurationFile = Paths.get(eiConfigurationDir, eiConfigurationFileName)
+
+		setLogLevel(agentLogLevel) // set debug level for Logging built-in capacity
+		setLoggingName(myName)
+		info("This is an INFO TEST message (level 3)....")
+		warning("This is a WARNING TEST message (level 2)....")
+		error("This is an ERROR TEST message (level 1)....")
+		setSkill(new S_ConsoleReporting(myName), C_Reporting) // Give reporting skill via console to agent
 
 
 		// Set the KB dumping directory: variable kb_dump_dir
 		// If a parameter was provided at CLI, then use that. Otherwise, use kb_dump_SWISingle/<timestamp>
-		if (args.length >= 2) 
-			kb_dump_dir = args.get(1).toString()
-		else {
-			TimestampedDir.setRoot("kb_dump_SWISingle")		// set and create the KB dumping folder 
-			if (!TimestampedDir.exists) TimestampedDir.create
-			kb_dump_dir = TimestampedDir.getDir()
+		if (kb_dump_dir === null) {
+			KBDumpingDir.setRoot("kb_dump_SWISingle")		// set and create the KB dumping folder 
+			if (!KBDumpingDir.exists) KBDumpingDir.create
+			kb_dump_dir = KBDumpingDir.getPath()
 		}
 		debug("\n***************************************************\n" + 
 				"Configuration settings:\n" + 
 				"\t My SARL agent name: {0}\n" +
-				"\t EI registration file: {1}\n" + 
+				"\t EI server connection configuration file: {1}\n" + 
 				"\t Directory to dump KB: {2}\n" + 
+				"\t Entities to be controlled: {3}\n" + 
 				"***************************************************", 
 			myName,
-			eiRegistrationFile,
-			Paths.get(kb_dump_dir))
+			eiConfigurationFile.toString,
+			kb_dump_dir.toString, 
+			myConnectedEntities.toString)
 			
 		try {
-
 			/** 
 			 * 2. SECOND, install Massim-Talking skill to talk to the  game server using EI registration file 
 			 * (no actual connection to entities yet, just recording of registration file to be used)
 			 */
-				
-			agent_says("PHASE 2: INSTALL MASSIM-TALKING SKILL WITH EI REGISTRATION FILE {0}", eiRegistrationFile)
-			setSkill(new S_MassimTalking(eiRegistrationFile, reportEILog), C_MassimTalking)
+			agent_says("PHASE 2: INSTALL MASSIM-TALKING SKILL WITH EI REGISTRATION FILE {0}", eiConfigurationFile)
+			setSkill(new S_MassimTalking(eiConfigurationFile, reportEILog), C_MassimTalking)
 
 			/** 
 			 * 3. THIRD, configure the skill by providing which specific entities this SARL agent will control
@@ -182,7 +197,7 @@ agent SWISuperSingleAgent {
 			 * 
 			 * All entities registered for control are authenticated and connected to the server
 			 */
-			agent_says("PHASE 4: INITIALIZING CONNECTIONS {1} USING EI CONFIG FILE {0}", eiRegistrationFileName);
+			agent_says("PHASE 4: INITIALIZING CONNECTIONS {1} USING EI CONFIG FILE {0}", eiConfigurationFileName);
 			if (MT_initialize()) {
 				agent_says("The EI is now initialized, entities are being authenticated...")
 			} else {
@@ -193,14 +208,13 @@ agent SWISuperSingleAgent {
 			/* 
 			 * FIFTH, Set up a new Prolog belief base - load agent knowledge bases.
 			 */
-			val beliefSpace = String.format(this.myName)
-			setSkill(new SWI_KB_AgtCity(beliefSpace, 0, kb_dump_dir))
+			setSkill(new SWI_KB_AgtCity(myName, 0, kb_dump_dir.toString))
 			agent_says("My KB SWI module is: {0}", get_prolog_engine.toString()) // This will give the SWI module where this agent has its KB!
 			kb_load(Paths.get(kb_root_path.toString, "tools.pl").toString)
 			kb_load(Paths.get(kb_root_path.toString, "percept-mgmt.pl").toString)
 			kb_load(Paths.get(kb_root_path.toString, "decision-making.pl").toString)
 			agent_says("I have loaded all my knowledge bases!")
-			assertFirst("agentName(?)", this.myName) // assert my name in the KB (using SWI_KB_Prolog skill directly)
+			assertFirst("agentName(?)", myName) // assert my name in the KB (using SWI_KB_Prolog skill directly)
 			// kb_recordKBName(mySARLname)				// same but using the current KB domain capacity KB_AgtCity
 			dump_kb() // Using Prolog-CAP directly
 				
@@ -226,7 +240,7 @@ agent SWISuperSingleAgent {
 	/* 
 	 * Repetitively sense each registered and connected entity
 	 */
-	on E_SenseEnvironment {
+	on E_SenseEnvironment [occurrence.fromMe] {
 		agent_shouts("Start sensing the environment for the following entities I control: {0}", MT_getEntityNames)
 
 		// While the environment is running, wait for new percepts (read percepts for each entity registered/connected)
@@ -282,7 +296,7 @@ agent SWISuperSingleAgent {
 
 
 
-	on E_MoveRandomly [reportState] {
+	on E_MoveRandomly [occurrence.fromMe && reportState] {
 
 		// 1. Report all the percepts/3 information available in the KB
 		// val query = new Query("percepts(Agent, Step, Percepts)")	// no need to format query
@@ -293,8 +307,9 @@ agent SWISuperSingleAgent {
 		// }
 		// 2. Report current status of each entity from data in the KB
 		MT_getEntityNames.forEach([ entity : String |
-			val solution = askOnce("get_entity_last_loc(?, Step, Lat, Long), 
-									get_entity_last_charge(?, Step, Charge)", entity, entity)
+			
+			val query = "get_entity_last_loc(?, Step, Lat, Long), get_entity_last_charge(?, Step, Charge)"
+			val solution = askOnce(query, entity, entity)
 			if (solution !== null) {
 				agent_says(
 					"entity **{0}** location is ({1},{2}) and charge is {3} at step {4}",
@@ -311,25 +326,23 @@ agent SWISuperSingleAgent {
 
 		// 3. Finally, save current KB to file (for the step)
 		agent_says("I will dump all that I know so far....")
-		dump_kb() // Using Prolog-CAP directly
-//		reportState(occurrence.entity)
-//		agent_says(state.report());
+		dump_kb() 
 	}
 
 	// We are still traveling, just continue following the path...
-	on E_MoveRandomly [MT_getEntityState(occurrence.entityName).routeLength > 0] {
+	on E_MoveRandomly [occurrence.fromMe && kb_lengthRoute(occurrence.entityName) > 0] {
 		val entityName = occurrence.entityName
+		val stepsToGo = kb_lengthRoute(entityName)
 
-		agent_says("Seems entity **{0}** is already traveling: {1} steps to go!", entityName,
-			MT_getEntityState(entityName).routeLength)
+		agent_says("Entity **{0}** is already traveling: {1} steps to go!", entityName, stepsToGo)
 
-		if (!MT_executeAction(entityName, new Action("continue")))
+		if (!MT_executeAction(entityName, action_continue))
 			warning("Could not perform continue for entity **{1}**", entityName)
 	}
-
-
-	// We are NOT traveling: buy or go somewhere or wait 
-	on E_MoveRandomly [MT_getEntityState(occurrence.entityName).routeLength == 0] {
+//
+//
+//	// We are NOT traveling: buy or go somewhere or wait 
+	on E_MoveRandomly [occurrence.fromMe && MT_getEntityState(occurrence.entityName).routeLength == 0] {
 		val entityName = occurrence.entityName
 
 		// Pick some random facility and go!
