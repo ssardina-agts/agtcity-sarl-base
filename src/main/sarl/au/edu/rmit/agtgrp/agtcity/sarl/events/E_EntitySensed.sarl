@@ -1,0 +1,19 @@
+/** 
+ * 
+ */
+package au.edu.rmit.agtgrp.agtcity.sarl.events
+
+import java.util.Collection
+import eis.iilang.Percept
+
+event E_EntitySensed {
+	var stepNo : int
+	var entityName : String
+	var percepts : Collection<Percept>
+
+	new(stepNo : int, entityName : String, percepts : Collection<Percept>) {
+		this.stepNo = stepNo
+		this.entityName = entityName
+		this.percepts = percepts
+	}
+}

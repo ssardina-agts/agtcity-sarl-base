@@ -55,12 +55,6 @@ import au.edu.rmit.agtgrp.agtcity.sarl.utils.BootingConf
 
 event E_SenseEnvironment
 
-//event E_EntitySensed { // Provided in the MW
-//	var stepNo : int
-//	var entityName : String
-//	var percepts : Collection<Percept>
-//}
-
 /** 
  * This is a monolithic SARL agent to manage ALL the entity agents in the  game simulation.
  */
