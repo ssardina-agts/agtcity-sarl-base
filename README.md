@@ -98,6 +98,8 @@ All the agents can be run via the booting class `BootMAS`, which is the default 
 
 To change the log level, pass `-Dloglevel=n` option (FINE/DEBUG=4; INFO=3; WARNING=2; ERROR=1). Defaults to level 3.
 
+The agents can be given a parameter as an object of class `au.edu.rmit.agtgrp.agtcity.sarl.utils.BootingConf` which can store various settings to be used when booting the agent.
+
 ### **`SuperSingleAgent`**: The SARL controller
 
 _Package_: `au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.SuperSingleAgent`
@@ -144,7 +146,8 @@ Here is how we can start this system directly:
 $ mvn -o exec:java -Dexec.args="BootMultiSWIAgents conf/SingleAgent"
 ```
 
-This agent has the different teams hard-coded, so any other argument passed (list of entities to be controlled) will be ignored.
+This agent has the different teams hard-coded, so any other argument passed (list of entities to be controlled) will be ignored. The different teams will have a different object 
+`BootingConf`, each containing a different set of entities to control.
 
 ----------------------------
 ## PROJECT CONTRIBUTORS
