@@ -98,7 +98,7 @@ All the agents can be run via the booting class `BootMAS`, which is the default 
 
 To change the log level, pass `-Dloglevel=n` option (FINE/DEBUG=4; INFO=3; WARNING=2; ERROR=1). Defaults to level 3.
 
-### **`SuperSingleAgent`**
+### **`SuperSingleAgent`**: The SARL controller
 
 _Package_: `au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.SuperSingleAgent`
 
@@ -110,7 +110,13 @@ $ mvn exec:java -Dexec.args="SuperSingleAgent conf/SingleAgent"
 
 This SARL agent will first register a set of entities to be controlled. Then it will repetitively perceptive percepts for each entity, update a global its global view of the game (by updating a MW's `State` object), and make all entities navigate to random shops.
 
-### **`SWISuperSingleAgent`**
+To tell the SARL agent which entities to control among the available:
+
+```bash
+$ mvn -o exec:java -Dexec.args="SuperSingleAgent conf/SingleAgent entityA1 entityA2 entityA3" 
+```
+
+### **`SWISuperSingleAgent`**: The SWI-based controller
 
 _Package_: `au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy.SWISingleFullAgent`
 
@@ -126,11 +132,19 @@ This agent can be run directly as follows:
 $ mvn -o exec:java -Dexec.args="SWISuperSingleAgent conf/SingleAgent"
 ```
 
-### **`Multi Agent System`**
+### **`BootMultiSWIAgents`**: The Multi-agent Controller
 
-This is a multi SARL agent team started with agent which starts a set of agents of type **SWISuperSingleAgent**.
+This is a multi SARL agent system based on a set of `SWISuperSingleAgent` SARL agents. Each of these agents spawn is in charge of controlling a set of entities in the game simulation (or even just one entity).
 
-Each `SWISuperSingleAgent` spawn is assigned a configuration file to control a set of entities in the simulation. To do so, the **BootMultiSWIAgents** overrides the default values of **`SWISuperSingleAgent`** to provide authentication files directly as arguments to the initialization.
+The SARL agent **`BootMultiSWIAgents`** is booted first, which in turn will spawn `SWISuperSingleAgent` SARL agents. It will override its default initial values to provide authentication files directly as arguments to the initialization.
+
+Here is how we can start this system directly:
+
+```bash
+$ mvn -o exec:java -Dexec.args="BootMultiSWIAgents conf/SingleAgent"
+```
+
+This agent has the different teams hard-coded, so any other argument passed (list of entities to be controlled) will be ignored.
 
 ----------------------------
 ## PROJECT CONTRIBUTORS

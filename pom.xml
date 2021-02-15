@@ -195,7 +195,7 @@
 		<dependency>
 		    <groupId>com.github.ssardina-agts</groupId>
 		    <artifactId>agtcity-sarl-mw</artifactId>
-		    <version>909154a</version>
+		    <version>14b2889</version>
 		</dependency>
 
  		 
@@ -269,31 +269,36 @@
    			<!--  Aggregate project into a FULL JAR package
 			https://maven.apache.org/plugins/maven-assembly-plugin/
 			-->
-		    <plugin>
-			    <artifactId>maven-assembly-plugin</artifactId>
-			    <version>3.3.0</version>
-			    <configuration>
-			        <archive>
-			            <manifest>
-			                <addClasspath>true</addClasspath>
-			                <mainClass>BootMAS</mainClass>
-			            </manifest>
-			        </archive>
-			        <descriptorRefs>
-			            <descriptorRef>jar-with-dependencies</descriptorRef>
-			        </descriptorRefs>
-			    </configuration>
-			    <executions>
-			        <execution>
-			            <id>make-my-jar-with-dependencies</id>
-			            <phase>package</phase>
-			            <goals>
-			                <goal>single</goal>
-			            </goals>
-			        </execution>
-			    </executions>
-		    </plugin>
-   
+			<!-- not working yet for new SARL
+			check https://github.com/sarl/sarl/issues/1061
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>make-assembly-with-deps</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>with-dependencies.xml</descriptor>
+                            </descriptors>
+                            <archive>
+                                <manifest>
+                                    <mainClass>${cliRunnerMainClass}</mainClass>
+                                </manifest>
+                                <manifestEntries>
+                                    <Automatic-Module-Name>${project.artifactId}</Automatic-Module-Name>
+                                </manifestEntries>
+                            </archive>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>   
+            -->
             
         </plugins>
 
