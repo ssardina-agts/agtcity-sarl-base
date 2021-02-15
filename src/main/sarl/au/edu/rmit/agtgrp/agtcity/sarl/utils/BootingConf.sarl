@@ -1,0 +1,27 @@
+package au.edu.rmit.agtgrp.agtcity.sarl.utils
+
+import org.eclipse.xtend.lib.annotations.Accessors
+import java.nio.file.Path
+
+@Accessors class BootingConf {
+	public var myName : String
+	public var eiConfigurationDir : String
+	public var eiConfigurationFileName : String = "eismassimconfig.json"
+	public var connections : String[] = #["entityA1"]
+	public var logDir : Path
+
+	//	new(myName : String, eiConfigurationDir : String, eiConfigurationFileName : String, connections : String[]) {
+//		this.myName = myName
+//		this.eiConfigurationDir = eiConfigurationDir
+//		this.eiConfigurationFileName = eiConfigurationFileName
+//		this.connections = connections
+	//	}
+	new() {
+	}
+
+	new(myName : String) {
+	 this.myName = myName
+	}
+	
+
+}
