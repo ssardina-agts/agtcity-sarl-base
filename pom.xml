@@ -48,6 +48,12 @@
         <!-- SARL framework version and configuration -->
         <sarl.version>0.11.0</sarl.version>
         <janus.version>3.${sarl.version}</janus.version>
+        
+        <!-- agtcity-sarl-mw  -->
+        <agtcity-sarl-mw.version>14b2889</agtcity-sarl-mw.version>
+
+        <!-- sarl-prolog-cap  -->
+        <sarl-prolog-cap.version>57ebaa8</sarl-prolog-cap.version>
 
         <compiler.level>1.8</compiler.level>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -195,7 +201,7 @@
 		<dependency>
 		    <groupId>com.github.ssardina-agts</groupId>
 		    <artifactId>agtcity-sarl-mw</artifactId>
-		    <version>14b2889</version>
+		    <version>${agtcity-sarl-mw.version}</version>
 		</dependency>
 
  		 
@@ -203,7 +209,7 @@
         <dependency>
 		    <groupId>com.github.ssardina-agts</groupId>
 		    <artifactId>sarl-prolog-cap</artifactId>
-    		<version>eb11c14a911f7443795d2addf3f4a48e6ca6aa7d</version>
+    		<version>${sarl-prolog-cap.version}</version>
 		</dependency>
 
        
@@ -268,9 +274,8 @@
           
    			<!--  Aggregate project into a FULL JAR package
 			https://maven.apache.org/plugins/maven-assembly-plugin/
-			-->
-			<!-- not working yet for new SARL
 			check https://github.com/sarl/sarl/issues/1061
+			-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -298,8 +303,6 @@
                     </execution>
                 </executions>
             </plugin>   
-            -->
-            
         </plugins>
 
     </build>
