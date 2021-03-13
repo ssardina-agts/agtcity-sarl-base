@@ -6,7 +6,7 @@
 
 %% Chooses a random Destination for Player
 choose_destination(_Entity, Destination) :-
-	findall(F, facility(F, _),L),
+	findall(F, facility(F, _), L),
 	random_permutation(L, L2),
 	member(Destination, L2).
 
