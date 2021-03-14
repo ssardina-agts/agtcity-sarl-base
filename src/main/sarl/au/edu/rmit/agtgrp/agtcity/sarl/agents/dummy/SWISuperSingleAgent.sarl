@@ -196,17 +196,17 @@ agent SWISuperSingleAgent {
 			 */
 			setSkill(new SWI_KB_AgtCity(myName, 0, kb_dump_dir.toString))
 			agent_says("My KB SWI module is: {0}", get_prolog_engine.toString()) // This will give the SWI module where this agent has its KB!
-			kb_load(Paths.get(kb_root_path.toString, "tools.pl").toString)
-			kb_load(Paths.get(kb_root_path.toString, "percept-mgmt.pl").toString)
-			kb_load(Paths.get(kb_root_path.toString, "decision-making.pl").toString)
+			kb_load(Paths.get(kb_root_path.toString, "agentKB.pl").toString)
 			agent_says("I have loaded all my knowledge bases!")
-			assertFirst("agentName(?)", myName) // assert my name in the KB (using SWI_KB_Prolog skill directly)
-			// kb_recordKBName(mySARLname)				// same but using the current KB domain capacity KB_AgtCity
+			
+			// Register my SARL name and all the entities to be tracked down in the KB
+			assertFirst("agentSARL(?)", myName)
+			MT_getEntityNames.forEach[entityName : String | kb_trackEntity(entityName) ]
+
 			dump_kb() // Using Prolog-CAP directly
 				
 
 			// Store in the KB the names of the EI entitys we are controlling
-			MT_getEntityNames.forEach [ entity : String | assertFirst("entity(?)", entity) ]
 
 		
 			/** 
@@ -235,12 +235,13 @@ agent SWISuperSingleAgent {
 			MT_getEntityNames().forEach([ entityName : String |
 
 				// All percepts for the entity: (role/entity of agent --> collection of single percepts)
-				// In this game, entitys usually are of one role/entity, so we will store that single set of percepts
+				// In this game, entities usually are of one role/entity, so we will store that single set of percepts
 				// in variable percepts (the first value of allPercepts)
 				try {
 					debug("About to sense percepts for step {0} in entity {0}", last_step + 1, entityName)
 					var percepts : Collection<Percept>
 					percepts = MT_senseEntityPercepts(entityName) // This is BLOCKING!!
+
 					// TODO: Change this to debug log
 					// var plist = percepts.stream().map([p | return p.name]).collect(Collectors.toList)
 					// System.out.println(String.join(",", plist))
@@ -253,8 +254,6 @@ agent SWISuperSingleAgent {
 					// MT_updateentityState(entityName, percepts) // update the agent data
 
 					kb_recordPercepts(entityName, MT_getStepNo(), percepts)
-					kb_processLastPercept(entityName)
-				
 
 	
 					// update the last step if the percept just processed has a higher step number
@@ -262,8 +261,6 @@ agent SWISuperSingleAgent {
 					agent_shouts("I am finished sensing the environment for entity {1} at step {0}", last_step,
 						entityName)
 					emit(new E_MoveRandomly => [it.entityName = entityName]) 	// see compact way of assignment data in event
-
-					
 
 				} catch (e : PerceiveException) {
 					agent_shouts("There was an error in perception ({0}), maybe not yet connected? Will try later...",
@@ -284,26 +281,26 @@ agent SWISuperSingleAgent {
 
 	on E_MoveRandomly [occurrence.fromMe && reportState] {
 
-		// 1. Report all the percepts/3 information available in the KB
-		// val query = new Query("percepts(Agent, Step, Percepts)")	// no need to format query
+		// 1. Report all the percepts_sensed/3 information available in the KB
+		// val query = new Query("percepts_sensed(Agent, Step, Percepts)")	
 		// for (solution : askForAllSolutions(query))
 		// {
 		// agent_says("There is percept information in KB for entity {0} on step {1}",
 		// solution.get("Agent").toString(), solution.get("Step").intValue)
 		// }
+		
+		
 		// 2. Report current status of each entity from data in the KB
 		MT_getEntityNames.forEach([ entity : String |
-			
-			val query = "get_entity_last_loc(?, Step, Lat, Long), get_entity_last_charge(?, Step, Charge)"
-			val solution = askOnce(query, entity, entity)
+			val solution = askOnce("holds(and([lat(Lat), lon(Lon), charge(C), step(S)]), ?)", entity)
 			if (solution !== null) {
 				agent_says(
 					"entity **{0}** location is ({1},{2}) and charge is {3} at step {4}",
 					entity,
 					solution.get("Lat").floatValue,
 					solution.get("Long").floatValue,
-					solution.get("Charge").floatValue,
-					solution.get("Step").intValue
+					solution.get("C").floatValue,
+					solution.get("S").intValue
 				)
 			} else {
 				agent_says("I do not have self information for entity {0}", entity)

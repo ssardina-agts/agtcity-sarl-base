@@ -30,7 +30,7 @@ import java.util.Collection
 capacity KB_AgtCity {
 	def kb_load(file : String)
 	def kb_dump()
-	def kb_recordKBName(name : String)
+	def kb_trackEntity(name : String)
 	def kb_recordPercepts(entityName : String, stepNo : int, percepts : String)
 	def kb_recordPercepts(entityName : String, stepNo : int, percepts : Collection<Percept>)
 	def kb_processLastPercept(entityName : String)
@@ -78,12 +78,12 @@ skill SWI_KB_AgtCity implements KB_AgtCity extends SWIJPL_KB_Prolog {
 	}
 	
 
-	def kb_recordKBName(name : String) {
+	def kb_trackEntity(name : String) {
 		assertFirst("entity_name(?)", name)
 	}
 
 	def kb_recordPercepts(entityName : String, stepNo : int, percepts : String) {
-		assertFirst("percepts(?, ?, ?)", entityName, stepNo, percepts)
+		assertFirst("percepts_sensed(?, ?, ?)", entityName, stepNo, percepts)
 		
 	}
 
@@ -92,12 +92,14 @@ skill SWI_KB_AgtCity implements KB_AgtCity extends SWIJPL_KB_Prolog {
 
 		percepts.forEach[percept : Percept|perceptsProlog.add(percept.toProlog())]
 		
-		assertFirst("percepts(?, ?, ?)", entityName, stepNo, perceptsProlog.toString)
+		assertFirst("percepts_sensed(?, ?, ?)", entityName, stepNo, perceptsProlog.toString)
 	}
 
 	def kb_processLastPercept(entityName : String) {
 		prove("process_last_percepts(?)", entityName)
 	}
+
+
 
 	def kb_pickDestination(entityName : String) : String {
 		val solution = askOnce(String.format("choose_destination('%s', Destination)", entityName))
@@ -108,8 +110,7 @@ skill SWI_KB_AgtCity implements KB_AgtCity extends SWIJPL_KB_Prolog {
 
 	@Pure
 	def kb_lengthRoute(entityName : String) : int {
-		val solution = askOnce(String.format("get_entity_routeLength('%s', N)", entityName))
-		// solution = askOnce("choose_destination(@S, Destination)", entityName)	// Using Mochalog query builder formatter
+		val solution = askOnce(String.format("holds(routeLength(N), %s))", entityName))
 		if (solution !== null) return solution.get("N").intValue else return -1
 	}
 
