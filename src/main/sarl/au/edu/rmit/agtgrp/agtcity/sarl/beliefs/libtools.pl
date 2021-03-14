@@ -2,7 +2,6 @@
 % TOOLS
 % This are just a set of Prolog tools convenient to have
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 :- module(libtools, [
 		strings_concat/2,
 		my_save_db/0,

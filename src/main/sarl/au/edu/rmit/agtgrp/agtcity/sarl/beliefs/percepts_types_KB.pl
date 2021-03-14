@@ -42,6 +42,7 @@ We classify each individual percept on the following TYPES:
 			about incomplete information: if it is not there, it may still be TRUE
 			so if a player sees it true, it should remember it even if it is not sensed after
  */
+:- dynamic percepts/3.
 
 %!      percept_type(?Type:atom) is nondet.
 %
@@ -78,11 +79,12 @@ percept_type(maxLat(_), game).
 percept_type(minLat(_), game).
 percept_type(maxLon(_), game).
 percept_type(minLon(_), game).
+percept_type(upgrade(_, _, _), game).
 percept_type(simEnd, game).	% from sim-end
 
 percept_type(chargingStation(_, _, _, _), game).
 percept_type(dump(_, _, _), game).
-percept_type(shop(_, _, _), game).
+percept_type(shop(_, _, _, _, _), game).
 percept_type(storage(_, _, _, _, _, _), game).
 percept_type(workshop(_, _, _), game).
 
@@ -113,18 +115,19 @@ percept_type(ranking(_), self).	% coming from sim-end message
 percept_type(score(_), self).	% coming from sim-end message
 
 % ROLE: These are the static specification of each entity role, truck, drone, etc 
-percept_type(role(_), role).
-percept_type(baseSpeed(_), role).
-percept_type(topSpeed(_), role).
-percept_type(baseLoad(_), role).
-percept_type(topLoad(_), role).
-percept_type(baseBattery(_), role).
-percept_type(topBattery(_), role).
-percept_type(baseSkill(_), role).
-percept_type(topSkill(_), role).
-percept_type(baseVision(_), role).
-percept_type(topVision(_), role).
-percept_type(tools(_), role).
+% 	role(role, baseSpeed, maxSpeed, baseLoad, maxLoad, baseSkill, maxSkill, baseVision, maxVision, baseBattery, maxBattery)
+percept_type(role(_, _, _, _, _, _, _, _, _, _, _), role).
+% percept_type(role(_), role).
+% percept_type(baseSpeed(_), role).
+% percept_type(maxSpeed(_), role).
+% percept_type(baseLoad(_), role).
+% percept_type(maxLoad(_), role).
+% percept_type(baseSkill(_), role).
+% percept_type(maxSkill(_), role).
+% percept_type(baseVision(_), role).
+% percept_type(maxVision(_), role).
+% percept_type(baseBattery(_), role).
+% percept_type(maxBattery(_), role).
 
 
 % WORLD: Dynamic but complete world data coming from request-action
@@ -139,9 +142,9 @@ percept_type(entity(_, _, _, _, _), world).	% for entities in the same team (alw
 % DISCOVERY: Dynamic data but not complete at every step
 %	if it is not seen in a step, it does NOT mean it is false
 %	so agents should remember the discoveries along steps
-percept_type(entity(_Name, _, _, _, _), discovery).	% for entities in other teams (observed only in proximity)
-percept_type(resourceNode(_Name, _, _, _), discovery).
-percept_type(well(_Name, _, _, _, _, _), discovery).
+percept_type(entity(_, _, _, _, _), discovery).	% for entities in other teams (observed only in proximity)
+percept_type(resourceNode(_, _, _, _), discovery).
+percept_type(well(_, _, _, _, _, _), discovery).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -1,16 +1,158 @@
+/** <percepts_base> - Management of **PERCEPTION**
+
+Tools to assimilate percept information from the game server.
+
+Basically, it processes facts percepts/3, which are asserted every time a 
+percept arrives, and produces implicit facts.
+
+@author Sebastian Sardina
+@author Joshua Hansen
+@author Adam Young
+
+@license GPL
+@copyright Sebastian Sardina, Joshua Hansen, Adam Young
+@tbd Maybe use mutexes for DB acccess: http://www.swi-prolog.org/pldoc/man?section=threadsync
+
+
+	Every time a percept is received via the MW and EISMassim framework, agent will assert percepts/3:
+
+	percepts(eismassim_connectionA9, 20, [.....])
+
+	The set of possible individual percepts is here:
+
+	2018: https://github.com/agentcontest/massim/blob/massim-2018-1.2/docs/eismassim.md
+	2017: https://github.com/agentcontest/massim/blob/massim-2017-1.7/docs/eismassim.md
+
+*/
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Tools to manipulate percepts from Agents in City Game
 %
 % Author: Sebastian Sardina 2017-2018 (ssardina@gmail.com) 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-:- dynamic 
-	id/1, 			% id
-	percepts/3,		% main percept data
-	percepts_nonself/2, 	% Stores percepts of others
-	percepts_self/3, 	% Stores percepts about myself
-	step/1, 		% Stores current simulator step number
+:- dynamic
+	percepts/3,			% main percept data
+	percepts_nonself/2, % Stores percepts of others
+	step/1, 			% Stores current simulator step number
 	agentName/1,		% Stores the name of the agent who owns the KB
-	entity/1.		% Stores names of connection entities controlled
+	entity/1.			% Stores names of connection entities controlled
+
+% all data from game (static during the game)
+:- dynamic
+	simStart/0,			% to signal that the simulation has started (and global data has been recorded)
+	simEnd/0,
+	id/1, 				% id
+	map/1,
+	seedCapital/1,
+	step/1,
+	team/1,
+	item/4,
+	wellType/5,
+	proximity/1,
+	cellSize/1,
+	centerLat/1,
+	centerLon/1,
+	maxLat/1,
+	maxLon/1,
+	minLat/1,
+	minLon/1,
+	upgrade/3,
+	chargingStation/4,
+	dump/3,
+	shop/5,
+	storage/6,
+	workshop/3.
+
+% ROLES
+:- dynamic
+	role/11.
+
+% Entity specific data (changes per step)
+:- dynamic
+	state_entity/3. 	% Stores percepts about myself
+
+
+% DISCOVERIES
+:- dynamic
+	entity/5,
+	well/6,
+	resourceNode/4.
+
+
+
+
+:- include('percepts_types_KB.pl').
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% USEFUL abtractions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+facility(F, storage) :- storage(F, _, _, _, _, _).
+facility(F, dump) :- dump(F, _, _).
+facility(F, chargingStation) :- chargingStation(F, _, _, _).
+facility(F, workshop) :- workshop(F, _, _).
+facility(F, resourceNode) :- resourceNode(F, _, _, _).
+facility(F, shop) :- shop(F, _, _ , _, _).
+
+
+%!      clean_percepts is det.
+%
+%	Retracts ALL implicit information form percepts asserted before (in predicates percepts_xxx/3)  
+clean_percepts :-
+	percept_type(P, _), 
+	retractall(P),
+	fail.
+clean_percepts.
+
+% clean_percepts :-
+% 	retractall(percepts_simStart(_)),
+% 	retractall(percepts_self(_, _, _)),
+% 	retractall(percepts_nonself(_, _)),
+% 	retractall(percepts_simEnd(_)).
+
+
+% Extract all percepts of a given Type from AllPercepts into PerceptsOfType 
+extract_percepts_by_type(Percepts, Type, PerceptsOfType) :-
+	setof(Percept, Percept^(member(Percept, Percepts), percept_type(Percept, Type)), PerceptsOfType).
+
+
+%!      process_percepts(++Percepts:list) is det.
+%
+%	Top-level processing predicate: process all the percepts in a list of percepts
+%
+%	@arg	Percepts	list of single percepts
+%
+process_percepts(Percepts) :-
+	extract_percepts_by_type(Percepts, game, GamePercepts),
+	process_percepts(_Player, Percepts, game) :-
+		\+ simStart ->  	% no sim-start message processed before
+			(extract_percepts(Percepts, game, GamePercepts),
+			 foreach(member(Percept, GamePercepts), asserta(Percept))) ; true.
+
+	foreach(member(Percept, Percepts), process_percept(Percept)).
+
+%!      process_percepts_linear(++Percepts:list) is det.
+%
+%	Top-level processing predicate: process all the percepts in a list of percepts
+%
+%	@arg	Percepts	list of single percepts
+%
+process_percepts_linear(Percepts) :-
+		foreach(member(Percept, Percepts), process_percept(Percept)).
+
+process_percept(Percept) :- percept_type(Percept, T), process_percept(T, Percept).
+process_percept(Percept) :- format('ERROR: percept has no type: "~w"\n', [Percept]).
+
+% STATIC info: does not change during a game
+% TODO: too inefficient, too many checks for the existence. We need to do it once and skip the game processing
+process_percept(game, Percept) :- \+ Percept, assert(Percept).
+process_percept(role, Percept) :- \+ Percept, assert(Percept).
+
+
+process_percept(_, _).
+
+
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -30,61 +172,6 @@
 % percepts_simEnd(SimEndPercepts)
 %	this is the information in the sim-end message
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Several get operations from percepts
-% This assumes percepts/3 have been recorded
-% Will yield info for all steps recorded
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-get_entity_data(Entity, Name, Step, Lat, Long, Charge, Load, Money, Facility) :- 
-	percepts(Entity, Step, Percepts),
-	member(name(Name), Percepts),
-	member(lat(Lat), Percepts),
-	member(lon(Long), Percepts),
-	member(load(Load), Percepts),
-	member(charge(Charge), Percepts),
-	member(money(Money), Percepts),
-	(member(facility(Facility), Percepts) -> true ; Facility = none).
-get_entity_name(Entity, Name) :-
-	entity(Entity),
-	once(percepts(Entity, _, Percepts)),
-	member(name(Name), Percepts).
-get_player_role(Entity, Role, Speed, Load, Charge, Tools) :- % role(motorcycle, 4, 300, 350, [tool1, tool5])
-	entity(Entity),
-	once(percepts(Entity, _, Percepts)),
-	member(role(Role, Speed, Load, Charge, Tools), Percepts).
-get_entity_loc(Entity, Step, Lat, Long) :-
-	percepts(Entity, Step, Percepts), !,
-	member(lat(Lat), Percepts),
-	member(lon(Long), Percepts).
-get_entity_charge(Entity, Step, Charge) :-
-	percepts(Entity, Step, Percepts), !,
-	member(charge(Charge), Percepts).
-get_entity_routeLength(Entity, Step, Length) :-
-	percepts(Entity, Step, Percepts), !,
-	member(routeLength(Length), Percepts).
-get_entity_routeLength(Entity, Length) :-       % return last route length
-    get_entity_routeLength(Entity, _, Length), !.
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Get operations from the last percept recorded
-% Using once(G) will yield just the first success of G
-% See once/1 doc: http://www.swi-prolog.org/pldoc/man?predicate=once/1
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-get_last_self_percepts(Entity, Step, Percepts) :-
-	entity(Entity),
-	once(percepts_self(Entity, Step, Percepts)).
-get_last_step(Entity, Step) :-
-	entity(Entity),
-	once(percepts(Entity, Step, _)).
-get_entity_last_loc(Entity, Step, Lat, Long) :-
-	entity(Entity),
-	once(get_entity_loc(Entity, Step, Lat, Long)).
-get_entity_last_charge(Entity, Step, Charge) :-
-	entity(Entity),
-	once(get_entity_charge(Entity, Step, Charge)).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -161,16 +248,6 @@ process_simEnd_percepts( _).
 
 
 
-% Clean up all stored information about percepts
-clean_percepts :-
-	(percept_self_type(T) ; percept_simStart_type(T) ; percept_simEnd_type(T)),
-	retractall(T),
-	fail.
-clean_percepts :-
-	retractall(percepts_simStart(_)),
-	retractall(percepts_self(_, _, _)),
-	retractall(percepts_nonself(_, _)),
-	retractall(percepts_simEnd(_)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % EOF
