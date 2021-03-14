@@ -1,6 +1,6 @@
-/** <percepts_base> - Management of **PERCEPTION**
+/** <percepts_sensed_base> - Management of **PERCEPTION**
 
-A simple holds/3 predicate to extract info from percepts/3 clauses
+An interface to extract whether a predicate (as a single percept) is true wrt sensed clauses
 
 @author Sebastian Sardina
 
@@ -8,18 +8,21 @@ A simple holds/3 predicate to extract info from percepts/3 clauses
 @copyright Sebastian Sardina, Joshua Hansen, Adam Young
 @tbd Maybe use mutexes for DB acccess: http://www.swi-prolog.org/pldoc/man?section=threadsync
 
+	Predicates that can be checked via holds/3 are:
 
-	Every time a percept is received via the MW and EISMassim framework, agent will assert percepts/3:
+		1. Single percepts as coming from the server in perception.
+		2. Higher-level predicates translated to single percepts.
+	
+	The set of possible individual percepts that can be sensed are:
 
-	percepts(eismassim_connectionA9, 20, [.....])
-
-	The set of possible individual percepts is here:
-
+	2018-RMIT: https://github.com/ssardina-agts/agtcity-server/blob/master/docs/eismassim.md
 	2018: https://github.com/agentcontest/massim/blob/massim-2018-1.2/docs/eismassim.md
 	2017: https://github.com/agentcontest/massim/blob/massim-2017-1.7/docs/eismassim.md
-
 */
 :- include('percepts_types_KB.pl').
+
+:- dynamic 
+	entity_name/1.		% an entity has been registered for perception
 
 
 %!      holds(+P:term) is nondet.
@@ -33,9 +36,20 @@ A simple holds/3 predicate to extract info from percepts/3 clauses
 %	@arg	E	the entity (e.g., entityA2)  to ask for only
 %	@arg	S	the step number to check
 %
-holds(P) :- holds(step(S), _, _), ! , holds(P, _, S).
-holds(P, E) :- holds(step(S), _, _), !, holds(P, E, S).
-holds(P, E, S) :- predicate_translate(P, P2), percepts(E, S, X), member(P2, X).
+holds(P) :- step(S), ! , holds(P, _, S).	% ignore entity, pick any/all. Use last step.
+holds(P, E) :- step(S), !, holds(P, E, S).	% use last step  only
+
+holds(and([P]), E, S) :- !, holds(P, E, S).
+holds(and([P|L]), E, S) :- !, holds(P, E, S), holds(and(L), E, S).
+holds(or(L), E, S) :- !, member(P, L), holds(P, E, S).
+holds(P, E, S) :- predicate_translate(P, P2), percepts_sensed(E, S, X), member(P2, X).
+
+% S is a step for which there is some percept
+step(S) :- holds(step(S), _, _).
+
+% E is an entity for which there is some percept or has been registered for perception
+entity(E) :- \+ \+ entity_name(_), !, entity_name(E).
+entity(E) :- percepts_sensed(_, E, _).
 
 % Role propositions translate to:
 % 	role(role, baseSpeed, maxSpeed, baseLoad, maxLoad, baseSkill, maxSkill, baseVision, maxVision, baseBattery, maxBattery)
@@ -77,10 +91,10 @@ predicate_translate(P, P).	% default
 %
 holds_all(P, A) :-
 	holds(step(S), _, _), ! ,
-	setof(P, E^P2^Percepts^(predicate_translate(P, P2), percepts(E, S, Percepts), member(P2, Percepts)), A).
+	setof(P, E^P2^Percepts^(predicate_translate(P, P2), percepts_sensed(E, S, Percepts), member(P2, Percepts)), A).
 holds_all(P, E, A) :- holds(step(S), _, _), !, holds_all(P, E, S, A).
 holds_all(P, E, S, A) :-
-	setof(P, P2^Percepts^(predicate_translate(P, P2), percepts(E, S, Percepts), member(P2, Percepts)), A).
+	setof(P, P2^Percepts^(predicate_translate(P, P2), percepts_sensed(E, S, Percepts), member(P2, Percepts)), A).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % EOF
