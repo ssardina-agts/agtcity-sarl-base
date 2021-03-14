@@ -9,7 +9,7 @@
 %% Chooses a random Destination for Player
 choose_destination(E, Destination) :-
 	holds_all(facility(_, _), E, L),
-	random_member((Destination, _), L).
+	random_member(facility(Destination, _), L).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

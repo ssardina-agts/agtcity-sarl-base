@@ -77,10 +77,10 @@ predicate_translate(P, P).	% default
 %
 holds_all(P, A) :-
 	holds(step(S), _, _), ! ,
-	setof(P2, E^P^Percepts^(predicate_translate(P, P2), percepts(E, S, Percepts), member(P2, Percepts)), A).
+	setof(P, E^P2^Percepts^(predicate_translate(P, P2), percepts(E, S, Percepts), member(P2, Percepts)), A).
 holds_all(P, E, A) :- holds(step(S), _, _), !, holds_all(P, E, S, A).
 holds_all(P, E, S, A) :-
-	setof(P2, P^Percepts^(predicate_translate(P, P2), percepts(E, S, Percepts), member(P2, Percepts)), A).
+	setof(P, P2^Percepts^(predicate_translate(P, P2), percepts(E, S, Percepts), member(P2, Percepts)), A).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % EOF
