@@ -30,7 +30,9 @@ An interface to extract whether a predicate (as a single percept) is true wrt se
 %       holds(+P:term, ?E:atom, ?S:number) is nondet.
 %
 %	Predicate P is true for entity E at step S.
-%	If step is not given, only the last step is retrived/checked
+%	If step is not given, only the last step is retrived/checked.
+%
+%	Relies on percepts_sensed/3 that stores a list of single percepts per entity per step
 %
 %	@arg	P	the term data to check or extract (type has to be given)
 %	@arg	E	the entity (e.g., entityA2)  to ask for only
