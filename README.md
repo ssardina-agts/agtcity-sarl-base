@@ -143,7 +143,9 @@ This agent has the different teams hard-coded, so any other argument passed (lis
 ## PROJECT CONTRIBUTORS
 
 * Sebastian Sardina (Project leader and contact - ssardina@gmail.com)
-* Matthew McNally (first version of SWI-based agent via the deprecated **Mochalog** interface)
+* Matthew McNally (ex-RMIT student; first version of SWI-based agent via the deprecated **Mochalog** interface)
+* Joshua Hansen (ex-RMIT student)
+* Adam Young (ex-RMIT student)
 
 ## LICENSE ##
 
