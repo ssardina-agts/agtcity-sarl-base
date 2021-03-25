@@ -1,7 +1,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% DECISION MAKING REASONING TOOLS!
+% EXAMPLE TO DO TESTING - LOAD TESTING EXAMPLES
 %
 % This is what needs to be developed!
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 :- use_module(libtools).
@@ -9,6 +10,7 @@
 % :- include(percepts_types_KB).
 :- include(percepts_holds_KB).
 % :- include(percepts_process_KB).
+:- include(percepts_examples).
 
 % :- include(actions_base).	    % reasoning of what ACTION the agent needs to do on the game server
 % :- include(build_base).		% reasoning for BUILDING complex items

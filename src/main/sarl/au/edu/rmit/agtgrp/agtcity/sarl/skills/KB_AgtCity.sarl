@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package au.edu.rmit.agtgrp.agtcity.sarl.beliefs
+package au.edu.rmit.agtgrp.agtcity.sarl.skills
 
 import eis.iilang.Percept
 import io.sarl.core.Logging
@@ -110,7 +110,7 @@ skill SWI_KB_AgtCity implements KB_AgtCity extends SWIJPL_KB_Prolog {
 
 	@Pure
 	def kb_lengthRoute(entityName : String) : int {
-		val solution = askOnce(String.format("holds(routeLength(N), %s)", entityName))
+		val solution = askOnce(String.format("holds(routeLength(N), %s))", entityName))
 		if (solution !== null) return solution.get("N").intValue else return -1
 	}
 

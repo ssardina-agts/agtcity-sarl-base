@@ -47,6 +47,7 @@ import io.sarl.extras.KB_Prolog
 import java.nio.file.Paths
 import java.util.Collection
 import java.nio.file.Path
+import io.sarl.core.Behaviors
 
 event E_SenseEnvironment
 
@@ -59,11 +60,12 @@ event E_SenseEnvironment
 agent SWISuperSingleAgent {
 	uses Logging, Lifecycle, DefaultContextInteractions
 	uses Schedules
+	uses Behaviors	
 	uses C_Reporting, C_MassimTalking
 	uses KB_AgtCity, KB_Prolog // We can use KB_Prolog directly!
 	
 
-	var myName = this.class.simpleName
+	var myName = this.class.simpleName	// it is in upper case so should be quoted for Prolog!
 	val agentLogLevel = 4 // debug = 4 this is for the high-level agent, not for SARL
 	val reportEILog = false // true if XML messages from server need to be printed out
 	val reportState = true // Report current state of entity and state tracking
@@ -85,7 +87,7 @@ agent SWISuperSingleAgent {
 	val action_continue = new Action("continue")
 
 	// Folders where Prolog KB are located by default and where to dump the KBs
-	var kb_root_path = Paths.get("src/main/sarl/au/edu/rmit/agtgrp/agtcity/sarl/beliefs")
+	var kb_root_path : Path // directory where all the KB Prolog files will sit 
 	var kb_dump_dir : Path  // directory where KB database is to be dumped
 
 	/* 
@@ -124,8 +126,10 @@ agent SWISuperSingleAgent {
 				eiConfigurationFileName = bootingOptions.eiConfigurationFileName
 			if (bootingOptions.connections !== null)
 				myConnectedEntities = bootingOptions.connections
-			if (bootingOptions.logDir !== null)
-				kb_dump_dir = bootingOptions.logDir
+			if (bootingOptions.logPath !== null)
+				kb_dump_dir = bootingOptions.logPath
+			if (bootingOptions.kbRootPath !== null)
+				kb_root_path = bootingOptions.kbRootPath
 		}
 		if (eiConfigurationDir === null) // ask the user which EI configuration dir to use
 			eiConfigurationDir = ConfHandler.getConfDir(eiConfigurationDirs) // ask user which folder in conf/ to use
@@ -196,26 +200,22 @@ agent SWISuperSingleAgent {
 			 */
 			setSkill(new SWI_KB_AgtCity(myName, 0, kb_dump_dir.toString))
 			agent_says("My KB SWI module is: {0}", get_prolog_engine.toString()) // This will give the SWI module where this agent has its KB!
-			kb_load(Paths.get(kb_root_path.toString, "agentKB.pl").toString)
+			kb_load(Paths .get(kb_root_path.toString, "agentKB.pl").toString)
 			agent_says("I have loaded all my knowledge bases!")
 			
 			// Register my SARL name and all the entities to be tracked down in the KB
-			assertFirst("agentSARL(?)", myName)
+			assertFirst("agentSARL(?)", quote(myName))
 			MT_getEntityNames.forEach[entityName : String | kb_trackEntity(entityName) ]
 
 			dump_kb() // Using Prolog-CAP directly
 				
-
-			// Store in the KB the names of the EI entitys we are controlling
-
-		
 			/** 
 			 * 6. SIXTH, finally with all entities registered and connected, emit an event to start 
 			 * sensing and controlling those entities 
 			 */
 			agent_says("PHASE FINAL: Emit E_SenseEnvironment() to start sensing and acting")
 			
-		in(2000)[emit(new E_SenseEnvironment())] 	// wait 2 seconds to allow everyone to auhenticate to server
+		in(2000)[wake(new E_SenseEnvironment())] 	// wait 2 seconds to allow everyone to auhenticate to server
 	} catch (e : Exception) {
 		error("Sorry but I was not able to initialize the skill to talk to server! Message: {0}", e.message)
 		e.printStackTrace()
@@ -238,7 +238,7 @@ agent SWISuperSingleAgent {
 				// In this game, entities usually are of one role/entity, so we will store that single set of percepts
 				// in variable percepts (the first value of allPercepts)
 				try {
-					debug("About to sense percepts for step {0} in entity {0}", last_step + 1, entityName)
+					debug("About to sense percepts for step {0} in entity {1}", last_step + 1, entityName)
 					var percepts : Collection<Percept>
 					percepts = MT_senseEntityPercepts(entityName) // This is BLOCKING!!
 
@@ -260,7 +260,7 @@ agent SWISuperSingleAgent {
 					last_step = MT_getStepNo()
 					agent_shouts("I am finished sensing the environment for entity {1} at step {0}", last_step,
 						entityName)
-					emit(new E_MoveRandomly => [it.entityName = entityName]) 	// see compact way of assignment data in event
+					wake(new E_MoveRandomly => [it.entityName = entityName]) 	// see compact way of assignment data in event
 
 				} catch (e : PerceiveException) {
 					agent_shouts("There was an error in perception ({0}), maybe not yet connected? Will try later...",
@@ -280,26 +280,15 @@ agent SWISuperSingleAgent {
 
 
 	on E_MoveRandomly [occurrence.fromMe && reportState] {
-
-		// 1. Report all the percepts_sensed/3 information available in the KB
-		// val query = new Query("percepts_sensed(Agent, Step, Percepts)")	
-		// for (solution : askForAllSolutions(query))
-		// {
-		// agent_says("There is percept information in KB for entity {0} on step {1}",
-		// solution.get("Agent").toString(), solution.get("Step").intValue)
-		// }
-		
-		
-		// 2. Report current status of each entity from data in the KB
 		MT_getEntityNames.forEach([ entity : String |
 			val solution = askOnce("holds(and([lat(Lat), lon(Lon), charge(C), step(S)]), ?)", entity)
 			if (solution !== null) {
-				agent_says(
-					"entity **{0}** location is ({1},{2}) and charge is {3} at step {4}",
+			 	agent_says(
+					"Entity **{0}** location is ({1}, {2}) and charge is {3} at step {4}",
 					entity,
 					solution.get("Lat").floatValue,
-					solution.get("Long").floatValue,
-					solution.get("C").floatValue,
+					solution.get("Lon").floatValue,
+					solution.get("C").intValue,
 					solution.get("S").intValue
 				)
 			} else {
@@ -322,11 +311,13 @@ agent SWISuperSingleAgent {
 		if (!MT_executeAction(entityName, action_continue))
 			warning("Could not perform continue for entity **{1}**", entityName)
 	}
-//
-//
+
+
 //	// We are NOT traveling: buy or go somewhere or wait 
 	on E_MoveRandomly [occurrence.fromMe && MT_getEntityState(occurrence.entityName).routeLength == 0] {
 		val entityName = occurrence.entityName
+
+		agent_says("I will send {0} somewhere", entityName)
 
 		// Pick some random facility and go!
 		val destination = kb_pickDestination(entityName)

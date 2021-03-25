@@ -10,35 +10,50 @@ It can be used as an initial set-up to build more advanced controllers.
 
 The following needs to be installed system-wide:
 
-- Java Runtime Environment (JRE) and Java Compiler (javac) v1.8+. 
-    - Tested with SUN Java 1.8 and OpenJDK 11.
-- [Maven management and comprehension tool](https://maven.apache.org/): used  to meet dependencies, compile, package, run, etc.
+- Java SE Development Kit (JDK) Version 1.8+.
+- Maven project management and comprehension tool (to meet dependencies, compile, package, run).
 - The [RMIT 2018+ game server edition](https://github.com/ssardina-agts/agtcity-server): An enhanced edition of the official 2018 version that brings back _items_ to _shop_ as in the 2017 version.
 - [SWI-Prolog](https://www.swi-prolog.org/): a state-of-the-art implementation of Prolog.
-- [JPL](https://jpl7.org/) package for SWI-Prolog: Java classes and C functions providing a bidirectional interface between Java and Prolog. 
+- [JPL](https://jpl7.org/) package for SWI-Prolog: Java classes and C native functions providing a bidirectional interface between Java and Prolog.
 
 The following  dependencies are resolved via Maven and JitPack automatically:
 
 - [SARL modules and execution engine](http://mvnrepository.com/artifact/io.sarl.maven).
 - The [SARL Agents in City Middleware](https://github.com/ssardina-agts/agtcity-sarl-mw) which provides SARL capacity and skill for teams to connect and play in the game simulator.
   - Itself, the MW builds on the [EISMASSim](https://github.com/ssardina-agts/agtcity-server/tree/master/eismassim) environment interface connectivity that comes with the [MASSim Agents in City Server (RMIT 2018+ edition)](https://github.com/ssardina-agts/agtcity-server). This is a Java API that provides high-level access to the game sever to avoid dealing with low-level XML or JSON messages. The doc of the protocol and messages can be found [here](https://github.com/ssardina-agts/agtcity-server/blob/master/docs/eismassim.md).
-- The [SARL-PROLOG-CAP](https://github.com/ssardina-agts/sarl-prolog-cap) project that provides a capacity and a skill for SARL agents to use [SWI-Prolog](http://www.swi-prolog.org/) and [JPL](https://jpl7.org/) for implementing the knowledge base of the agents.
+- The [SARL-PROLOG-CAP](https://github.com/ssardina-agts/sarl-prolog-cap) framework that provides agents with the skill to use [SWI-Prolog](http://www.swi-prolog.org/) for belief maintenance & management. Such framework relies, in turn, on the [JPL](https://jpl7.org/) for linking Prolog with Java.
+
+## VERSION MANAGEMENT
+
+The version convention used is `Major.Minor.<SARL Version>`.
+
+For example, 1.3.0.11.0 is version 1.3 for SARL 0.11.0.
+
+To change the version of your application change the following entries in the POM:
+
+1. Update `X.Y` only on the `<version>` key at the top of the file. This should happen when you actually change your application (e.g., a new feature is added or something is fixed).
+2. Update the `Z` version by updating the `<sarl.version>` property.
+
+## DESCRIPTION OF DUMMY AGENTS
 
 ## INSTALL, RUN and DEVELOP
 
-You can run the SARL controller, either from ECLIPSE or from CLI (via Java or Maven), please refer to [this instructions](https://gist.github.com/ssardina/43d6e6f469921e5f692b37304f952d43#4-running-a-sarl-application).
+Three simple dummy controllers are provided as examples via the following agents:
 
-You can use the source JAR files for modules [EIS](https://github.com/eishub/eis) and [massim](https://github.com/eishub/massim) provided in `extras/` to attah sources in ECLIPSE (their sources are not available via Maven).
+- `SuperSingleAgent`: fully implemented in SARL/Java.
+- `SWISuperSingleAgent`: implemented using SARL/Java and SWI-Prolog.
+- `BootMultiSWIAgents`: spawns two `SWISuperSingleAgent` agents, each managing two entities.
 
+Details of each system in the next section.
+
+You can use the source JAR files for modules [EIS](https://github.com/eishub/eis) and [massim](https://github.com/eishub/massim) provided in `extras/` to attach sources in ECLIPSE (their sources are not available via Maven).
 
 So, to **run the system** you need to follow these general steps:
-
-
 
 1. **Compile the base system**: `mvn clean package`
 2. **Start RMIT 2018+ Game Server**. From `server/` folder:
 
-	```bash
+	```shell
 	$ ./startServer.sh conf/SampleConfig.json
 	```
 
@@ -52,29 +67,28 @@ So, to **run the system** you need to follow these general steps:
 
 	In the console of the server, you will see a URL link to the monitor. Click it to see the GUI interface of the game.
 
-3. Start the SARL Controller, either via ECLIPSE or through the CLI. Remember the application needs the JSON server connection configuration file). For example.
+3. Start the SARL Controller, either via ECLIPSE or through the CLI. Remember the application needs the JSON server connection configuration file `eismassimconfig.json`. For example:
 
 	```bash
 	$ mvn exec:java -Dexec.args="SuperSingleAgent conf/SingleAgent" -Dloglevel=4
 	```
 
-	If you run `mvn exec:java` without arguments, it will list all available controllers and ask for one (and also ask for location of server connection configuration file).
+	**NOTE:** If you run `mvn exec:java` without arguments, it will list all available controllers and ask for one, and then also ask for location of server connection configuration file `eismassimconfig.json`.
 	
-	You can use grep inverse `-e` to get rid of all the printout of XML messages produced by the `EI` framework (filter out everything between `< >`, and any "`sent`" and "`received`" printout at start of line):
-
- 	```bash
-	$ mvn exec:java | grep -v -e  \<.*\> -e WARNING -e '^ sent' -e '^ received'
-	```
-
-	If you packaged the JAR with dependencies:
+	One can also start an agent directly via Java as follows:
 
 	```bash
 	$ java -jar target/agtcity-sarl-base-4.5.0.11.0-jar-with-dependencies.jar io.sarl.sre.boot.Boot SuperSingleAgent -Dloglevel=4
 	```
 
 5. Start the MASSIM Simulation by just hitting **_ENTER_** in the Game Server console.
+6. **Enjoy!** You should start seeing the agent reporting things in the console. You can see the simulation on the web browser.
 
-**Enjoy!** You should start seeing the agent reporting things in the console. You can see the simulation on the web browser.
+You can use grep inverse `-e` to get rid of all the printout of XML messages produced by the `EI` framework (filter out everything between `< >`, and any "`sent`" and "`received`" printout at start of line):
+
+```bash
+$ mvn exec:java | grep -v -e  \<.*\> -e WARNING -e '^ sent' -e '^ received'
+```
 
 ## Developing SARL agents
 

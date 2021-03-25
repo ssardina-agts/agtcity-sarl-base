@@ -4,6 +4,7 @@ import io.sarl.lang.core.Agent
 import java.util.Scanner
 import au.edu.rmit.agtgrp.agtcity.sarl.utils.BootingConf
 import java.util.ArrayList
+import java.nio.file.Paths
 
 /** 
  * @author Sebastian Sardina (ssardina@gmail.com)
@@ -19,8 +20,7 @@ class BootMAS {
 
 		// Configuration of booting utility
 		val basePackage = "au.edu.rmit.agtgrp.agtcity.sarl.agents"
-		val AGENTS_AVAILABLE : String[] = #["default", "SuperSingleAgent", "SWISuperSingleAgent",
-			"BootMultiSWIAgents"]
+		val AGENTS_AVAILABLE : String[] = #["default", "SuperSingleAgent", "SWISuperSingleAgent", "BootMultiSWIAgents"]
 		val DEFAULT = "SuperSingleAgent"
 		
 		System.out.println(String.format("Default Controller is: %s", DEFAULT))
@@ -60,6 +60,7 @@ class BootMAS {
 				bootingConf.connections = entitiesToConnect
 			}
 		}
+		bootingConf.kbRootPath = Paths.get(System.getProperty("kb", "src/main/sarl/au/edu/rmit/agtgrp/agtcity/sarl/beliefs/")) 
 		// Finally boot the agent and pass booting object as argument
 		sre.startAgent(SARLagent, bootingConf)
 	}

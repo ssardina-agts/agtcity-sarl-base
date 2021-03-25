@@ -34,6 +34,7 @@ import java.util.UUID
 import au.edu.rmit.agtgrp.agtcity.sarl.mw.utils.ConfHandler
 import au.edu.rmit.agtgrp.util.KBDumpingDir
 import au.edu.rmit.agtgrp.agtcity.sarl.utils.BootingConf
+import java.nio.file.Path
 
 /** 
  * This agent will spawn several single SWISingleFullAgents, each of the managing some subset
@@ -56,6 +57,7 @@ agent BootMultiSWIAgents {
 	var eiConfigurationDir : String // the configuration folder to be used (given by argument or asked to the user)
 	var eiConfigurationFileName = "eismassimconfig.json" // fixed (should be inside the configuration dir)
 	val eiConfigurationDirs = "conf" // the folder containing many configuration folders
+	var kb_root_path : Path
 	
 
 	// Variables used to keep track the various SARL agents spawns
@@ -78,6 +80,8 @@ agent BootMultiSWIAgents {
 				eiConfigurationDir = bootingOptions.eiConfigurationDir
 			if (bootingOptions.eiConfigurationFileName !== null)
 				eiConfigurationFileName = bootingOptions.eiConfigurationFileName
+			if (bootingOptions.kbRootPath !== null)
+				kb_root_path = bootingOptions.kbRootPath
 		}
 		if (eiConfigurationDir === null) // ask the user which EI configuration dir to use
 			eiConfigurationDir = ConfHandler.getConfDir(eiConfigurationDirs) // ask user which folder in conf/ to use
@@ -92,14 +96,16 @@ agent BootMultiSWIAgents {
 		bootConf1.eiConfigurationDir = eiConfigurationDir
 		bootConf1.eiConfigurationFileName = eiConfigurationFileName
 		bootConf1.connections = #["entityA1", "entityA3"]
-		bootConf1.logDir = KBDumpingDir.path
+		bootConf1.logPath = KBDumpingDir.path
+		bootConf1.kbRootPath = kb_root_path
 		bootingConfigs.add(bootConf1)
 
 		var bootConf2 = new BootingConf("team2Manager")
 		bootConf2.eiConfigurationDir = eiConfigurationDir
 		bootConf2.eiConfigurationFileName = eiConfigurationFileName
 		bootConf2.connections = #["entityA2", "entityA4"]
-		bootConf2.logDir = KBDumpingDir.path
+		bootConf2.logPath = KBDumpingDir.path
+		bootConf2.kbRootPath = kb_root_path
 		bootingConfigs.add(bootConf2)
 	
 		info("Starting to spawn the individual manager agents")

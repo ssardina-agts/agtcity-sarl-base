@@ -8,7 +8,8 @@ import java.nio.file.Path
 	public var eiConfigurationDir : String
 	public var eiConfigurationFileName : String = "eismassimconfig.json"
 	public var connections : String[] = #["entityA1", "entityA4", "entityA6"]
-	public var logDir : Path
+	public var logPath : Path
+	public var kbRootPath : Path
 
 	//	new(myName : String, eiConfigurationDir : String, eiConfigurationFileName : String, connections : String[]) {
 //		this.myName = myName
