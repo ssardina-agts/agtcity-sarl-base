@@ -1,5 +1,5 @@
 /** 
- * SARL-MASSIM - Interface between the SARL agent-oriented language 
+ * SARL-AGTCITY-BASE - Interface between the SARL agent-oriented language 
  * and the MASSIM RMIT 2018+ server
  * 
  * Copyright (C) 2017-2021 Sebastian Sardina - ssardina@gmail.com
@@ -21,7 +21,6 @@ package au.edu.rmit.agtgrp.agtcity.sarl.agents.dummy
 
 import au.edu.rmit.agtgrp.agtcity.sarl.beliefs.KB_AgtCity
 import au.edu.rmit.agtgrp.agtcity.sarl.beliefs.SWI_KB_AgtCity
-import au.edu.rmit.agtgrp.agtcity.sarl.events.E_MoveRandomly
 import au.edu.rmit.agtgrp.agtcity.sarl.mw.capacities.C_MassimTalking
 import au.edu.rmit.agtgrp.agtcity.sarl.mw.capacities.C_Reporting
 import au.edu.rmit.agtgrp.agtcity.sarl.mw.skills.S_ConsoleReporting
@@ -48,6 +47,8 @@ import java.nio.file.Paths
 import java.util.Collection
 import java.nio.file.Path
 import io.sarl.core.Behaviors
+import au.edu.rmit.agtgrp.agtcity.sarl.events.E_EntitySensed
+import au.edu.rmit.agtgrp.agtcity.sarl.behaviors.NavigationRandom
 
 event E_SenseEnvironment
 
@@ -58,7 +59,8 @@ event E_SenseEnvironment
  */
 @SuppressWarnings("potential_field_synchronization_problem")
 agent SWISuperSingleAgent {
-	uses Logging, Lifecycle, DefaultContextInteractions
+	uses Logging, Lifecycle 
+	uses DefaultContextInteractions
 	uses Schedules
 	uses Behaviors	
 	uses C_Reporting, C_MassimTalking
@@ -84,7 +86,6 @@ agent SWISuperSingleAgent {
 
 	// Data kept by this single SARL agent: just the step number
 	var last_step : int = -1
-	val action_continue = new Action("continue")
 
 	// Folders where Prolog KB are located by default and where to dump the KBs
 	var kb_root_path : Path // directory where all the KB Prolog files will sit 
@@ -112,7 +113,7 @@ agent SWISuperSingleAgent {
 		var args = newArrayList(occurrence.parameters) // may receive a booting configuration object
 
 		/** 
-		 * 1. FIRST, collect the directory where the server configuration file eiRegistrationFile is located
+		 * 1. Collect the directory where the server configuration file eiRegistrationFile is located
 		 * If none is given as CLI argument, search inside conf/ folder and make user select one
 		 */
 		if (args.length >= 1) { // a configuration booting object has been provided, use it!
@@ -164,7 +165,7 @@ agent SWISuperSingleAgent {
 			
 		try {
 			/** 
-			 * 2. SECOND, install Massim-Talking skill to talk to the  game server using EI registration file 
+			 * 2. Install Massim-Talking skill to talk to the  game server using EI registration file 
 			 * (no actual connection to entities yet, just recording of registration file to be used)
 			 */
 			agent_says("PHASE 2: INSTALL MASSIM-TALKING SKILL WITH EI REGISTRATION FILE {0}", eiConfigurationFile)
@@ -183,7 +184,7 @@ agent SWISuperSingleAgent {
 				]
 
 			/** 
-			 * 4. FOURTH, we establish the connection to the game server via the EI 
+			 * 4. We establish the connection to the game server via the EI 
 			 * 
 			 * All entities registered for control are authenticated and connected to the server
 			 */
@@ -196,11 +197,11 @@ agent SWISuperSingleAgent {
 			}
 
 			/* 
-			 * FIFTH, Set up a new Prolog belief base - load agent knowledge bases.
+			 * 5. Set up a new Prolog belief base - load agent knowledge bases.
 			 */
 			setSkill(new SWI_KB_AgtCity(myName, 0, kb_dump_dir.toString))
 			agent_says("My KB SWI module is: {0}", get_prolog_engine.toString()) // This will give the SWI module where this agent has its KB!
-			kb_load(Paths .get(kb_root_path.toString, "agentKB.pl").toString)
+			kb_load(Paths.get(kb_root_path.toString, "agentKB.pl").toString)
 			agent_says("I have loaded all my knowledge bases!")
 			
 			// Register my SARL name and all the entities to be tracked down in the KB
@@ -208,20 +209,25 @@ agent SWISuperSingleAgent {
 			MT_getEntityNames.forEach[entityName : String | kb_trackEntity(entityName) ]
 
 			dump_kb() // Using Prolog-CAP directly
-				
+
 			/** 
-			 * 6. SIXTH, finally with all entities registered and connected, emit an event to start 
+			 * 7. Instantiate all behaviors to be given to the user
+			 */
+			registerBehavior(new NavigationRandom(this))
+
+			/** 
+			 * 8. Finally with all entities registered and connected, emit an event to start 
 			 * sensing and controlling those entities 
 			 */
 			agent_says("PHASE FINAL: Emit E_SenseEnvironment() to start sensing and acting")
 			
-		in(2000)[wake(new E_SenseEnvironment())] 	// wait 2 seconds to allow everyone to auhenticate to server
-	} catch (e : Exception) {
-		error("Sorry but I was not able to initialize the skill to talk to server! Message: {0}", e.message)
-		e.printStackTrace()
-		killMe
+			in(2000)[wake(new E_SenseEnvironment())] 	// wait 2 seconds to allow everyone to auhenticate to server
+		} catch (e : Exception) {
+			error("Sorry but I was not able to initialize the skill to talk to server! Message: {0}", e.message)
+			e.printStackTrace()
+			killMe
+		}
 	}
-}
 
 	/* 
 	 * Repetitively sense each registered and connected entity
@@ -260,7 +266,10 @@ agent SWISuperSingleAgent {
 					last_step = MT_getStepNo()
 					agent_shouts("I am finished sensing the environment for entity {1} at step {0}", last_step,
 						entityName)
-					wake(new E_MoveRandomly => [it.entityName = entityName]) 	// see compact way of assignment data in event
+//					wake(new E_MoveRandomly => [it.entityName = entityName]) // see compact way of assignment data in event
+//					wake(new E_EntitySensed => [it.entityName = entityName], [it.stepNo = last_step]) // see compact way of assignment data in event
+					wake(new E_EntitySensed(entityName, last_step, percepts))
+					
 
 				} catch (e : PerceiveException) {
 					agent_shouts("There was an error in perception ({0}), maybe not yet connected? Will try later...",
@@ -279,8 +288,9 @@ agent SWISuperSingleAgent {
 
 
 
-	on E_MoveRandomly [occurrence.fromMe && reportState] {
+	on E_EntitySensed [reportState] {
 		MT_getEntityNames.forEach([ entity : String |
+			// askOnce is provided by skill KB_Prolog (PROLOG-CAP) directly
 			val solution = askOnce("holds(and([lat(Lat), lon(Lon), charge(C), step(S)]), ?)", entity)
 			if (solution !== null) {
 			 	agent_says(
@@ -300,39 +310,6 @@ agent SWISuperSingleAgent {
 		agent_says("I will dump all that I know so far....")
 		dump_kb() 
 	}
-
-	// We are still traveling, just continue following the path...
-	on E_MoveRandomly [occurrence.fromMe && kb_lengthRoute(occurrence.entityName) > 0] {
-		val entityName = occurrence.entityName
-		val stepsToGo = kb_lengthRoute(entityName)
-
-		agent_says("Entity **{0}** is already traveling: {1} steps to go!", entityName, stepsToGo)
-
-		if (!MT_executeAction(entityName, action_continue))
-			warning("Could not perform continue for entity **{1}**", entityName)
-	}
-
-
-//	// We are NOT traveling: buy or go somewhere or wait 
-	on E_MoveRandomly [occurrence.fromMe && MT_getEntityState(occurrence.entityName).routeLength == 0] {
-		val entityName = occurrence.entityName
-
-		agent_says("I will send {0} somewhere", entityName)
-
-		// Pick some random facility and go!
-		val destination = kb_pickDestination(entityName)
-		
-		if (destination !== null) {
-			agent_says("I will send entity **{1}** to location {0}", destination, entityName)
-			if (!MT_executeAction(entityName, new Action("goto", new Identifier(destination))))
-				agent_shouts("Was not able to successfully send action goto({0}) for entity {1}", destination,
-					entityName)
-		} else {
-			agent_shouts("I just don't know any facility to go yet, sorry...!")
-		}
-	}
-
-
 
 	
 }

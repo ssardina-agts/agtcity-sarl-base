@@ -11,7 +11,7 @@ event E_EntitySensed {
 	var entityName : String
 	var percepts : Collection<Percept>
 
-	new(stepNo : int, entityName : String, percepts : Collection<Percept>) {
+	new(entityName : String, stepNo : int, percepts : Collection<Percept>) {
 		this.stepNo = stepNo
 		this.entityName = entityName
 		this.percepts = percepts
