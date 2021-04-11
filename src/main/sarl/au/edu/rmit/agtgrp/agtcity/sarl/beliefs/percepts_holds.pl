@@ -19,8 +19,7 @@ entity E at step S
 	2018: https://github.com/agentcontest/massim/blob/massim-2018-1.2/docs/eismassim.md
 	2017: https://github.com/agentcontest/massim/blob/massim-2017-1.7/docs/eismassim.md
 */
-:- ensure_loaded(percepts_types_KB).
-:- ensure_loaded(percepts_mngt_KB).
+:- include(percepts_mngt).
 
 
 %!      holds(+P:term) is nondet.

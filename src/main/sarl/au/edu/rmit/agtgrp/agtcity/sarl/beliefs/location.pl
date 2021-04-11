@@ -1,22 +1,24 @@
-:- ensure_loaded(percepts_holds_KB).
+% UNCOMMENT ONLY TO DEVELOP&EDIT IN VSCODE WITHOUT MISSING ERRORS
+% COMMENT OUT WHEN RUNNING THE SYSTEM OR WILL GIVE ERROR
+%:- ensure_loaded(percepts_holds).  
 
-%!      shops(?Entity:atom, ?Name:atom, ?Loc:term, ?Restock:number, ?Items:list, -A: list) is nondet.
+%!      shops(?Entity:atom, -Shops: list) is nondet.
 %       shop(?Entity:atom, ?Name:atom, ?Loc:term, ?Restock:number, ?Items:list) is nondet.
 %
-%       shops(?Name:atom, ?Loc:term, ?Restock:number, ?Items:list, -A: list) is nondet.
+%       shops(-Shops: list) is nondet.
 %       shop(?Name:atom, ?Loc:term, ?Restock:number, ?Items:list) is nondet.
 %
 %	Checks or retrives the existing shops as has been perceived by entity E
 %
 %	The location is combined into a term geo(Lat, Lon)
-%   If the Entity is missing (last 2 queries), the data from one arbitrary entity will be used
+%   If the Entity is missing, the data from one arbitrary entity will be used
 %       this is useful as every entity perceives the same set of shops so it can
 %       avoid redundant answers (i.e., getting the same shop many times)
-shops(E, Name, geo(Lat, Lon), Restock, Items, A) :-
-    holds_all(shop(Name, Lat, Lon, Restock, Items), E, A).
-shops(Name, geo(Lat, Lon), Restock, Items, A) :-
+shops(E, Shops) :-
+    holds_all(shop(_, _, _, _, _), E, Shops).
+shops(Shops) :-
     entity(E), !,
-    holds_all(shop(Name, Lat, Lon, Restock, Items), E, A).
+    holds_all(shop(_, _, _, _, _), E, Shops).
 
 shop(E, Name, geo(Lat, Lon), Restock, Items) :-
     holds(shop(Name, Lat, Lon, Restock, Items), E).

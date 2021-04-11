@@ -1,10 +1,19 @@
+/** <agentKB> - Main file for loading the whole KB
+
+@author Sebastian Sardina
+
+@license GPL
+@copyright Sebastian Sardina, Joshua Hansen, Adam Young
+
+	SARL agents can just load this file and the whole KB will be consulted
+*/
 :- use_module(libtools).
 
-:- ensure_loaded(percepts_holds_KB).  % definitions for holds/x predicates to query percepts
-:- ensure_loaded(percepts_types_KB). % definitions of type of percepts in the game
-:- ensure_loaded(percepts_mngt_KB).  % management of percepts (e.g., recording, registering entities)
+:- include(percepts_holds).  % definitions for holds/x predicates to query percepts
+%:- ensure_loaded(percepts_mngt).  % included in percepts_holds for management of percepts
 
-:- ensure_loaded(location_KB).	    % reasoning about LOCATIONS and DISTANCE
+:- include(decision_making).
+:- include(location).	    % reasoning about LOCATIONS and DISTANCE
 % :- include(actions_base).	    % reasoning of what ACTION the agent needs to do on the game server
 % :- include(build_base).		% reasoning for BUILDING complex items
 % :- include(charge_base).	    % reasoning for ENERGY and CHARGING management
@@ -13,6 +22,5 @@
 % :- include(jobs_base).		% reasoning about JOBS (auctions, missions, regular)
 % :- include(items_base).		% reasoning about ITEMS
 
-:- include(decision_making).
 
 % load_unit_test :- load_test_files([]).
