@@ -1,4 +1,4 @@
-/** <percepts_type> - Definition of all single percepts
+/** <percepts_type> - Definition of all single percept types available
 
 Defines the types of percepts available
 
@@ -10,7 +10,6 @@ Defines the types of percepts available
 @copyright Sebastian Sardina, Joshua Hansen, Adam Young
 @tbd Maybe use mutexes for DB acccess: http://www.swi-prolog.org/pldoc/man?section=threadsync
 
-
 	Percepts come as JSON data from server, but they are converted into a list of Prolog
 	terms by the EIS. Each term is an individual percept.
 	The MW (via the EISMassim framework) will gather/provide that list directly.
@@ -21,8 +20,6 @@ Defines the types of percepts available
 	2018: https://github.com/agentcontest/massim/blob/massim-2018-1.2/docs/eismassim.md
 	2017: https://github.com/agentcontest/massim/blob/massim-2017-1.7/docs/eismassim.md
 */
-
-:- dynamic percepts_sensed/3.
 
 %!      percept(?Type:atom) is nondet.
 %

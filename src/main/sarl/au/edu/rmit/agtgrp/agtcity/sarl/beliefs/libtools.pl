@@ -30,7 +30,7 @@ strings_concat([S|L], CS) :-
 %	Dumps the KB of the agent to a file kb-<agent name>-<step no>.pl
 % 	OBS: Not used as we have a dumping mechanism in Prolog Capacity
 my_save_db :-
-	(agentName(Name) -> true ; Name = default),
+	(entity(Name) -> true ; Name = default),
 	(step(Step) ; Step = "none"), !,
 	strings_concat(["kb-", Name, "-", Step, ".pl"], FileName),
 	open(FileName, write, F),

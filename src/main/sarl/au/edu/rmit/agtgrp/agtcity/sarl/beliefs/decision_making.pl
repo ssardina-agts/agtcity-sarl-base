@@ -5,6 +5,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 :- ensure_loaded(library(random)).
+:- ensure_loaded(percepts_holds_KB).
 
 %% Chooses a random Destination for Player
 choose_destination(E, Destination) :-
