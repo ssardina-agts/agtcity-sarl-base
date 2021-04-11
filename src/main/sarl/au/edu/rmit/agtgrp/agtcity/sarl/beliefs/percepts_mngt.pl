@@ -62,10 +62,13 @@ register_entity(E) :- asserta(entity_registered(E)).
 unregister_entity(E) :- retractall(entity_registered(E)).
 
 
-%!      step(?N: number) is ndet.
+%!      step(?E: atom, ?N: number) is det.
+%       step(?N: number) is det.
 %
-% 	S is a last step number for which there is some percept
-step(S) :- percepts_sensed(_, S, _).
+% 	S is a last step number for which there is some percept for entity ?E
+%	If no entity is given, then the very last step sensed by any entity is given
+step(S) :- percepts_sensed(_, S, _), !.
+step(E, S) :- percepts_sensed(E, S, _), !.
 
 
 

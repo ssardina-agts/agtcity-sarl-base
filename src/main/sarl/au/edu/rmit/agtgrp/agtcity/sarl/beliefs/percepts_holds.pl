@@ -36,8 +36,8 @@ entity E at step S
 %	@arg	E	the entity (e.g., entityA2)  to ask for only
 %	@arg	S	the step number to check
 %
-holds(P) :- step(S), ! , holds(P, _, S).	% ignore entity, pick any/all. Use last step.
-holds(P, E) :- step(S), !, holds(P, E, S).	% use last step  only
+holds(P) :- step(S), holds(P, _, S).		% any entity for the last step.
+holds(P, E) :- step(E, S), holds(P, E, S).	% use last step  only
 
 holds(and([P]), E, S) :- !, holds(P, E, S).
 holds(and([P|L]), E, S) :- !, holds(P, E, S), holds(and(L), E, S).
@@ -84,9 +84,9 @@ predicate_translate(P, P).	% default
 %	@arg	A	a list with a set of all the answers
 %
 holds_all(P, A) :-
-	step(S), ! ,
+	step(S),	% use last sensed step
 	setof(P, E^P2^Percepts^(predicate_translate(P, P2), percepts_sensed(E, S, Percepts), member(P2, Percepts)), A).
-holds_all(P, E, A) :- step(S), !, holds_all(P, E, S, A).
+holds_all(P, E, A) :- step(E, S), holds_all(P, E, S, A).
 holds_all(P, E, S, A) :-
 	setof(P, P2^Percepts^(predicate_translate(P, P2), percepts_sensed(E, S, Percepts), member(P2, Percepts)), A).
 
