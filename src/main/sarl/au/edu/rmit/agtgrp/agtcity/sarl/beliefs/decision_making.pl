@@ -1,6 +1,6 @@
 % UNCOMMENT ONLY TO DEVELOP&EDIT IN VSCODE WITHOUT MISSING ERRORS
 % COMMENT OUT WHEN RUNNING THE SYSTEM OR WILL GIVE ERROR
-%:- ensure_loaded(percepts_holds).
+% :- ensure_loaded(percepts_holds).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DECISION MAKING REASONING TOOLS!
