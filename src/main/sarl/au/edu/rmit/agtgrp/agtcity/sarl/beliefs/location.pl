@@ -3,9 +3,9 @@
 %:- ensure_loaded(percepts_holds).  
 
 %!      shops(?Entity:atom, -Shops: list) is nondet.
-%       shop(?Entity:atom, ?Name:atom, ?Loc:term, ?Restock:number, ?Items:list) is nondet.
+%       shops(-Shops: list) is det.
 %
-%       shops(-Shops: list) is nondet.
+%       shop(?Entity:atom, ?Name:atom, ?Loc:term, ?Restock:number, ?Items:list) is nondet.
 %       shop(?Name:atom, ?Loc:term, ?Restock:number, ?Items:list) is nondet.
 %
 %	Checks or retrives the existing shops as has been perceived by entity E
@@ -25,4 +25,5 @@ shop(E, Name, geo(Lat, Lon), Restock, Items) :-
 shop(Name, geo(Lat, Lon), Restock, Items) :-
     entity(E), !,
     holds(shop(Name, Lat, Lon, Restock, Items), E).
+
 
