@@ -98,7 +98,11 @@ As the system becomes very complex, it may be convenient to use a better technol
 
 Three simple example SARL agent controllers are provided in this base system as a reference. These examples should provide a solid base for developing more sophisticated agent systems for Agents in City.
 
-All the agents can be run via the booting class `BootMAS`, which is the default execution class in the package JAR file. One has to give the name of the agent controller to start as an argument.
+All the agents can be run via the booting class `BootMAS`, which is the default execution class in the package JAR file and when running `mvn exec:java`; see above. If one defines another booting class, e.g.. `BootMAS2`, it can be used using:
+
+```shell
+$ mvn exec:java -Dexec.mainClass=BootMAS2
+```
 
 To change the log level, pass `-Dloglevel=n` option (FINE/DEBUG=4; INFO=3; WARNING=2; ERROR=1). Defaults to level 3.
 
