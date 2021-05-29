@@ -48,16 +48,16 @@ holds(P, E, S) :- predicate_translate(P, P2), percepts_sensed(E, S, X), member(P
 % Role propositions translate to:
 % 	role(role, baseSpeed, maxSpeed, baseLoad, maxLoad, baseSkill, maxSkill, baseVision, maxVision, baseBattery, maxBattery)
 predicate_translate(role(X), role(X, _, _, _, _, _, _, _, _, _, _)).
-predicate_translate(baseSpeed(X), role(_, X, _, _, _, _, _, _, _, _, _)).
-predicate_translate(maxSpeed(X), role(_, _, X, _, _, _, _, _, _, _, _)).
-predicate_translate(baseLoad(X), role(_, _, _, X, _, _, _, _, _, _, _)).
-predicate_translate(maxLoad(X), role(_, _, _, _, X, _, _, _, _, _, _)).
-predicate_translate(baseSkill(X), role(_, _, _, _, _, X, _, _, _, _, _)).
-predicate_translate(maxSkill(X), role(_, _, _, _, _, _, X, _, _, _, _)).
-predicate_translate(baseVision(X), role(_, _, _, _, _, _, _, X, _, _, _)).
-predicate_translate(maxVision(X), role(_, _, _, _, _, _, _, _, X, _, _)).
-predicate_translate(baseBattery(X), role(_, _, _, _, _, _, _, _, _, X, _)).
-predicate_translate(maxBattery(X), role(_, _, _, _, _, _, _, _, _, _, X)).
+predicate_translate(baseRoleSpeed(X), role(_, X, _, _, _, _, _, _, _, _, _)).
+predicate_translate(maxRoleSpeed(X), role(_, _, X, _, _, _, _, _, _, _, _)).
+predicate_translate(baseRoleLoad(X), role(_, _, _, X, _, _, _, _, _, _, _)).
+predicate_translate(maxRoleLoad(X), role(_, _, _, _, X, _, _, _, _, _, _)).
+predicate_translate(baseRoleSkill(X), role(_, _, _, _, _, X, _, _, _, _, _)).
+predicate_translate(maxRoleSkill(X), role(_, _, _, _, _, _, X, _, _, _, _)).
+predicate_translate(baseRoleVision(X), role(_, _, _, _, _, _, _, X, _, _, _)).
+predicate_translate(maxRoleVision(X), role(_, _, _, _, _, _, _, _, X, _, _)).
+predicate_translate(baseRoleBattery(X), role(_, _, _, _, _, _, _, _, _, X, _)).
+predicate_translate(maxRoleBattery(X), role(_, _, _, _, _, _, _, _, _, _, X)).
 
 predicate_translate(facility(F, storage), storage(F, _, _, _, _, _)).
 predicate_translate(facility(F, dump), dump(F, _, _)).
