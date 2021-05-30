@@ -36,3 +36,4 @@ generated-sources
 kb*.pl
 pom.xml.orig
 agent-link
+kb_dump_SWISingle
