@@ -81,7 +81,8 @@ agent SWISuperSingleAgent {
 	val eiConfigurationDirs = "conf" // the folder containing many configuration folders
 
 	// Entities to register in the server and control
-	var myConnectedEntities = #["entityA1", "entityA4"] 
+	var myConnectedEntities = #["entityA1", "entityA2", "entityA3", "entityA4", "entityA5", "entityA6", "entityA7",
+		"entityA8", "entityA9", "entityA10", "entityA11", "entityA12", "entityA13", "entityA14", "entityA15"] 
 
 
 	// Data kept by this single SARL agent: just the step number
