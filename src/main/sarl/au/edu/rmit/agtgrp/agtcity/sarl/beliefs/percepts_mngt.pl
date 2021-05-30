@@ -33,15 +33,16 @@ add_percepts(E, P) :-
 
 %!      entity(?E: atom) is nondet.
 %
-% 		E is an entity thta has been registered for tracking or 
+% 		E is an entity that has been registered for tracking or
 %		for which there is some percept available
-entity(E) :- \+ \+ entity_registered(_), !, entity_registered(E).
-entity(E) :- percepts_sensed(E, _, _).
+%		Optimized yield each entity once
+entity(E) :- entities(Es), member(E, Es).
 
 %!      entities(?Es: list) is det.
 %
-% 		Es is a list of all the entities known
-entities(Es) :- setof(E, entity(E), Es).
+% 		Es is a list of all the entities known (registered or that have sensed)
+entities(Es) :- setof(E, entity_registered(E), Es), !.
+entities(Es) :- setof(E, A^B^percepts_sensed(E, A, B), Es).
 
 %!      entity_name(?E: atom, ?N: atom) is nondet.
 %
@@ -62,13 +63,13 @@ register_entity(E) :- asserta(entity_registered(E)).
 unregister_entity(E) :- retractall(entity_registered(E)).
 
 
-%!      step(?E: atom, ?N: number) is det.
+%!      step(?E: atom, ?N: number) is ndet.
 %       step(?N: number) is det.
 %
-% 	S is a last step number for which there is some percept for entity ?E
-%	If no entity is given, then the very last step sensed by any entity is given
+% 	step/1: S is a last step number for which there is some percept
+%	step/2: last step number for each entity E
 step(S) :- percepts_sensed(_, S, _), !.
-step(E, S) :- percepts_sensed(E, S, _), !.
+step(E, S) :- entity(E), once(percepts_sensed(E, S, _)).
 
 
 
