@@ -25,14 +25,12 @@ The following  dependencies are resolved via Maven and JitPack automatically:
 
 ## VERSION MANAGEMENT
 
-The version convention used is `Major.Minor.<SARL Version>`.
+The version convention used is `Major.Minor.Patch`. Each version will rely on a particular SARL version:
 
-For example, 1.3.0.11.0 is version 1.3 for SARL 0.11.0.
+* 4.5.10: SARL 0.11.0
+* 4.5.0.11.0: SARL 0.11.0
 
-To change the version of your application change the following entries in the POM:
-
-1. Update `X.Y` only on the `<version>` key at the top of the file. This should happen when you actually change your application (e.g., a new feature is added or something is fixed).
-2. Update the `Z` version by updating the `<sarl.version>` property.
+The SARL version is dictated by `<sarl.version>` property in the POM file.
 
 ## DESCRIPTION OF DUMMY AGENTS
 
